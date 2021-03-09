@@ -7,6 +7,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="API" />
+        <module name="UserInterface" />
+        <module name="Server" />
+        <module name="Engine" />
         <module name="DataBase" />
       </profile>
     </annotationProcessing>

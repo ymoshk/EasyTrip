@@ -12,6 +12,9 @@
     <modules>
         <module>API</module>
         <module>DataBase</module>
+        <module>Engine</module>
+        <module>Server</module>
+        <module>UserInterface</module>
     </modules>
 
     <properties>
