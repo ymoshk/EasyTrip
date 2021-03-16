@@ -1,5 +1,6 @@
 package util;
 
+import city.City;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PlacesApi;
 import com.google.maps.TextSearchRequest;
@@ -20,7 +21,7 @@ import java.util.List;
 
 public class GoogleMapsApiUtils {
 
-    public List<Attraction> getAttractionInStandardTextSearch(String apiKey, String query, PriceLevel priceLevel, PlaceType type) throws IOException {
+    public List<Attraction> getAttractionInStandardTextSearch(String apiKey, String query, PriceLevel priceLevel, PlaceType type, City city) throws IOException {
         GeoApiContext context = new GeoApiContext.Builder()
                 .apiKey(apiKey)
                 .build();
@@ -32,7 +33,7 @@ public class GoogleMapsApiUtils {
                     .await();
 
             Arrays.stream(req.results)
-                    .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceLevel)));
+                    .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceLevel, city)));
         } catch (ApiException e) {
             //TODO - Maybe to print into a log file
             e.printStackTrace();
@@ -57,13 +58,20 @@ public class GoogleMapsApiUtils {
         return res;
     }
 
-    public static void getPhotoUrl(String photoReference, String apiKey) throws IOException {
+    public static String getPhotoUrl(String photoReference, String apiKey) {
         String reqUrl = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + photoReference +
                 "&key=" + apiKey;
         OkHttpClient client = new OkHttpClient();
-        Request r = new Request.Builder().url(reqUrl).build();
-        Response response = client.newCall(r).execute();
+        Request request = new Request.Builder().url(reqUrl).build();
+        Response response;
+        String res = null;
+        try {
+            response = client.newCall(request).execute();
+            res = response.request().url().toString();
+        } catch (IOException ioException) {
 
-        System.out.println(response.request().url().toString());
+        }
+
+        return res;
     }
 }
