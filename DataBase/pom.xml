@@ -23,6 +23,12 @@
             <version>5.4.29.Final</version>
             <type>pom</type>
         </dependency>
+        <dependency>
+            <groupId>com.google.maps</groupId>
+            <artifactId>google-maps-services</artifactId>
+            <version>0.17.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>
