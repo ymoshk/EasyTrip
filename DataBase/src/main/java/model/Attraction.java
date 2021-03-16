@@ -20,8 +20,10 @@ public class Attraction implements Serializable {
     private boolean permanentlyClosed;
     private int userRatingsTotal;
     private String businessStatus;
+    private PlaceType placeType;
+    private PriceLevel priceLevel;
 
-    public Attraction(PlacesSearchResult searchResultObject) {
+    public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel) {
         this.formattedAddress = searchResultObject.formattedAddress;
         this.geometry = searchResultObject.geometry;
         this.name = searchResultObject.name;
@@ -35,6 +37,8 @@ public class Attraction implements Serializable {
         this.permanentlyClosed = searchResultObject.permanentlyClosed;
         this.userRatingsTotal = searchResultObject.userRatingsTotal;
         this.businessStatus = searchResultObject.businessStatus;
+        this.placeType = placeType;
+        this.priceLevel = priceLevel;
     }
 
     public String getFormattedAddress() {
@@ -86,9 +90,9 @@ public class Attraction implements Serializable {
     }
 
     public String getBusinessStatus() {
+        PlaceType.
         return businessStatus;
     }
-
 
 
 

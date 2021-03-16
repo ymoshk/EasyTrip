@@ -4,8 +4,11 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.PlacesApi;
 import com.google.maps.TextSearchRequest;
 import com.google.maps.errors.ApiException;
+import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResponse;
+import com.google.maps.model.PriceLevel;
 import model.Attraction;
+import model.AttractionsFactory;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -17,7 +20,7 @@ import java.util.List;
 
 public class GoogleMapsApiUtils {
 
-    public List<Attraction> getAttractionInStandardTextSearch(String apiKey, String query) throws IOException {
+    public List<Attraction> getAttractionInStandardTextSearch(String apiKey, String query, PriceLevel priceLevel, PlaceType type) throws IOException {
         GeoApiContext context = new GeoApiContext.Builder()
                 .apiKey(apiKey)
                 .build();
@@ -25,10 +28,11 @@ public class GoogleMapsApiUtils {
         List<Attraction> result = new ArrayList<>();
 
         try {
-            PlacesSearchResponse req = getTextSearchRequest(context, query)
+            PlacesSearchResponse req = getTextSearchRequest(context, query, priceLevel, type)
                     .await();
 
-            Arrays.stream(req.results).forEach(singleRes -> result.add(new Attraction(singleRes)));
+            Arrays.stream(req.results)
+                    .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceLevel)));
         } catch (ApiException e) {
             //TODO - Maybe to print into a log file
             e.printStackTrace();
@@ -41,8 +45,8 @@ public class GoogleMapsApiUtils {
     }
 
 
-    public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String query) {
-        TextSearchRequest res = PlacesApi.textSearchQuery(context, query);
+    public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String query, PriceLevel priceLevel, PlaceType type) {
+        TextSearchRequest res = PlacesApi.textSearchQuery(context, query).minPrice(priceLevel).maxPrice(priceLevel).type(type);
 
         return res;
     }
