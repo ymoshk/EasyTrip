@@ -1,9 +1,9 @@
 package model.attraction;
 
 
-import city.City;
 import com.google.maps.model.*;
 import constant.Constants;
+import model.City;
 import model.Model;
 import util.GoogleMapsApiUtils;
 
@@ -26,7 +26,7 @@ public abstract class Attraction extends Model {
     private  String businessStatus;
     private  PlaceType placeType;
     private  PriceLevel priceLevel;
-    private  City city;
+    private City city;
 
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;

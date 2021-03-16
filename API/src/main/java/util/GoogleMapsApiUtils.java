@@ -1,39 +1,33 @@
 package util;
 
-import city.City;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PlacesApi;
 import com.google.maps.TextSearchRequest;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResponse;
+import com.google.maps.model.PlacesSearchResult;
 import com.google.maps.model.PriceLevel;
-import model.attraction.Attraction;
-import model.attraction.AttractionsFactory;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 
 public class GoogleMapsApiUtils {
 
-    public List<Attraction> getAttractionInStandardTextSearch(String apiKey, String query, PriceLevel priceLevel, PlaceType type, City city) throws IOException {
+    public PlacesSearchResult[] getAttractionInStandardTextSearch(String apiKey, String query, PriceLevel priceLevel, PlaceType type) throws IOException {
         GeoApiContext context = new GeoApiContext.Builder()
                 .apiKey(apiKey)
                 .build();
 
-        List<Attraction> result = new ArrayList<>();
+        PlacesSearchResult[] result = null;
 
         try {
-            PlacesSearchResponse req = getTextSearchRequest(context, query, priceLevel, type)
+            PlacesSearchResponse response = getTextSearchRequest(context, query, priceLevel, type)
                     .await();
+            result = response.results;
 
-            Arrays.stream(req.results)
-                    .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceLevel, city)));
         } catch (ApiException e) {
             //TODO - Maybe to print into a log file
             e.printStackTrace();

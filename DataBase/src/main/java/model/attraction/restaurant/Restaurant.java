@@ -1,9 +1,9 @@
 package model.attraction.restaurant;
 
-import city.City;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;
 import com.google.maps.model.PriceLevel;
+import model.City;
 import model.attraction.Attraction;
 
 public class Restaurant extends Attraction {

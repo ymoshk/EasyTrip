@@ -1,12 +1,10 @@
 package model.attraction;
 
-import city.City;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;
 import com.google.maps.model.PriceLevel;
-import model.attraction.Attraction;
+import model.City;
 import model.attraction.hotel.Hotel;
-import model.attraction.restaurant.Restaurant;
 
 public class AttractionsFactory {
 
@@ -22,8 +20,8 @@ public class AttractionsFactory {
                 break;
 
             case RESTAURANT:
-                res = new Restaurant(searchResultObject, placeType, priceLevel, city);
-                break;
+//                res = new Restaurant(searchResultObject, placeType, priceLevel, city);
+//                break;
 
         }
 
