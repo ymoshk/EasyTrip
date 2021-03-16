@@ -16,7 +16,6 @@ public class DbConnection {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection cnn = DriverManager.getConnection(url, user, password);
             Statement statement = cnn.createStatement();
-            statement.execute("CREATE TABLE Person (PersonID int)");
 
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
