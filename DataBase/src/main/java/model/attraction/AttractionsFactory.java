@@ -1,10 +1,11 @@
-package model;
+package model.attraction;
 
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;
 import com.google.maps.model.PriceLevel;
-import model.hotel.Hotel;
-import model.restaurant.Restaurant;
+import model.attraction.Attraction;
+import model.attraction.hotel.Hotel;
+import model.attraction.restaurant.Restaurant;
 
 public class AttractionsFactory {
 

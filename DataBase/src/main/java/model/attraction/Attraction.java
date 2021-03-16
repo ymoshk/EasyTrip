@@ -1,12 +1,13 @@
-package model;
+package model.attraction;
 
 
 import com.google.maps.model.*;
+import model.Model;
 
 import java.io.Serializable;
 import java.net.URL;
 
-public class Attraction implements Serializable {
+public abstract class Attraction extends Model {
     private String formattedAddress;
     private Geometry geometry;
     private String name;
@@ -90,7 +91,6 @@ public class Attraction implements Serializable {
     }
 
     public String getBusinessStatus() {
-        PlaceType.
         return businessStatus;
     }
 
