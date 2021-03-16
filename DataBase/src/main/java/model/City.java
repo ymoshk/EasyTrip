@@ -1,9 +1,6 @@
-package city;
+package model;
 
-import airport.Airport;
 import com.google.maps.model.LatLng;
-import country.Country;
-import model.Model;
 
 import java.util.List;
 

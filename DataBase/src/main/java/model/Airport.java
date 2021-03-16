@@ -1,7 +1,6 @@
-package airport;
+package model;
 
-import city.City;
-import com.google.maps.model.Geometry;
+import model.City;
 import com.google.maps.model.LatLng;
 import model.Model;
 
