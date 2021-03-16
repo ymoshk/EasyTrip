@@ -7,7 +7,7 @@ import model.Model;
 import java.io.Serializable;
 import java.net.URL;
 
-public class Attraction extends Model implements Serializable {
+public abstract class Attraction extends Model {
     private String formattedAddress;
     private Geometry geometry;
     private String name;
