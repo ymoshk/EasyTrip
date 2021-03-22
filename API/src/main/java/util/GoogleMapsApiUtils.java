@@ -3,41 +3,39 @@ package util;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PlacesApi;
 import com.google.maps.TextSearchRequest;
-import com.google.maps.errors.ApiException;
 import com.google.maps.model.PlaceType;
-import com.google.maps.model.PlacesSearchResponse;
-import com.google.maps.model.PlacesSearchResult;
 import com.google.maps.model.PriceLevel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import java.io.IOException;
 
+import java.io.IOException;
 
 public class GoogleMapsApiUtils {
 
-    public PlacesSearchResult[] getAttractionInStandardTextSearch(String apiKey, String query, PriceLevel priceLevel, PlaceType type) throws IOException {
-        GeoApiContext context = new GeoApiContext.Builder()
-                .apiKey(apiKey)
-                .build();
-
-        PlacesSearchResult[] result = null;
-
-        try {
-            PlacesSearchResponse response = getTextSearchRequest(context, query, priceLevel, type)
-                    .await();
-            result = response.results;
-
-        } catch (ApiException e) {
-            //TODO - Maybe to print into a log file
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            context.shutdown();
-            return result;
-        }
-    }
+//    public List<Attraction> getAttractionInStandardTextSearch(String apiKey, String query, PriceLevel priceLevel, PlaceType type, City city) throws IOException {
+    //        GeoApiContext context = new GeoApiContext.Builder()
+    //                .apiKey(apiKey)
+    //                .build();
+    //
+    //        List<Attraction> result = new ArrayList<>();
+    //
+    //        try {
+    //            PlacesSearchResponse req = getTextSearchRequest(context, query, priceLevel, type)
+    //                    .await();
+    //
+    //            Arrays.stream(req.results)
+    //                    .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceLevel, city)));
+    //        } catch (ApiException e) {
+    //            //TODO - Maybe to print into a log file
+    //            e.printStackTrace();
+    //        } catch (InterruptedException e) {
+    //            e.printStackTrace();
+    //        } finally {
+    //            context.shutdown();
+    //            return result;
+    //        }
+    //    }
 
 
     public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String query, PriceLevel priceLevel, PlaceType type) {

@@ -3,24 +3,22 @@ package connection;
 
 import model.Model;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.Serializable;
 
+//TODO - delete this class.
+
 @Entity
-@Table(name = "test")
+@Table(name = "Test")
 public class EntityTest extends Model implements Serializable {
 
-    @Column(name = "name", nullable = true)
-    private String name = "S";
+    private String name;
+    private int age;
 
-    @Column(name = "age", nullable = true)
-    private int age = 3;
+    public EntityTest() {
 
-    @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id = 10L;
-
-
+    }
 
     public EntityTest(String jonson, int i) {
         super();
@@ -28,16 +26,27 @@ public class EntityTest extends Model implements Serializable {
         this.name = jonson;
     }
 
-    public EntityTest() {
-
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getAge() {
         return age;
     }
 
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "EntityTest{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
 }

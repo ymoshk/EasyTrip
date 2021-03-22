@@ -10,16 +10,25 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <!-- Define the object that should be persisted in the database -->
         <class>connection.EntityTest</class>
-        <class>model.Model</class>
+        <!-- Use the annotation @Cacheable to apply a 2nd level cache -->
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
             <!-- Driver for DB database -->
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
             <!-- URL for DB -->
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://83-229-71-203.cloud-xip.io/EasyTrip"/>
+            <property name="javax.persistence.jdbc.url"
+                      value="jdbc:mysql://easytripdb.cokzgojh4dcb.eu-west-3.rds.amazonaws.com/EasyTrip"/>
             <!-- Username -->
-            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.user" value="easyDB"/>
             <!-- Password -->
-            <property name="javax.persistence.jdbc.password" value="easyPassword2021"/>
+            <property name="javax.persistence.jdbc.password" value="7ykkDKxdc8NWEQpBEK30"/>
+
+            <!-- Auto generate tables in the DB-->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+            <!-- Echo all executed SQL to stdout -->
+            <property name="show_sql" value="true"/>
+
         </properties>
     </persistence-unit>
 </persistence>

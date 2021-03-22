@@ -15,6 +15,7 @@
         <module>Engine</module>
         <module>Server</module>
         <module>UserInterface</module>
+        <module>Utils</module>
     </modules>
     <dependencies>
         <dependency>

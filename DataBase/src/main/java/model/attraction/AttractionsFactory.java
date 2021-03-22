@@ -9,11 +9,10 @@ import model.attraction.hotel.Hotel;
 public class AttractionsFactory {
 
 
-    public static Attraction getAttraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city)
-    {
+    public static Attraction getAttraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
         Attraction res = null;
 
-        switch (placeType){
+        switch (placeType) {
 
             case LODGING:
                 res = new Hotel(searchResultObject, placeType, priceLevel, city);

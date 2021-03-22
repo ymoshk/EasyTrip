@@ -7,25 +7,24 @@ import model.City;
 import model.Model;
 import util.GoogleMapsApiUtils;
 
-import java.io.Serializable;
 import java.net.URL;
 
 public abstract class Attraction extends Model {
-    private  String formattedAddress;
-    private  Geometry geometry;
-    private  String name;
-    private  URL icon;
-    private  String placeId;
-    private  float rating;
-    private  String[] types;
-    private  OpeningHours openingHours;
-    private  String photoUrl;
-    private  String vicinity;
-    private  boolean permanentlyClosed;
-    private  int userRatingsTotal;
-    private  String businessStatus;
-    private  PlaceType placeType;
-    private  PriceLevel priceLevel;
+    private String formattedAddress;
+    private Geometry geometry;
+    private String name;
+    private URL icon;
+    private String placeId;
+    private float rating;
+    private String[] types;
+    private OpeningHours openingHours;
+    private String photoUrl;
+    private String vicinity;
+    private boolean permanentlyClosed;
+    private int userRatingsTotal;
+    private String businessStatus;
+    private PlaceType placeType;
+    private PriceLevel priceLevel;
     private City city;
 
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
@@ -58,7 +57,7 @@ public abstract class Attraction extends Model {
 
     }
 
-    public City getCity(){
+    public City getCity() {
         return this.city;
     }
 

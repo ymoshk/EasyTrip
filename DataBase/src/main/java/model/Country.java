@@ -2,19 +2,27 @@ package model;
 
 import com.google.maps.model.LatLng;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
+@Entity
 public class Country extends Model implements Serializable {
 
+    @ElementCollection
     List<String> timezones;
     LatLng countryLatLong;
     String countryName;
     String localeCode;
     String capital;
     double averagePricePerDay;
-    List<City> cityList = new ArrayList<>();
+    // TODO
+//    List<City> cityList = new ArrayList<>();
+
+    public Country() {
+
+    }
 
     public Country(List<String> timezones, LatLng countryLatLong, String countryName, String localeCode,
                    String capital) {
@@ -24,6 +32,7 @@ public class Country extends Model implements Serializable {
         this.localeCode = localeCode;
         this.capital = capital;
     }
+
 
     public List<String> getTimezones() {
         return timezones;
@@ -72,12 +81,12 @@ public class Country extends Model implements Serializable {
     public void setAveragePricePerDay(double averagePricePerDay) {
         this.averagePricePerDay = averagePricePerDay;
     }
-
-    public List<City> getCityList() {
-        return cityList;
-    }
-
-    public void setCityList(List<City> cityList) {
-        this.cityList = cityList;
-    }
+//
+//    public List<City> getCityList() {
+//        return cityList;
+//    }
+//
+//    public void setCityList(List<City> cityList) {
+//        this.cityList = cityList;
+//    }
 }
