@@ -25,11 +25,9 @@ public class Application {
 //        airport.setThreeLetterCode("TLVTEST");
 
 
-        City city = (City) context.findById(City.class, 34).orElse(null);
-        Hotel testHotel = new Hotel("TestHotel", city);
-
-        city.getAttractionList().add(testHotel);
-        context.update(city);
+//        City city = (City) context.findById(City.class, 34).orElse(null);
+//
+//        context.update(city);
 //        context.insert(testHotel);
 
 

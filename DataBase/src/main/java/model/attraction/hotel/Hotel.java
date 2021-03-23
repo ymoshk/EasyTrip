@@ -21,9 +21,4 @@ public class Hotel extends Attraction {
     public Hotel() {
         super();
     }
-
-    public Hotel(String name, City city) {
-//        this.name = name;
-        this.city = city;
-    }
 }
