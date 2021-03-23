@@ -26,7 +26,8 @@ public class DBContext implements Closeable {
         this.entityManager = entityManagerFactory.createEntityManager();
     }
 
-    public static DBContext getInstance() {
+    // only one thread can execute this method at the same time.
+    public static synchronized DBContext getInstance() {
         if (instance == null) {
             instance = new DBContext();
         }
@@ -75,7 +76,6 @@ public class DBContext implements Closeable {
      * @return An 'optional' object contains the requested object or an empty value if nothing was found.
      */
     public Optional<Model> findById(Class<?> modelClass, long id) {
-
         if (modelClass.getSuperclass() == Model.class || modelClass == Model.class) {
             Model modelFound = (Model) entityManager.find(modelClass, id);
 
@@ -85,7 +85,6 @@ public class DBContext implements Closeable {
         }
         return Optional.empty();
     }
-
 
     /**
      * @param queryString the query to process as a string.

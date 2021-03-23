@@ -7,8 +7,11 @@ import model.City;
 import model.Model;
 import util.GoogleMapsApiUtils;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.MappedSuperclass;
 import java.net.URL;
 
+@MappedSuperclass
 public abstract class Attraction extends Model {
     private String formattedAddress;
     private Geometry geometry;
@@ -16,6 +19,7 @@ public abstract class Attraction extends Model {
     private URL icon;
     private String placeId;
     private float rating;
+    @ElementCollection
     private String[] types;
     private OpeningHours openingHours;
     private String photoUrl;
@@ -26,6 +30,7 @@ public abstract class Attraction extends Model {
     private PlaceType placeType;
     private PriceLevel priceLevel;
     private City city;
+
 
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;

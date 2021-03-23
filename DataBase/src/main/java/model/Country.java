@@ -2,14 +2,13 @@ package model;
 
 import com.google.maps.model.LatLng;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
 @Entity
+@Cacheable
 public class Country extends Model implements Serializable {
-
     @ElementCollection
     List<String> timezones;
     LatLng countryLatLong;
@@ -17,8 +16,9 @@ public class Country extends Model implements Serializable {
     String localeCode;
     String capital;
     double averagePricePerDay;
-    // TODO
-//    List<City> cityList = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "country_id", insertable = true, updatable = true)
+    List<City> cityList;
 
     public Country() {
 
@@ -33,6 +33,13 @@ public class Country extends Model implements Serializable {
         this.capital = capital;
     }
 
+    public List<City> getCityList() {
+        return cityList;
+    }
+
+    public void setCityList(List<City> cityList) {
+        this.cityList = cityList;
+    }
 
     public List<String> getTimezones() {
         return timezones;
@@ -81,12 +88,12 @@ public class Country extends Model implements Serializable {
     public void setAveragePricePerDay(double averagePricePerDay) {
         this.averagePricePerDay = averagePricePerDay;
     }
-//
-//    public List<City> getCityList() {
-//        return cityList;
-//    }
-//
-//    public void setCityList(List<City> cityList) {
-//        this.cityList = cityList;
-//    }
+    //
+    //    public List<City> getCityList() {
+    //        return cityList;
+    //    }
+    //
+    //    public void setCityList(List<City> cityList) {
+    //        this.cityList = cityList;
+    //    }
 }

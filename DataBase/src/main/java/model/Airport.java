@@ -1,11 +1,16 @@
 package model;
 
-import model.City;
 import com.google.maps.model.LatLng;
-import model.Model;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "Airport")
 public class Airport extends Model {
     String airportName;
+    //TODO - check this
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "city_id", insertable = true, updatable = true)
     City city;
     String IATA;
     String threeLetterCode;

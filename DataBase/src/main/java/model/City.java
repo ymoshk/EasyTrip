@@ -2,13 +2,22 @@ package model;
 
 import com.google.maps.model.LatLng;
 
+import javax.persistence.*;
 import java.util.List;
 
+
+@Entity
+@Table(name = "City")
+@Cacheable
 public class City extends Model {
     String cityName;
     LatLng cityCenter;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "country_id", insertable = true, updatable = true)
     Country country;
     double averagePricePerDay;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "city_id", insertable = true, updatable = true)
     List<Airport> airportList;
 
     public String getCityName() {
@@ -27,13 +36,13 @@ public class City extends Model {
         this.cityCenter = cityCenter;
     }
 
-    public Country getCountry() {
-        return country;
-    }
-
-    public void setCountry(Country country) {
-        this.country = country;
-    }
+//    public Country getCountry() {
+//        return country;
+//    }
+//
+//    public void setCountry(Country country) {
+//        this.country = country;
+//    }
 
     public double getAveragePricePerDay() {
         return averagePricePerDay;
