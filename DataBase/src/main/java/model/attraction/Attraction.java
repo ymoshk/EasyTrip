@@ -9,31 +9,32 @@ import util.GoogleMapsApiUtils;
 
 import javax.persistence.*;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
-@MappedSuperclass
-//@Entity
-//@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+//@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Attraction extends Model {
-    private String formattedAddress;
-    private Geometry geometry;
-    private String name;
-    private URL icon;
-    private String placeId;
-    private float rating;
+    protected String formattedAddress;
+    protected Geometry geometry;
+    protected String name;
+    protected URL icon;
+    protected String placeId;
+    protected float rating;
     @ElementCollection
-    private String[] types;
-    private OpeningHours openingHours;
-    private String photoUrl;
-    private String vicinity;
-    private boolean permanentlyClosed;
-    private int userRatingsTotal;
-    private String businessStatus;
-    private PlaceType placeType;
-    private PriceLevel priceLevel;
-//    @ManyToOne(cascade = CascadeType.ALL)
-//    @OneToMany(targetEntity = AbstractAnimal.class)
-//    @JoinColumn(name = "city_id", insertable = true, updatable = true)
-    private City city;
+    protected List<String> types;
+    protected OpeningHours openingHours;
+    protected String photoUrl;
+    protected String vicinity;
+    protected boolean permanentlyClosed;
+    protected int userRatingsTotal;
+    protected String businessStatus;
+    protected PlaceType placeType;
+    protected PriceLevel priceLevel;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "city_id", insertable = true, updatable = true)
+    protected City city;
 
 
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
@@ -43,7 +44,7 @@ public abstract class Attraction extends Model {
         this.icon = searchResultObject.icon;
         this.placeId = searchResultObject.placeId;
         this.rating = searchResultObject.rating;
-        this.types = searchResultObject.types;
+        this.types = Arrays.asList(searchResultObject.types);
         this.openingHours = searchResultObject.openingHours;
 
         if (searchResultObject.photos != null && searchResultObject.photos.length > 0) {
@@ -102,7 +103,7 @@ public abstract class Attraction extends Model {
         return this.rating;
     }
 
-    public String[] getTypes() {
+    public List<String> getTypes() {
         return this.types;
     }
 

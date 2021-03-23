@@ -7,8 +7,11 @@ import com.google.maps.model.PriceLevel;
 import model.location.City;
 import model.attraction.Attraction;
 
-//@Entity
-//@Table(name = "hotel")
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "hotel")
 public class Hotel extends Attraction {
 
     public Hotel(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
@@ -17,5 +20,9 @@ public class Hotel extends Attraction {
 
     public Hotel() {
         super();
+    }
+
+    public Hotel(String name) {
+        super.name = name;
     }
 }

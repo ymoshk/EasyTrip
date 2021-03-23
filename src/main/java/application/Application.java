@@ -1,7 +1,16 @@
 package application;
 
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.LatLng;
 import connection.DBContext;
+import constant.Constants;
+import model.attraction.hotel.Hotel;
+import model.location.Airport;
+import model.location.City;
 import model.location.Country;
+import util.GoogleMapsApiUtils;
+
+import java.util.ArrayList;
 
 public class Application {
 
@@ -9,30 +18,38 @@ public class Application {
         System.out.println("Application is starting...");
         DBContext context = DBContext.getInstance();
 
-        Country country = (Country) context.findById(Country.class, 30).orElse(null);
-        context.delete(country);
+//        Airport airport = new Airport();
+//        airport.setAirportLocation(new LatLng(5.0, 5.3));
+//        airport.setAirportName("TEST");
+//        airport.setIATA("IATATEST");
+//        airport.setThreeLetterCode("TLVTEST");
 
-        //        Airport airport = new Airport();
-        //        airport.setAirportLocation(new LatLng(1.0, 1.3));
-        //        airport.setAirportName("name");
-        //        airport.setIATA("IATA");
-        //        airport.setThreeLetterCode("TLV");
-        //
-        //        City city = new City();
-        //        city.setAirportList(new ArrayList<>());
-        //        city.getAirportList().add(airport);
-        //        city.setAveragePricePerDay(100.0);
-        //        city.setCityCenter(new LatLng(50.9, 55.9));
-        //        city.setCityName("Tel Aviv");
-        //
-        //        Country country = new Country();
-        //        country.setAveragePricePerDay(100);
-        //        country.setCapital("Tel aviv");
-        //        country.setCityList(new ArrayList<>());
-        //        country.getCityList().add(city);
-        //        country.setLocaleCode("5555");
-        //
-        //        context.insert(country);
+
+        City city = (City) context.findById(City.class, 2).orElse(null);
+        Hotel testHotel = new Hotel("TestHotel");
+
+        city.getAttractionList().add(testHotel);
+        context.update(city);
+
+
+//        City city = new City();
+//        city.setAirportList(new ArrayList<>());
+//        city.getAirportList().add(airport);
+//        city.setAveragePricePerDay(100.0);
+//        city.setCityCenter(new LatLng(22, 22));
+//        city.setCityName("Tel Aviv");
+//
+//        Country country = new Country();
+//        country.setAveragePricePerDay(100);
+//        country.setCapital("Tel aviv");
+//        country.setCityList(new ArrayList<>());
+//        country.getCityList().add(city);
+//        country.setLocaleCode("5555");
+//        country.getTimezones().add("1");
+//        country.getTimezones().add("2");
+//
+//
+//        context.insert(country);
 
         //        context.insert(airport);
         //

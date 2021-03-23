@@ -5,13 +5,14 @@ import model.Model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Cacheable
 public class Country extends Model implements Serializable {
     @ElementCollection
-    List<String> timezones;
+    List<String> timezones = new ArrayList<>();
     LatLng countryLatLong;
     String countryName;
     String localeCode;
