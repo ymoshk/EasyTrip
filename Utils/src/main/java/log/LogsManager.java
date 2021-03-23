@@ -65,14 +65,11 @@ public class LogsManager {
     }
 
     private static String buildMessage(String message) {
-        LocalTime time = LocalTime.now();
-        String timeString = time.format(DateTimeFormatter.ofPattern("hh:mm:ss"));
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Time: ").append(timeString).append('\n');
-        stringBuilder.append("Message: ").append(message).append('\n');
-        stringBuilder.append(lineSeparator).append(lineSeparator)
-                .append('\n');
-        return stringBuilder.toString();
+        String timeString = LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss"));
+        return "Time: " + timeString + '\n' +
+                "Message: " + message + '\n' +
+                lineSeparator + lineSeparator +
+                '\n';
     }
 
     private enum logType {
