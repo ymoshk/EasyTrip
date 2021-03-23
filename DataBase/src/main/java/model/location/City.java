@@ -1,6 +1,8 @@
-package model;
+package model.location;
 
 import com.google.maps.model.LatLng;
+import model.Model;
+import model.attraction.Attraction;
 
 import javax.persistence.*;
 import java.util.List;
@@ -19,6 +21,17 @@ public class City extends Model {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     List<Airport> airportList;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "city_id", insertable = true, updatable = true)
+    List<Attraction> attractionList;
+
+    public List<Attraction> getAttractionList() {
+        return attractionList;
+    }
+
+    public void setAttractionList(List<Attraction> attractionList) {
+        this.attractionList = attractionList;
+    }
 
     public String getCityName() {
         return cityName;
@@ -36,13 +49,13 @@ public class City extends Model {
         this.cityCenter = cityCenter;
     }
 
-//    public Country getCountry() {
-//        return country;
-//    }
-//
-//    public void setCountry(Country country) {
-//        this.country = country;
-//    }
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+    }
 
     public double getAveragePricePerDay() {
         return averagePricePerDay;

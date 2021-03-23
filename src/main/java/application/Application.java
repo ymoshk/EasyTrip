@@ -1,7 +1,7 @@
 package application;
 
 import connection.DBContext;
-import model.Country;
+import model.location.Country;
 
 public class Application {
 

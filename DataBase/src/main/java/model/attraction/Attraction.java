@@ -3,12 +3,11 @@ package model.attraction;
 
 import com.google.maps.model.*;
 import constant.Constants;
-import model.City;
+import model.location.City;
 import model.Model;
 import util.GoogleMapsApiUtils;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 import java.net.URL;
 
 @MappedSuperclass
@@ -29,6 +28,8 @@ public abstract class Attraction extends Model {
     private String businessStatus;
     private PlaceType placeType;
     private PriceLevel priceLevel;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "city_id", insertable = true, updatable = true)
     private City city;
 
 

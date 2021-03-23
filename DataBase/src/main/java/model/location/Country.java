@@ -1,6 +1,7 @@
-package model;
+package model.location;
 
 import com.google.maps.model.LatLng;
+import model.Model;
 
 import javax.persistence.*;
 import java.io.Serializable;

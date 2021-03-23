@@ -1,4 +1,4 @@
-package model;
+package model.location;
 
 import com.google.gson.Gson;
 import com.google.maps.model.LatLng;
