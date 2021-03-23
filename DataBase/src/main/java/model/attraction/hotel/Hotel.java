@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "hotel")
+@Table(name = "Hotel")
 public class Hotel extends Attraction {
 
     public Hotel(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
