@@ -5,6 +5,7 @@ import model.Model;
 
 import javax.persistence.*;
 import java.io.Closeable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -112,6 +113,8 @@ public class DBContext implements Closeable {
      */
     public void insert(Model objectToAdd) {
         EntityTransaction transaction = this.entityManager.getTransaction();
+        objectToAdd.setCreateTime(LocalDateTime.now());
+        objectToAdd.setUpdateTime(LocalDateTime.now());
         try {
             transaction.begin();
             this.entityManager.persist(objectToAdd);
@@ -129,7 +132,11 @@ public class DBContext implements Closeable {
         EntityTransaction transaction = this.entityManager.getTransaction();
         try {
             transaction.begin();
-            modelCollection.forEach(this.entityManager::persist);
+            for (Model model : modelCollection) {
+                model.setCreateTime(LocalDateTime.now());
+                model.setUpdateTime(LocalDateTime.now());
+                this.entityManager.persist(model);
+            }
             transaction.commit();
         } catch (Exception ex) {
             LogsManager.logException(ex);
@@ -178,6 +185,7 @@ public class DBContext implements Closeable {
     public void update(Model updatedModel) {
         if (updatedModel != null) {
             EntityTransaction transaction = this.entityManager.getTransaction();
+            updatedModel.setUpdateTime(LocalDateTime.now());
             try {
                 transaction.begin();
                 transaction.commit();
