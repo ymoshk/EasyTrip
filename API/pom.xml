@@ -22,6 +22,11 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
         </dependency>
+        <dependency>
+            <groupId>com.amadeus</groupId>
+            <artifactId>amadeus-java</artifactId>
+            <version>5.7.1</version>
+        </dependency>
     </dependencies>
 
     <properties>
