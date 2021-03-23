@@ -3,8 +3,21 @@ package model.attraction;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;
 import com.google.maps.model.PriceLevel;
+import model.attraction.amusement.park.AmusementPark;
+import model.attraction.aquarium.Aquarium;
+import model.attraction.art.gallery.ArtGallery;
+import model.attraction.camp.ground.CampGround;
+import model.attraction.casino.Casino;
+import model.attraction.museum.Museum;
+import model.attraction.night.life.NightLife;
+import model.attraction.other.OtherAttraction;
+import model.attraction.park.Park;
+import model.attraction.restaurant.Restaurant;
+import model.attraction.shopping.mall.ShoppingMall;
+import model.attraction.zoo.Zoo;
 import model.location.City;
 import model.attraction.hotel.Hotel;
+import sun.security.util.SecurityConstants;
 
 public class AttractionsFactory {
 
@@ -13,15 +26,59 @@ public class AttractionsFactory {
         Attraction res = null;
 
         switch (placeType) {
-
             case LODGING:
                 res = new Hotel(searchResultObject, placeType, priceLevel, city);
                 break;
 
             case RESTAURANT:
-//                res = new Restaurant(searchResultObject, placeType, priceLevel, city);
-//                break;
+            case CAFE:
+                res = new Restaurant(searchResultObject, placeType, priceLevel, city);
+                break;
 
+            case MUSEUM:
+                res = new Museum(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case AMUSEMENT_PARK:
+                res = new AmusementPark(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case AQUARIUM:
+                res = new Aquarium(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case ART_GALLERY:
+                res = new ArtGallery(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case BAR:
+            case NIGHT_CLUB:
+                res = new NightLife(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case CASINO:
+                res = new Casino(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case CAMPGROUND:
+                res = new CampGround(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case PARK:
+                res = new Park(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case SHOPPING_MALL:
+                res = new ShoppingMall(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case ZOO:
+                res = new Zoo(searchResultObject, placeType, priceLevel, city);
+                break;
+
+            case TOURIST_ATTRACTION:
+                res = new OtherAttraction(searchResultObject, placeType, priceLevel, city);
+                break;
         }
 
         return res;

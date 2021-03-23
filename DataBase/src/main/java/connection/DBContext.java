@@ -84,6 +84,7 @@ public class DBContext implements Closeable {
                 return Optional.of(modelFound);
             }
         }
+
         return Optional.empty();
     }
 
