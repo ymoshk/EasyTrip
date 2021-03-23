@@ -18,15 +18,15 @@ public class Application {
         System.out.println("Application is starting...");
         DBContext context = DBContext.getInstance();
 
-//        Airport airport = new Airport();
-//        airport.setAirportLocation(new LatLng(5.0, 5.3));
-//        airport.setAirportName("TEST");
-//        airport.setIATA("IATATEST");
-//        airport.setThreeLetterCode("TLVTEST");
+        Airport airport = new Airport();
+        airport.setAirportLocation(new LatLng(5.0, 5.3));
+        airport.setAirportName("TEST");
+        airport.setIATA("IATATEST");
+        airport.setThreeLetterCode("TLVTEST");
 
 
         City city = (City) context.findById(City.class, 2).orElse(null);
-        Hotel testHotel = new Hotel("TestHotel");
+        Hotel testHotel = new Hotel("TestHotel", city);
 
         city.getAttractionList().add(testHotel);
         context.update(city);
