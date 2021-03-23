@@ -17,10 +17,8 @@ import model.attraction.shopping.mall.ShoppingMall;
 import model.attraction.zoo.Zoo;
 import model.location.City;
 import model.attraction.hotel.Hotel;
-import sun.security.util.SecurityConstants;
 
 public class AttractionsFactory {
-
 
     public static Attraction getAttraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
         Attraction res = null;

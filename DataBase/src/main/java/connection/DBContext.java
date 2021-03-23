@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 /**
  * A singleton class to connect and process CRUD operations over the DB.
  */
-public class DBContext implements Closeable {
+class DBContext implements Closeable {
 
     private static DBContext instance = null;
     private final EntityManagerFactory entityManagerFactory;

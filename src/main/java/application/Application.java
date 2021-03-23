@@ -2,7 +2,6 @@ package application;
 
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.LatLng;
-import connection.DBContext;
 import constant.Constants;
 import model.attraction.hotel.Hotel;
 import model.location.Airport;
@@ -16,7 +15,7 @@ public class Application {
 
     public static void main(String[] args) {
         System.out.println("Application is starting...");
-        DBContext context = DBContext.getInstance();
+//        DBContext context = DBContext.getInstance();
 
 //        Airport airport = new Airport();
 //        airport.setAirportLocation(new LatLng(5.0, 5.3));
