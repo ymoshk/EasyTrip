@@ -21,17 +21,17 @@ public class City extends Model {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     List<Airport> airportList;
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "city_id", insertable = true, updatable = true)
-    List<Attraction> attractionList;
+//    @OneToMany(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "city_id", insertable = true, updatable = true)
+//    List<Attraction> attractionList;
 
-    public List<Attraction> getAttractionList() {
-        return attractionList;
-    }
+//    public List<Attraction> getAttractionList() {
+//        return attractionList;
+//    }
 
-    public void setAttractionList(List<Attraction> attractionList) {
-        this.attractionList = attractionList;
-    }
+//    public void setAttractionList(List<Attraction> attractionList) {
+//        this.attractionList = attractionList;
+//    }
 
     public String getCityName() {
         return cityName;

@@ -11,6 +11,8 @@ import javax.persistence.*;
 import java.net.URL;
 
 @MappedSuperclass
+//@Entity
+//@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Attraction extends Model {
     private String formattedAddress;
     private Geometry geometry;
@@ -28,8 +30,9 @@ public abstract class Attraction extends Model {
     private String businessStatus;
     private PlaceType placeType;
     private PriceLevel priceLevel;
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "city_id", insertable = true, updatable = true)
+//    @ManyToOne(cascade = CascadeType.ALL)
+//    @OneToMany(targetEntity = AbstractAnimal.class)
+//    @JoinColumn(name = "city_id", insertable = true, updatable = true)
     private City city;
 
 
