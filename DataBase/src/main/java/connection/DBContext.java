@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 /**
  * A singleton class to connect and process CRUD operations over the DB.
  */
+//TODO -> להוריד את המודיפייר ל package
 public class DBContext implements Closeable {
 
     private static DBContext instance = null;

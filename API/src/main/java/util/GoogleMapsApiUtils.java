@@ -8,6 +8,7 @@ import com.google.maps.model.PriceLevel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import sun.plugin.com.Utils;
 
 import java.io.IOException;
 
@@ -38,8 +39,10 @@ public class GoogleMapsApiUtils {
     //    }
 
 
-    public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String query, PriceLevel priceLevel, PlaceType type) {
-        TextSearchRequest res = PlacesApi.textSearchQuery(context, query).minPrice(priceLevel).maxPrice(priceLevel).type(type);
+    public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName,String cityName ,PriceLevel priceLevel, PlaceType type) {
+        TextSearchRequest res = PlacesApi.textSearchQuery(context,attractionName + "in " + cityName)
+                .minPrice(priceLevel)
+                .maxPrice(priceLevel).type(type);
 
         return res;
     }

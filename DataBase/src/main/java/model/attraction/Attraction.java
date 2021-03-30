@@ -19,6 +19,7 @@ public abstract class Attraction extends Model {
     protected Geometry geometry;
     protected String name;
     protected URL icon;
+    @Column(unique = true)
     protected String placeId;
     protected float rating;
     @ElementCollection

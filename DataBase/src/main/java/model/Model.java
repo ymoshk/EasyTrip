@@ -32,4 +32,8 @@ public abstract class Model implements Serializable {
         this.updateTime = updateTime;
     }
 
+    public long getId(){
+        return this.id;
+    }
+
 }

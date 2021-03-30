@@ -1,5 +1,7 @@
 package constant;
 
+import java.util.Random;
+
 public class Constants {
 
     private static final String saharApiKey = "AIzaSyA7J13fNA-XT138vseVyVOFmpQ7fhmiKyQ";
@@ -15,4 +17,16 @@ public class Constants {
         // ex: "Restaurants in London"
         return placeToSearchType + "in " + location;
     }
+
+
+//    //TODO -> לראות שאצל כולם יש גישה לכל המפתחות של כולם
+//    public String getRandomApi(){
+//        int rand = new Random().nextInt(1);
+//        if(rand == 0 ){
+//            return saharApiKey;
+//        }
+//        else{
+//            return barApiKey;
+//        }
+//    }
 }
