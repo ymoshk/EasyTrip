@@ -40,7 +40,7 @@ public class FixedDataHandler {
         DBContext context = DBContext.getInstance();
         initJsonObjectsArrays();
         initProjectObjectLists();
-        Collection<Model> airportsTest = new ArrayList<>();
+        List<> airportsTest = new ArrayList<>();
         boolean add;
         add = airportsTest.add((Model)airports[0]);
 //        airports.forEach(airport -> context.insert(airport));
