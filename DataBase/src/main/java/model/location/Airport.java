@@ -9,6 +9,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "Airport")
 public class Airport extends Model implements Serializable{
+    @Column(unique = true)
     String airportName;
     //TODO - check this
     @ManyToOne(cascade = CascadeType.ALL)

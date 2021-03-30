@@ -12,25 +12,32 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class FixedDataHandler {
-    private Gson gson = new Gson();
-    private List <Country> countries = new ArrayList<>();
-    private List <City> cities = new ArrayList<>();
-    private Collection<Model> airports = new ArrayList<>();
     private static final String ALL_COUNTRIES_FILE = "DataBase/src/main/resources/DataFiles/countries.json";
     private static final String ALL_CITIES_FILE = "DataBase/src/main/resources/DataFiles/cities500.json";
     private static final String ALL_AIRPORTS_FILE = "DataBase/src/main/resources/DataFiles/airports.json";
+    private Gson gson = new Gson();
+    private List<Country> countries = new ArrayList<>();
+    private List<City> cities = new ArrayList<>();
+    private Collection<Model> airports = new ArrayList<>();
     private JsonCountry[] jsonCountries;
     private JsonCity[] jsonCities;
     private Map<String, LinkedHashMap> airportMap;
 
+    public static String readFileAsString(String file) throws Exception {
+        return new String(Files.readAllBytes(Paths.get(file)));
+    }
 
-    private Country getCountryByCountryCode(String countryCode){
+    public static void main(String[] args) {
+        new FixedDataHandler().saveToDataBase();
+    }
+
+    private Country getCountryByCountryCode(String countryCode) {
         return countries.stream().filter(country ->
                 country.getLocaleCode().equalsIgnoreCase(countryCode)).findFirst().orElse(null);
     }
 
     private City getCityByName(List<City> cityList, String cityName) {
-        if(cityList == null)
+        if (cityList == null)
             cityList = new ArrayList<>();
         return cityList.stream().filter(city ->
                 city.getCityName().equalsIgnoreCase(cityName)).findFirst().orElse(null);
@@ -40,12 +47,44 @@ public class FixedDataHandler {
         DBContext context = DBContext.getInstance();
         initJsonObjectsArrays();
         initProjectObjectLists();
-        List<> airportsTest = new ArrayList<>();
-        boolean add;
-        add = airportsTest.add((Model)airports[0]);
-//        airports.forEach(airport -> context.insert(airport));
-        context.insertAll(airports);
+        //        context.insertAll(countries);
+        int i = 0;
+
+        for (Country country : countries) {
+            System.out.println(++i);
+            if (i < 16) {
+                continue;
+            }
+            System.out.println(country.countryName);
+            context.insert(country);
+        }
     }
+
+    //    private boolean isValidAirportName(String name) {
+    //        if(name.equals("Hedley Airport"))
+    //            return false;
+    //        else if(name.equals("Seronera Airport"))
+    //            return false;
+    //        else if (name.equals("Maquela do Zombo Airport"))
+    //            return false;
+    //        else if (name.equals("Ambergris Cay International Airport"))
+    //            return false;
+    //        else if (name.equals("Bailey Airport"))
+    //            return false;
+    //        else if(name.equals("Luzamba Airport"))
+    //            return false;
+    //        else if(name.equals("Nansio Airport"))
+    //            return false;
+    //        else if(name.equals("Porto Amboim Airport"))
+    //            return false;
+    //        else if(name.equals("Sanza Pombo Airport"))
+    //            return false;
+    //        else if(name.equals("Negage Airport"))
+    //            return false;
+    //        else if(name.equals("Guangzhou MR Air Base"))
+    //            return false;
+    //        return true;
+    //    }
 
     private void initProjectObjectLists() {
         Arrays.asList(jsonCountries).forEach(jsonCountry -> countries.add(new Country(jsonCountry.timezones,
@@ -61,82 +100,55 @@ public class FixedDataHandler {
             cities.add(cityToAdd);
         });
         airportMap.values().stream().filter(jsonAirport ->
-                isValidAirport((String) jsonAirport.get("country"),(String) jsonAirport.get("name"))).
-                forEach( airport ->{
-            Country countryOfAirport = getCountryByCountryCode((String) airport.get("country"));
-            String cityName = getValidCityName((String) airport.get("city"));
-            City cityToUpdate = getCityByName(countryOfAirport.getCityList(), cityName);
-            LatLng location;
-            try {
-                location = new LatLng((double)airport.get("lat"), (double)airport.get("lon"));
-            }catch (ClassCastException e){
-                double lat;
-                double lon;
-                int temp;
-                if(airport.get("lat") instanceof Double)
-                    lat = (Double)airport.get("lat");
-                else {
-                    temp = (int) airport.get("lat");
-                    lat = temp;
-                }
-                if(airport.get("lon") instanceof Double)
-                    lon = (Double) airport.get("lon");
-                else{
-                    temp = (int) airport.get("lon");
-                    lon = temp;
-                }
-                location = new LatLng(lat, lon);
-            }
-            if(cityToUpdate == null) {
-                if (airport.get("city") == "") {
-                    cityToUpdate = new City((String)airport.get("name"), location, countryOfAirport);
-                }
-                else{
-                    cityToUpdate = new City((String)airport.get("city"), location, countryOfAirport);
-                }
-                countryOfAirport.addCityToCityList(cityToUpdate);
-            }
-            Airport airportToAdd = new Airport((String)airport.get("name"), cityToUpdate, (String)airport.get("iata"),
-                    (String)airport.get("icao"), location);
-            airports.add(airportToAdd);
-            cityToUpdate.addAirportToAirportList(airportToAdd);
-        });
+                isValidAirport((String) jsonAirport.get("country"), (String) jsonAirport.get("name"))).
+                forEach(airport -> {
+                    Country countryOfAirport = getCountryByCountryCode((String) airport.get("country"));
+                    String cityName = getValidCityName((String) airport.get("city"));
+                    City cityToUpdate = getCityByName(countryOfAirport.getCityList(), cityName);
+                    LatLng location;
+                    try {
+                        location = new LatLng((double) airport.get("lat"), (double) airport.get("lon"));
+                    } catch (ClassCastException e) {
+                        double lat;
+                        double lon;
+                        int temp;
+                        if (airport.get("lat") instanceof Double)
+                            lat = (Double) airport.get("lat");
+                        else {
+                            temp = (int) airport.get("lat");
+                            lat = temp;
+                        }
+                        if (airport.get("lon") instanceof Double)
+                            lon = (Double) airport.get("lon");
+                        else {
+                            temp = (int) airport.get("lon");
+                            lon = temp;
+                        }
+                        location = new LatLng(lat, lon);
+                    }
+                    if (cityToUpdate == null) {
+                        if (airport.get("city") == "") {
+                            cityToUpdate = new City((String) airport.get("name"), location, countryOfAirport);
+                        } else {
+                            cityToUpdate = new City((String) airport.get("city"), location, countryOfAirport);
+                        }
+                        countryOfAirport.addCityToCityList(cityToUpdate);
+                    }
+                    Airport airportToAdd = new Airport((String) airport.get("name"), cityToUpdate, (String) airport.get("iata"),
+                            (String) airport.get("icao"), location);
+                    airports.add(airportToAdd);
+                    cityToUpdate.addAirportToAirportList(airportToAdd);
+                });
     }
 
     private boolean isValidAirport(String country, String name) {
         return isValidCountryCode(country);
     }
 
-//    private boolean isValidAirportName(String name) {
-//        if(name.equals("Hedley Airport"))
-//            return false;
-//        else if(name.equals("Seronera Airport"))
-//            return false;
-//        else if (name.equals("Maquela do Zombo Airport"))
-//            return false;
-//        else if (name.equals("Ambergris Cay International Airport"))
-//            return false;
-//        else if (name.equals("Bailey Airport"))
-//            return false;
-//        else if(name.equals("Luzamba Airport"))
-//            return false;
-//        else if(name.equals("Nansio Airport"))
-//            return false;
-//        else if(name.equals("Porto Amboim Airport"))
-//            return false;
-//        else if(name.equals("Sanza Pombo Airport"))
-//            return false;
-//        else if(name.equals("Negage Airport"))
-//            return false;
-//        else if(name.equals("Guangzhou MR Air Base"))
-//            return false;
-//        return true;
-//    }
-
     private String getValidCityName(String city) {
-        if(city.equals("Kuito"))
+        if (city.equals("Kuito"))
             return "Cuito";
-        else if(city.equals("Chake"))
+        else if (city.equals("Chake"))
             return "Chake Chake";
 
 
@@ -174,11 +186,7 @@ public class FixedDataHandler {
         jsonCities = gson.fromJson(citiesJson, JsonCity[].class);
     }
 
-    public static String readFileAsString(String file)throws Exception {
-        return new String(Files.readAllBytes(Paths.get(file)));
-    }
-
-    static class JsonCountry{
+    static class JsonCountry {
         List<String> timezones = new ArrayList<>();
         double[] latlng;
         String name;
@@ -186,7 +194,7 @@ public class FixedDataHandler {
         String capital;
     }
 
-    static class JsonCity{
+    static class JsonCity {
         String id;//inner id
         String name;//city name
         String country;//iso 3166-1 alpha-2 country code
@@ -196,7 +204,7 @@ public class FixedDataHandler {
         String pop;//population
     }
 
-    static class JsonAirport{
+    static class JsonAirport {
         String icao;//ICAO code
         String iata;// IATA code
         String name;//airport name
@@ -207,9 +215,5 @@ public class FixedDataHandler {
         double lat;
         double lon;
         String tz;//timezone
-    }
-
-    public static void main(String[] args) {
-        new FixedDataHandler().saveToDataBase();
     }
 }
