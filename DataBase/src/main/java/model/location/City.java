@@ -5,6 +5,7 @@ import model.Model;
 import model.attraction.Attraction;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,6 +25,14 @@ public class City extends Model {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     List<Attraction> attractionList;
+
+    public City(String name, LatLng latLng, Country countryToUpdate) {
+        this.cityName = name;
+        this.cityCenter = latLng;
+        this.country = countryToUpdate;
+    }
+
+    public City(){}
 
     public List<Attraction> getAttractionList() {
         return attractionList;
@@ -71,5 +80,10 @@ public class City extends Model {
 
     public void setAirportList(List<Airport> airportList) {
         this.airportList = airportList;
+    }
+
+    public void addAirportToAirportList(Airport airportToAdd) {
+        if(airportList == null) airportList = new ArrayList<>();
+        airportList.add(airportToAdd);
     }
 }

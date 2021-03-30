@@ -35,6 +35,11 @@ public class Country extends Model implements Serializable {
         this.capital = capital;
     }
 
+    public void addCityToCityList(City cityToAdd){
+        if(cityList == null) cityList = new ArrayList<>();
+        cityList.add(cityToAdd);
+    }
+
     public List<City> getCityList() {
         return cityList;
     }

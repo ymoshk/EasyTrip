@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 /**
  * A singleton class to connect and process CRUD operations over the DB.
  */
-class DBContext implements Closeable {
+public class DBContext implements Closeable {
 
     private static DBContext instance = null;
     private final EntityManagerFactory entityManagerFactory;
@@ -130,6 +130,7 @@ class DBContext implements Closeable {
      *                        The models will be mapped automatically to the relevant table.
      */
     public void insertAll(Collection<Model> modelCollection) {
+        int i =0;
         EntityTransaction transaction = this.entityManager.getTransaction();
         try {
             transaction.begin();
@@ -137,6 +138,7 @@ class DBContext implements Closeable {
                 model.setCreateTime(LocalDateTime.now());
                 model.setUpdateTime(LocalDateTime.now());
                 this.entityManager.persist(model);
+                LogsManager.log(String.valueOf(++i));
             }
             transaction.commit();
         } catch (Exception ex) {
