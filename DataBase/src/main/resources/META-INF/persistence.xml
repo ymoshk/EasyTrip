@@ -9,7 +9,6 @@
         <!-- Define the class for Hibernate which implements JPA -->
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <!-- Define the object that should be persisted in the database -->
-        <class>connection.EntityTest</class>
         <!-- Use the annotation @Cacheable to apply a 2nd level cache -->
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>

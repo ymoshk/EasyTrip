@@ -8,12 +8,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Server" />
+        <module name="Utils" />
         <module name="UserInterface" />
-        <module name="Engine" />
       </profile>
       <profile name="Disabled">
-        <module name="Utils" />
         <module name="API" />
+        <module name="Engine" />
         <module name="DataBase" />
       </profile>
     </annotationProcessing>
