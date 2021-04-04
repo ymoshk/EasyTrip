@@ -35,5 +35,4 @@ public abstract class Model implements Serializable {
     public long getId(){
         return this.id;
     }
-
 }

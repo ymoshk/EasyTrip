@@ -5,17 +5,18 @@ import model.Model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Airport")
 public class Airport extends Model implements Serializable{
-    @Column(unique = true)
     String airportName;
     //TODO - check this
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     City city;
     String IATA;
+    @Column(unique = true)
     String threeLetterCode;
     LatLng airportLocation;
 
@@ -25,9 +26,14 @@ public class Airport extends Model implements Serializable{
         this.IATA = IATA;
         this.threeLetterCode = threeLetterCode;
         this.airportLocation = airportLocation;
+        setCreateTime(LocalDateTime.now());
+        setUpdateTime(LocalDateTime.now());
     }
 
-    public Airport(){}
+    public Airport(){
+        setCreateTime(LocalDateTime.now());
+        setUpdateTime(LocalDateTime.now());
+    }
 
     public String getThreeLetterCode() {
         return threeLetterCode;

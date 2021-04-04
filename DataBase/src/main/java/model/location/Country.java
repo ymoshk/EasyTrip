@@ -5,6 +5,7 @@ import model.Model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class Country extends Model implements Serializable {
     List<String> timezones = new ArrayList<>();
     LatLng countryLatLong;
     String countryName;
+    @Column(unique = true)
     String localeCode;
     String capital;
     double averagePricePerDay;
@@ -23,7 +25,8 @@ public class Country extends Model implements Serializable {
     List<City> cityList;
 
     public Country() {
-
+        setCreateTime(LocalDateTime.now());
+        setUpdateTime(LocalDateTime.now());
     }
 
     public Country(List<String> timezones, LatLng countryLatLong, String countryName, String localeCode,
@@ -33,10 +36,13 @@ public class Country extends Model implements Serializable {
         this.countryName = countryName;
         this.localeCode = localeCode;
         this.capital = capital;
+        setCreateTime(LocalDateTime.now());
+        setUpdateTime(LocalDateTime.now());
     }
 
-    public void addCityToCityList(City cityToAdd){
-        if(cityList == null) cityList = new ArrayList<>();
+    public void addCityToCityList(City cityToAdd) {
+        if (cityList == null)
+            cityList = new ArrayList<>();
         cityList.add(cityToAdd);
     }
 

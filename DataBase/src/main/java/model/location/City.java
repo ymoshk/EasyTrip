@@ -5,6 +5,7 @@ import model.Model;
 import model.attraction.Attraction;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +31,14 @@ public class City extends Model {
         this.cityName = name;
         this.cityCenter = latLng;
         this.country = countryToUpdate;
+        setCreateTime(LocalDateTime.now());
+        setUpdateTime(LocalDateTime.now());
     }
 
-    public City(){}
+    public City() {
+        setCreateTime(LocalDateTime.now());
+        setUpdateTime(LocalDateTime.now());
+    }
 
     public List<Attraction> getAttractionList() {
         return attractionList;
@@ -83,7 +89,8 @@ public class City extends Model {
     }
 
     public void addAirportToAirportList(Airport airportToAdd) {
-        if(airportList == null) airportList = new ArrayList<>();
+        if (airportList == null)
+            airportList = new ArrayList<>();
         airportList.add(airportToAdd);
     }
 }
