@@ -36,7 +36,7 @@ public class DataEngine {
 //        List<Hotel> h = new ArrayList<>();
 //        List<City> res = (List<City>) de.getCities("Tel Aviv");
 //        int x = 5;
-        List<Attraction> atts = de.getAttractions(PlaceType.RESTAURANT, "HADERA", PriceLevel.MODERATE);
+        List<Attraction> atts = de.getAttractions(PlaceType.ZOO, "Ramat Gan", PriceLevel.UNKNOWN);
         int x = 3;
     }
 
