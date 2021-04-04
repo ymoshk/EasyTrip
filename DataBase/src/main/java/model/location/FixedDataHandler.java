@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.maps.model.LatLng;
 import connection.DBContext;
+import log.LogsManager;
 import model.Model;
 
 import java.nio.file.Files;
@@ -15,10 +16,10 @@ public class FixedDataHandler {
     private static final String ALL_COUNTRIES_FILE = "DataBase/src/main/resources/DataFiles/countries.json";
     private static final String ALL_CITIES_FILE = "DataBase/src/main/resources/DataFiles/cities500.json";
     private static final String ALL_AIRPORTS_FILE = "DataBase/src/main/resources/DataFiles/airports.json";
-    private Gson gson = new Gson();
-    private List<Country> countries = new ArrayList<>();
-    private List<City> cities = new ArrayList<>();
-    private Collection<Model> airports = new ArrayList<>();
+    private final Gson gson = new Gson();
+    private final List<Country> countries = new ArrayList<>();
+    private final List<City> cities = new ArrayList<>();
+    private final Collection<Model> airports = new ArrayList<>();
     private JsonCountry[] jsonCountries;
     private JsonCity[] jsonCities;
     private Map<String, LinkedHashMap> airportMap;
@@ -47,17 +48,26 @@ public class FixedDataHandler {
         DBContext context = DBContext.getInstance();
         initJsonObjectsArrays();
         initProjectObjectLists();
-        //        context.insertAll(countries);
-        int i = 0;
 
-        for (Country country : countries) {
-            System.out.println(++i);
-            if (i < 16) {
+        for (int i = 0; i < countries.size(); i++) {
+            if (isCountryExists(countries.get(i))) {
                 continue;
             }
-            System.out.println(country.countryName);
-            context.insert(country);
+            System.out.println(i);
+            System.out.println(countries.get(i).countryName);
+            try {
+                context.insert(countries.get(i));
+            } catch (Exception ex) {
+                LogsManager.log("Country failed: " + countries.get(i).getCountryName() + " index: " + i);
+            }
         }
+    }
+
+    private boolean isCountryExists(Country country) {
+        DBContext context = DBContext.getInstance();
+        List<Country> lst = (List<Country>) context
+                .selectQuery("FROM Country WHERE localeCode = '" + country.localeCode + "'");
+        return lst.size() != 0;
     }
 
     //    private boolean isValidAirportName(String name) {
@@ -91,7 +101,7 @@ public class FixedDataHandler {
                 new LatLng(jsonCountry.latlng[0], jsonCountry.latlng[1]),
                 jsonCountry.name, jsonCountry.country_code, jsonCountry.capital)));
 
-        Arrays.asList(jsonCities).stream().filter(jsonCity -> isValidCountryCode(jsonCity.country)).forEach(city -> {
+        Arrays.stream(jsonCities).filter(jsonCity -> isValidCountryCode(jsonCity.country)).forEach(city -> {
             Country countryToUpdate = getCountryByCountryCode(city.country);
             City cityToAdd = new City(city.name,
                     new LatLng(Double.parseDouble(city.lat), Double.parseDouble(city.lon)),

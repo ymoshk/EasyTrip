@@ -36,6 +36,10 @@ public class DBContext implements Closeable {
         return instance;
     }
 
+    public static Collection<? extends Model> castCollection(Collection<? extends Model> collection) {
+        return new ArrayList<>(collection);
+    }
+
     /**
      * A method to close the release any resource of the DBContext
      */
@@ -130,8 +134,8 @@ public class DBContext implements Closeable {
      * @param modelCollection A collection of models to insert into the DB.
      *                        The models will be mapped automatically to the relevant table.
      */
-    public void insertAll(Collection<Model> modelCollection) {
-        int i =0;
+    public void insertAll(Collection<? extends Model> modelCollection) {
+        int i = 0;
         EntityTransaction transaction = this.entityManager.getTransaction();
         try {
             transaction.begin();
@@ -168,7 +172,7 @@ public class DBContext implements Closeable {
      * @param modelCollection A collection of models to remove from the DB.
      *                        If any of the models couldn't be found in the DB it will be ignored.
      */
-    public void deleteAll(Collection<Model> modelCollection) {
+    public void deleteAll(Collection<? extends Model> modelCollection) {
         if (modelCollection != null) {
             EntityTransaction transaction = this.entityManager.getTransaction();
             try {
