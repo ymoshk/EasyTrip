@@ -16,7 +16,7 @@ import java.util.List;
 public class City extends Model {
     String cityName;
     LatLng cityCenter;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "country_id", insertable = true, updatable = true)
     Country country;
     double averagePricePerDay;

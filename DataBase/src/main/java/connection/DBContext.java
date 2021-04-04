@@ -104,7 +104,7 @@ public class DBContext implements Closeable {
      * <p>
      * More info can be found at https://www.javatpoint.com/hql
      */
-    public List<?> selectQuery(String queryString) {
+    public List<? extends Model> selectQuery(String queryString) {
         try {
             Query query = this.entityManager.createQuery(queryString);
             return query.getResultList();
@@ -135,7 +135,6 @@ public class DBContext implements Closeable {
      *                        The models will be mapped automatically to the relevant table.
      */
     public void insertAll(Collection<? extends Model> modelCollection) {
-        int i = 0;
         EntityTransaction transaction = this.entityManager.getTransaction();
         try {
             transaction.begin();
@@ -143,7 +142,6 @@ public class DBContext implements Closeable {
                 model.setCreateTime(LocalDateTime.now());
                 model.setUpdateTime(LocalDateTime.now());
                 this.entityManager.persist(model);
-                LogsManager.log(String.valueOf(++i));
             }
             transaction.commit();
         } catch (Exception ex) {
