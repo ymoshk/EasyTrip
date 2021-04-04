@@ -26,6 +26,7 @@ public class DataEngine {
     private static final int nextPageDelay = 2000; // millisec
 
 
+    // main for testing
     public static void main(String[] args) {
         DBContext context = DBContext.getInstance();
         List<Country> res = (List<Country>) context.selectQuery("FROM Country WHERE countryName LIKE 'aruba'");
