@@ -25,7 +25,7 @@ public class City extends Model {
     List<Airport> airportList;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
-    List<Attraction> attractionList;
+    List<Attraction> attractionList = new ArrayList<>();
 
     public City(String name, LatLng latLng, Country countryToUpdate) {
         this.cityName = name;

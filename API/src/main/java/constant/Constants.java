@@ -15,11 +15,11 @@ public class Constants {
 
     public String getStandardQuery(String placeToSearchType, String location){
         // ex: "Restaurants in London"
-        return placeToSearchType + "in " + location;
+        return placeToSearchType + " in " + location;
     }
 
-
 //    //TODO -> לראות שאצל כולם יש גישה לכל המפתחות של כולם
+    //TODO -> לממש פונקציה שמחזירה כל פעם מפתח אחר
 //    public String getRandomApi(){
 //        int rand = new Random().nextInt(1);
 //        if(rand == 0 ){
