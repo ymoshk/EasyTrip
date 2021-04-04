@@ -16,7 +16,7 @@ import java.util.List;
 public class City extends Model {
     String cityName;
     LatLng cityCenter;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "country_id", insertable = true, updatable = true)
     Country country;
     double averagePricePerDay;
@@ -25,7 +25,7 @@ public class City extends Model {
     List<Airport> airportList;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
-    List<Attraction> attractionList;
+    List<Attraction> attractionList = new ArrayList<>();
 
     public City(String name, LatLng latLng, Country countryToUpdate) {
         this.cityName = name;

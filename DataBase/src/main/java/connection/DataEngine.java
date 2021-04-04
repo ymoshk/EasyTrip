@@ -7,6 +7,7 @@ import com.google.maps.model.PlacesSearchResponse;
 import com.google.maps.model.PriceLevel;
 import constant.Constants;
 import log.LogsManager;
+import model.Model;
 import model.attraction.Attraction;
 import model.attraction.AttractionsFactory;
 import model.attraction.hotel.Hotel;
@@ -19,19 +20,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DataEngine {
     // this class will be use by the client to get data informations
-    private static final int pageCountToGet = 5; // total of 100 results
-    private static final int nextPageDelay = 2000; // millisec
+    private static final int PAGE_COUNT_TO_GET = 3; // total of 60 results
+    private static final int NEXT_PAGE_DELAY = 2000; // millisec
+    private static final int MIN_SIZE_COLLECTION = 5; // millisec
 
     // main for testing
     //TODO - DELETE the main
     public static void main(String[] args) {
         DataEngine de = new DataEngine();
-        DBContext context = DBContext.getInstance();
-        List<City> res = (List<City>) de.getCities("Tel Aviv");
-        int x = 5;
+//        DBContext context = DBContext.getInstance();
+//        List<Hotel> h = new ArrayList<>();
+//        List<City> res = (List<City>) de.getCities("Tel Aviv");
+//        int x = 5;
+        List<Attraction> atts = de.getAttractions(PlaceType.ZOO, "Ramat Gan", PriceLevel.UNKNOWN);
+        int x = 3;
     }
 
     public List<City> getCities(String cityPrefix) {
@@ -39,39 +45,47 @@ public class DataEngine {
                 "FROM City WHERE cityName LIKE '" + cityPrefix + "%'");
     }
 
-    public List<City> getCountries(String countryPrefix) {
-        return (List<City>) DBContext.getInstance().selectQuery(
+    public List<Country> getCountries(String countryPrefix) {
+        return (List<Country>) DBContext.getInstance().selectQuery(
                 "FROM City WHERE cityName LIKE '" + countryPrefix + "%'");
     }
 
-    public List<Attraction> getAttractions(Class<?> classObj, PlaceType type, City city, PriceLevel priceLevel) {
-        List<Attraction> res = new ArrayList<>();
+    public City getCity(String cityName) {
+        List<City> cityAsList = (List<City>) DBContext.getInstance().selectQuery(
+                "FROM City WHERE cityName LIKE '" + cityName + "'");
 
-        res = (List<Attraction>) DBContext.getInstance().selectQuery(
-                "FROM " + classObj.getSimpleName() +
-                        " WHERE city_id = " + city.getId());
-        if (res.isEmpty()) {
-            try {
-                res = addAttractionsToTheDb(Constants.getSaharApiKey(), priceLevel, type, city);
-            } catch (IOException ioException) {
-                LogsManager.log(ioException.getMessage());
+        return cityAsList.isEmpty() ? null : cityAsList.get(0);
+    }
+
+    public List<Attraction> getAttractions(PlaceType type, String cityName, PriceLevel priceLevel) {
+        DBContext dbContext = DBContext.getInstance();
+        City theCity = getCity(cityName);
+
+        List<Attraction> res = theCity.getAttractionList().stream()
+                .filter(attr -> attr.getPlaceType().equals(type) && attr.getPriceLevel().equals(priceLevel))
+                .collect(Collectors.toList());
+
+        try {
+            if (res.isEmpty()) {
+                res = addAttractionsToTheDb(Constants.getSaharApiKey(), priceLevel, type, theCity);
+            } else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
+                dbContext.deleteAll(res);
+                res = addAttractionsToTheDb(Constants.getSaharApiKey(), priceLevel, type, theCity);
             }
+        } catch (Exception e) {
+            LogsManager.logException(e);
         }
-
-        res = (List<Attraction>) res.stream().filter(attr -> attr.getPriceLevel().equals(priceLevel));
 
         return res;
     }
 
     private List<Attraction> addAttractionsToTheDb(String apiKey, PriceLevel priceLevel, PlaceType type, City city) throws IOException {
-        List<Attraction> attToAdd = getAttractionInStandardTextSearch(apiKey,
+        List<Attraction> attractionsToAdd = getAttractionInStandardTextSearch(apiKey,
                 type.name().replace("_", " "), priceLevel, type, city);
 
-        attToAdd.forEach(attraction -> {
-            DBContext.getInstance().insert(attraction);
-        });
+        DBContext.getInstance().insertAll(attractionsToAdd);
 
-        return attToAdd;
+        return attractionsToAdd;
     }
 
     private boolean isAttractionExist(String tableName, String placeId) {
@@ -96,12 +110,17 @@ public class DataEngine {
             do {
                 Arrays.stream(resp.results)
                         .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceLevel, city)));
-                Thread.sleep(nextPageDelay);
+                Thread.sleep(NEXT_PAGE_DELAY);
+
+                if(resp.nextPageToken ==  null){
+                    break;
+                }
+
                 resp = GoogleMapsApiUtils.getNextPageTextSearchRequest(context, resp.nextPageToken).await();
                 i++;
-            } while (i <= pageCountToGet);
+            } while (i <= PAGE_COUNT_TO_GET);
         } catch (Exception e) {
-            LogsManager.log(e.getMessage());
+            LogsManager.logException(e);
         } finally {
             context.shutdown();
             return result;

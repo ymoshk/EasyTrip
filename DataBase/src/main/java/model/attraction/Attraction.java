@@ -3,8 +3,8 @@ package model.attraction;
 
 import com.google.maps.model.*;
 import constant.Constants;
-import model.location.City;
 import model.Model;
+import model.location.City;
 import util.GoogleMapsApiUtils;
 
 import javax.persistence.*;
@@ -31,76 +31,10 @@ public abstract class Attraction extends Model {
     protected int userRatingsTotal;
     protected String businessStatus;
     protected PlaceType placeType;
-
-    public void setFormattedAddress(String formattedAddress) {
-        this.formattedAddress = formattedAddress;
-    }
-
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setIcon(URL icon) {
-        this.icon = icon;
-    }
-
-    public void setPlaceId(String placeId) {
-        this.placeId = placeId;
-    }
-
-    public void setRating(float rating) {
-        this.rating = rating;
-    }
-
-    public void setTypes(List<String> types) {
-        this.types = types;
-    }
-
-    public void setOpeningHours(OpeningHours openingHours) {
-        this.openingHours = openingHours;
-    }
-
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
-
-    public void setVicinity(String vicinity) {
-        this.vicinity = vicinity;
-    }
-
-    public void setPermanentlyClosed(boolean permanentlyClosed) {
-        this.permanentlyClosed = permanentlyClosed;
-    }
-
-    public void setUserRatingsTotal(int userRatingsTotal) {
-        this.userRatingsTotal = userRatingsTotal;
-    }
-
-    public void setBusinessStatus(String businessStatus) {
-        this.businessStatus = businessStatus;
-    }
-
-    public void setPlaceType(PlaceType placeType) {
-        this.placeType = placeType;
-    }
-
-    public void setPriceLevel(PriceLevel priceLevel) {
-        this.priceLevel = priceLevel;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
-    }
-
     protected PriceLevel priceLevel;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     protected City city;
-
 
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;
@@ -136,65 +70,127 @@ public abstract class Attraction extends Model {
         return this.city;
     }
 
+    public void setCity(City city) {
+        this.city = city;
+    }
+
     public PlaceType getPlaceType() {
         return this.placeType;
+    }
+
+    public void setPlaceType(PlaceType placeType) {
+        this.placeType = placeType;
     }
 
     public PriceLevel getPriceLevel() {
         return this.priceLevel;
     }
 
+    public void setPriceLevel(PriceLevel priceLevel) {
+        this.priceLevel = priceLevel;
+    }
+
     public String getFormattedAddress() {
         return this.formattedAddress;
+    }
+
+    public void setFormattedAddress(String formattedAddress) {
+        this.formattedAddress = formattedAddress;
     }
 
     public Geometry getGeometry() {
         return this.geometry;
     }
 
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
+    }
+
     public String getName() {
         return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public URL getIcon() {
         return this.icon;
     }
 
+    public void setIcon(URL icon) {
+        this.icon = icon;
+    }
+
     public String getPlaceId() {
         return this.placeId;
+    }
+
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
     }
 
     public float getRating() {
         return this.rating;
     }
 
+    public void setRating(float rating) {
+        this.rating = rating;
+    }
+
     public List<String> getTypes() {
         return this.types;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
     }
 
     public OpeningHours getOpeningHours() {
         return this.openingHours;
     }
 
+    public void setOpeningHours(OpeningHours openingHours) {
+        this.openingHours = openingHours;
+    }
+
     public String getPhotoUrl() {
         return this.photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
     public String getVicinity() {
         return this.vicinity;
     }
 
+    public void setVicinity(String vicinity) {
+        this.vicinity = vicinity;
+    }
+
     public boolean isPermanentlyClosed() {
         return this.permanentlyClosed;
+    }
+
+    public void setPermanentlyClosed(boolean permanentlyClosed) {
+        this.permanentlyClosed = permanentlyClosed;
     }
 
     public int getUserRatingsTotal() {
         return this.userRatingsTotal;
     }
 
+    public void setUserRatingsTotal(int userRatingsTotal) {
+        this.userRatingsTotal = userRatingsTotal;
+    }
+
     public String getBusinessStatus() {
         return this.businessStatus;
     }
 
-
+    public void setBusinessStatus(String businessStatus) {
+        this.businessStatus = businessStatus;
+    }
 }
