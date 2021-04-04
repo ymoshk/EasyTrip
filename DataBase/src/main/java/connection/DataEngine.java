@@ -25,11 +25,12 @@ public class DataEngine {
     private static final int pageCountToGet = 5; // total of 100 results
     private static final int nextPageDelay = 2000; // millisec
 
-
     // main for testing
+    //TODO - DELETE the main
     public static void main(String[] args) {
+        DataEngine de = new DataEngine();
         DBContext context = DBContext.getInstance();
-        List<Country> res = (List<Country>) context.selectQuery("FROM Country WHERE countryName LIKE 'aruba'");
+        List<City> res = (List<City>) de.getCities("Tel Aviv");
         int x = 5;
     }
 
@@ -44,7 +45,6 @@ public class DataEngine {
     }
 
     public List<Attraction> getAttractions(Class<?> classObj, PlaceType type, City city, PriceLevel priceLevel) {
-
         List<Attraction> res = new ArrayList<>();
 
         res = (List<Attraction>) DBContext.getInstance().selectQuery(
@@ -68,7 +68,6 @@ public class DataEngine {
                 type.name().replace("_", " "), priceLevel, type, city);
 
         attToAdd.forEach(attraction -> {
-            // TODO - לבדוק איך יודעים אם לא הצלחנו להכניס אובייקט (כי הוא קיים כבר)
             DBContext.getInstance().insert(attraction);
         });
 

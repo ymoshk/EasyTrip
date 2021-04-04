@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Amusement_Park")
+@Table(name = "AmusementPark")
 public class AmusementPark extends Attraction {
 
 

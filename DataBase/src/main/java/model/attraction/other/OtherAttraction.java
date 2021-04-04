@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Other_Attraction")
+@Table(name = "OtherAttraction")
 public class OtherAttraction extends Attraction {
 
     public OtherAttraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
