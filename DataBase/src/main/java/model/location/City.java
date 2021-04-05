@@ -16,11 +16,12 @@ import java.util.List;
 @Table(name = "City")
 @Cacheable
 public class City extends Model {
+    @Column(nullable = false)
     String cityName;
     LatLng cityCenter;
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "country_id", insertable = true, updatable = true)
+    @JoinColumn(name = "country_id", insertable = true, updatable = true, nullable = false)
     Country country;
     double averagePricePerDay;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

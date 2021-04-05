@@ -8,6 +8,7 @@ import okhttp3.Response;
 import util.google.Keys;
 
 import javax.imageio.ImageIO;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
@@ -20,7 +21,9 @@ import java.io.InputStream;
 @Entity
 @Table(indexes = @Index(columnList = "placeId", unique = true, name = "placeId_Index"))
 public class AttractionImage extends Model {
+    @Column(length = 5 * 1024, nullable = false)
     private byte[] imageBytes;
+    @Column(nullable = false)
     private String placeId;
 
     public AttractionImage() {

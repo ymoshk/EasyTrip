@@ -9,13 +9,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Airport")
-public class Airport extends Model implements Serializable{
+public class Airport extends Model implements Serializable {
     String airportName;
     @ManyToOne
-    @JoinColumn(name = "city_id", insertable = true, updatable = true)
+    @JoinColumn(name = "city_id", insertable = true, updatable = true, nullable = false)
     City city;
     String IATA;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     String threeLetterCode;
     LatLng airportLocation;
 
@@ -29,7 +29,7 @@ public class Airport extends Model implements Serializable{
         setUpdateTime(LocalDateTime.now());
     }
 
-    public Airport(){
+    public Airport() {
         setCreateTime(LocalDateTime.now());
         setUpdateTime(LocalDateTime.now());
     }
