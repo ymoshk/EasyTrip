@@ -23,10 +23,10 @@ public class City extends Model {
     @JoinColumn(name = "country_id", insertable = true, updatable = true)
     Country country;
     double averagePricePerDay;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     List<Airport> airportList;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     List<Attraction> attractionList = new ArrayList<>();
 
@@ -49,6 +49,10 @@ public class City extends Model {
 
     public void setAttractionList(List<Attraction> attractionList) {
         this.attractionList = attractionList;
+    }
+
+    public void removeAttraction(Attraction attractionToRemove) {
+        this.attractionList.remove(attractionToRemove);
     }
 
     public String getCityName() {

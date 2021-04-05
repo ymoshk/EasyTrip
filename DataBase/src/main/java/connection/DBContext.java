@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 
 /**
  * A singleton class to connect and process CRUD operations over the DB.
+ * This class can only be accessed from 'connection' package.
  */
-//TODO -> להוריד את המודיפייר ל package
-public class DBContext implements Closeable {
+class DBContext implements Closeable {
 
     private static DBContext instance = null;
     private final EntityManagerFactory entityManagerFactory;
@@ -29,15 +29,11 @@ public class DBContext implements Closeable {
     }
 
     // only one thread can execute this method at the same time.
-    public static synchronized DBContext getInstance() {
+    static synchronized DBContext getInstance() {
         if (instance == null) {
             instance = new DBContext();
         }
         return instance;
-    }
-
-    public static Collection<? extends Model> castCollection(Collection<? extends Model> collection) {
-        return new ArrayList<>(collection);
     }
 
     /**
@@ -55,7 +51,7 @@ public class DBContext implements Closeable {
      * @return A list of all the records inside the DB of the requested class
      * or an empty list if there are no records of the requested class.
      */
-    public List<?> getToList(Class<?> modelClass) {
+    List<?> getToList(Class<?> modelClass) {
         try {
             Query query = this.entityManager.createQuery("from " + modelClass.getSimpleName());
             return query.getResultList();
@@ -70,7 +66,7 @@ public class DBContext implements Closeable {
      * @return A stream of all the records inside the DB of the requested class
      * or an empty stream if there are no records of the requested class.
      */
-    public Stream<?> getToStream(Class<?> modelClass) {
+    Stream<?> getToStream(Class<?> modelClass) {
         return getToList(modelClass).stream();
     }
 
@@ -81,7 +77,7 @@ public class DBContext implements Closeable {
      * @param id         Represent the id of the requested object inside the DB - long int.
      * @return An 'optional' object contains the requested object or an empty value if nothing was found.
      */
-    public Optional<Model> findById(Class<?> modelClass, long id) {
+    Optional<Model> findById(Class<?> modelClass, long id) {
         if (modelClass.getSuperclass() == Model.class || modelClass == Model.class) {
             Model modelFound = (Model) entityManager.find(modelClass, id);
 
@@ -104,7 +100,7 @@ public class DBContext implements Closeable {
      * <p>
      * More info can be found at https://www.javatpoint.com/hql
      */
-    public List<? extends Model> selectQuery(String queryString) {
+    List<? extends Model> selectQuery(String queryString) {
         try {
             Query query = this.entityManager.createQuery(queryString);
             return query.getResultList();
@@ -117,7 +113,7 @@ public class DBContext implements Closeable {
     /**
      * @param objectToAdd A model to insert into the DB. The model will be mapped automatically to the relevant table.
      */
-    public void insert(Model objectToAdd) {
+    void insert(Model objectToAdd) {
         EntityTransaction transaction = this.entityManager.getTransaction();
         objectToAdd.setCreateTime(LocalDateTime.now());
         objectToAdd.setUpdateTime(LocalDateTime.now());
@@ -134,7 +130,7 @@ public class DBContext implements Closeable {
      * @param modelCollection A collection of models to insert into the DB.
      *                        The models will be mapped automatically to the relevant table.
      */
-    public void insertAll(Collection<? extends Model> modelCollection) {
+    void insertAll(Collection<? extends Model> modelCollection) {
         EntityTransaction transaction = this.entityManager.getTransaction();
         try {
             transaction.begin();
@@ -153,7 +149,7 @@ public class DBContext implements Closeable {
      * @param modelToRemove the model to remove from the DB.
      *                      If the model couldn't be found in the DB, the method will end without an error.
      */
-    public void delete(Model modelToRemove) {
+    void delete(Model modelToRemove) {
         if (modelToRemove != null) {
             EntityTransaction transaction = this.entityManager.getTransaction();
             try {
@@ -170,7 +166,7 @@ public class DBContext implements Closeable {
      * @param modelCollection A collection of models to remove from the DB.
      *                        If any of the models couldn't be found in the DB it will be ignored.
      */
-    public void deleteAll(Collection<? extends Model> modelCollection) {
+    void deleteAll(Collection<? extends Model> modelCollection) {
         if (modelCollection != null) {
             EntityTransaction transaction = this.entityManager.getTransaction();
             try {
@@ -188,7 +184,7 @@ public class DBContext implements Closeable {
      *                     Use the model's setters to modify any of it's value.
      *                     Use this method once to save these changes.
      */
-    public void update(Model updatedModel) {
+    void update(Model updatedModel) {
         if (updatedModel != null) {
             EntityTransaction transaction = this.entityManager.getTransaction();
             updatedModel.setUpdateTime(LocalDateTime.now());

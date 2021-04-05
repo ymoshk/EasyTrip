@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "Airport")
 public class Airport extends Model implements Serializable{
     String airportName;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     City city;
     String IATA;

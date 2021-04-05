@@ -1,12 +1,14 @@
-package model.location;
+package connection;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.maps.model.LatLng;
-import connection.DBContext;
 import log.LogsManager;
 import model.Model;
+import model.location.Airport;
+import model.location.City;
+import model.location.Country;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -50,11 +52,11 @@ public class FixedDataHandler {
         initProjectObjectLists();
 
         for (int i = 0; i < countries.size(); i++) {
-            if (!(countries.get(i).getCountryName().toLowerCase().equals("israel"))) {
+            if (!countries.get(i).getCountryName().toLowerCase().equals("israel")) {
                 continue;
             }
             System.out.println(i);
-            System.out.println(countries.get(i).countryName);
+            System.out.println(countries.get(i).getCountryName());
             try {
                 context.insert(countries.get(i));
                 break;
@@ -67,7 +69,7 @@ public class FixedDataHandler {
     private boolean isCountryExists(Country country) {
         DBContext context = DBContext.getInstance();
         List<Country> lst = (List<Country>) context
-                .selectQuery("FROM Country WHERE localeCode = '" + country.localeCode + "'");
+                .selectQuery("FROM Country WHERE localeCode = '" + country.getLocaleCode() + "'");
         return lst.size() != 0;
     }
 

@@ -2,12 +2,13 @@ package model.attraction;
 
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;
-import com.google.maps.model.PriceLevel;
+import container.PriceRange;
 import model.attraction.amusement.park.AmusementPark;
 import model.attraction.aquarium.Aquarium;
 import model.attraction.art.gallery.ArtGallery;
 import model.attraction.camp.ground.CampGround;
 import model.attraction.casino.Casino;
+import model.attraction.hotel.Hotel;
 import model.attraction.museum.Museum;
 import model.attraction.night.life.NightLife;
 import model.attraction.other.OtherAttraction;
@@ -16,66 +17,65 @@ import model.attraction.restaurant.Restaurant;
 import model.attraction.shopping.mall.ShoppingMall;
 import model.attraction.zoo.Zoo;
 import model.location.City;
-import model.attraction.hotel.Hotel;
 
 public class AttractionsFactory {
 
-    public static Attraction getAttraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
+    public static Attraction getAttraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
         Attraction res = null;
 
         switch (placeType) {
             case LODGING:
-                res = new Hotel(searchResultObject, placeType, priceLevel, city);
+                res = new Hotel(searchResultObject, placeType, priceRange, city);
                 break;
 
             case RESTAURANT:
             case CAFE:
-                res = new Restaurant(searchResultObject, placeType, priceLevel, city);
+                res = new Restaurant(searchResultObject, placeType, priceRange, city);
                 break;
 
             case MUSEUM:
-                res = new Museum(searchResultObject, placeType, priceLevel, city);
+                res = new Museum(searchResultObject, placeType, priceRange, city);
                 break;
 
             case AMUSEMENT_PARK:
-                res = new AmusementPark(searchResultObject, placeType, priceLevel, city);
+                res = new AmusementPark(searchResultObject, placeType, priceRange, city);
                 break;
 
             case AQUARIUM:
-                res = new Aquarium(searchResultObject, placeType, priceLevel, city);
+                res = new Aquarium(searchResultObject, placeType, priceRange, city);
                 break;
 
             case ART_GALLERY:
-                res = new ArtGallery(searchResultObject, placeType, priceLevel, city);
+                res = new ArtGallery(searchResultObject, placeType, priceRange, city);
                 break;
 
             case BAR:
             case NIGHT_CLUB:
-                res = new NightLife(searchResultObject, placeType, priceLevel, city);
+                res = new NightLife(searchResultObject, placeType, priceRange, city);
                 break;
 
             case CASINO:
-                res = new Casino(searchResultObject, placeType, priceLevel, city);
+                res = new Casino(searchResultObject, placeType, priceRange, city);
                 break;
 
             case CAMPGROUND:
-                res = new CampGround(searchResultObject, placeType, priceLevel, city);
+                res = new CampGround(searchResultObject, placeType, priceRange, city);
                 break;
 
             case PARK:
-                res = new Park(searchResultObject, placeType, priceLevel, city);
+                res = new Park(searchResultObject, placeType, priceRange, city);
                 break;
 
             case SHOPPING_MALL:
-                res = new ShoppingMall(searchResultObject, placeType, priceLevel, city);
+                res = new ShoppingMall(searchResultObject, placeType, priceRange, city);
                 break;
 
             case ZOO:
-                res = new Zoo(searchResultObject, placeType, priceLevel, city);
+                res = new Zoo(searchResultObject, placeType, priceRange, city);
                 break;
 
             case TOURIST_ATTRACTION:
-                res = new OtherAttraction(searchResultObject, placeType, priceLevel, city);
+                res = new OtherAttraction(searchResultObject, placeType, priceRange, city);
                 break;
         }
 
