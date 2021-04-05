@@ -26,17 +26,14 @@ public class DataEngine {
     // this class will be use by the client to get data informations
     private static final int PAGE_COUNT_TO_GET = 3; // total of 60 results
     private static final int NEXT_PAGE_DELAY = 2000; // millisec
-    private static final int MIN_SIZE_COLLECTION = 5; // millisec
+    private static final int MIN_SIZE_COLLECTION = 11;
 
     // main for testing
     //TODO - DELETE the main
     public static void main(String[] args) {
         DataEngine de = new DataEngine();
-//        DBContext context = DBContext.getInstance();
-//        List<Hotel> h = new ArrayList<>();
-//        List<City> res = (List<City>) de.getCities("Tel Aviv");
-//        int x = 5;
-        List<Attraction> atts = de.getAttractions(PlaceType.ZOO, "Ramat Gan", PriceLevel.UNKNOWN);
+
+        List<Attraction> atts = de.getAttractions(PlaceType.ZOO, "RAMAT GAN", PriceLevel.UNKNOWN);
         int x = 3;
     }
 
@@ -61,25 +58,29 @@ public class DataEngine {
         DBContext dbContext = DBContext.getInstance();
         City theCity = getCity(cityName);
 
-        List<Attraction> res = theCity.getAttractionList().stream()
-                .filter(attr -> attr.getPlaceType().equals(type) && attr.getPriceLevel().equals(priceLevel))
-                .collect(Collectors.toList());
+        List<Attraction> res = null;
 
-        try {
-            if (res.isEmpty()) {
-                res = addAttractionsToTheDb(Constants.getSaharApiKey(), priceLevel, type, theCity);
-            } else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
-                dbContext.deleteAll(res);
-                res = addAttractionsToTheDb(Constants.getSaharApiKey(), priceLevel, type, theCity);
+        if(theCity != null) {
+            res = theCity.getAttractionList().stream()
+                    .filter(attr -> attr.getPlaceType().equals(type) && attr.getPriceLevel().equals(priceLevel))
+                    .collect(Collectors.toList());
+
+            try {
+                if (res.isEmpty()) {
+                    res = addAttractionsToTheDb(Constants.getSaharApiKey(), priceLevel, type, theCity);
+                } else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
+                    dbContext.deleteAll(res);
+                    res = addAttractionsToTheDb(Constants.getSaharApiKey(), priceLevel, type, theCity);
+                }
+            } catch (Exception e) {
+                LogsManager.logException(e);
             }
-        } catch (Exception e) {
-            LogsManager.logException(e);
         }
 
         return res;
     }
 
-    private List<Attraction> addAttractionsToTheDb(String apiKey, PriceLevel priceLevel, PlaceType type, City city) throws IOException {
+    private List<Attraction> addAttractionsToTheDb(String apiKey, PriceLevel priceLevel, PlaceType type, City city) {
         List<Attraction> attractionsToAdd = getAttractionInStandardTextSearch(apiKey,
                 type.name().replace("_", " "), priceLevel, type, city);
 
@@ -88,13 +89,7 @@ public class DataEngine {
         return attractionsToAdd;
     }
 
-    private boolean isAttractionExist(String tableName, String placeId) {
-        return !DBContext.getInstance().selectQuery(
-                "FROM " + tableName +
-                        " WHERE placeId LIKE " + "'" + placeId + "'").isEmpty();
-    }
-
-    private List<Attraction> getAttractionInStandardTextSearch(String apiKey, String attractionName, PriceLevel priceLevel, PlaceType type, City city) throws IOException {
+    private List<Attraction> getAttractionInStandardTextSearch(String apiKey, String attractionName, PriceLevel priceLevel, PlaceType type, City city) {
         GeoApiContext context = new GeoApiContext.Builder()
                 .apiKey(apiKey)
                 .build();
@@ -107,12 +102,13 @@ public class DataEngine {
                     .await();
 
             int i = 0;
+
             do {
                 Arrays.stream(resp.results)
                         .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceLevel, city)));
                 Thread.sleep(NEXT_PAGE_DELAY);
 
-                if(resp.nextPageToken ==  null){
+                if (resp.nextPageToken == null) {
                     break;
                 }
 
@@ -125,5 +121,11 @@ public class DataEngine {
             context.shutdown();
             return result;
         }
+    }
+
+    private boolean isAttractionExist(String tableName, String placeId) {
+        return !DBContext.getInstance().selectQuery(
+                "FROM " + tableName +
+                        " WHERE placeId LIKE " + "'" + placeId + "'").isEmpty();
     }
 }

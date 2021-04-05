@@ -50,13 +50,14 @@ public class FixedDataHandler {
         initProjectObjectLists();
 
         for (int i = 0; i < countries.size(); i++) {
-            if (isCountryExists(countries.get(i))) {
+            if (!(countries.get(i).getCountryName().toLowerCase().equals("israel"))) {
                 continue;
             }
             System.out.println(i);
             System.out.println(countries.get(i).countryName);
             try {
                 context.insert(countries.get(i));
+                break;
             } catch (Exception ex) {
                 LogsManager.log("Country failed: " + countries.get(i).getCountryName() + " index: " + i);
             }

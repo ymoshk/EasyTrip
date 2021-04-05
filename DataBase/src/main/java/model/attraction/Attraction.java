@@ -5,6 +5,8 @@ import com.google.maps.model.*;
 import constant.Constants;
 import model.Model;
 import model.location.City;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import util.GoogleMapsApiUtils;
 
 import javax.persistence.*;
@@ -16,6 +18,7 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Attraction extends Model {
     protected String formattedAddress;
+    @Column(length = 1024)
     protected Geometry geometry;
     protected String name;
     protected URL icon;
@@ -25,6 +28,7 @@ public abstract class Attraction extends Model {
     @ElementCollection
     protected List<String> types;
     protected OpeningHours openingHours;
+    @Column(length = 1024)
     protected String photoUrl;
     protected String vicinity;
     protected boolean permanentlyClosed;
@@ -32,7 +36,8 @@ public abstract class Attraction extends Model {
     protected String businessStatus;
     protected PlaceType placeType;
     protected PriceLevel priceLevel;
-    @ManyToOne()
+    @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     protected City city;
 

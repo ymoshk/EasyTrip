@@ -43,11 +43,20 @@ public class GoogleMapsApiUtils {
     //    }
 
 
-    public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName, String cityName, PriceLevel priceLevel, PlaceType type) {
-        TextSearchRequest res = PlacesApi.textSearchQuery(context, attractionName + " in " + cityName)
-                .minPrice(priceLevel)
-                .maxPrice(priceLevel)
-                .type(type);
+    public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName,String cityName ,PriceLevel priceLevel, PlaceType type) {
+        TextSearchRequest res;
+
+        if(!priceLevel.equals(PriceLevel.UNKNOWN)) {
+            res = PlacesApi.textSearchQuery(context, attractionName + " in " + cityName)
+                    .minPrice(priceLevel)
+                    .maxPrice(priceLevel)
+                    .type(type);
+        }
+        else
+        {
+            res = PlacesApi.textSearchQuery(context, attractionName + " in " + cityName)
+                    .type(type);
+        }
 
         return res;
     }

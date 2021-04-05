@@ -3,6 +3,8 @@ package model.location;
 import com.google.maps.model.LatLng;
 import model.Model;
 import model.attraction.Attraction;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,7 +18,8 @@ import java.util.List;
 public class City extends Model {
     String cityName;
     LatLng cityCenter;
-    @ManyToOne()
+    @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "country_id", insertable = true, updatable = true)
     Country country;
     double averagePricePerDay;

@@ -20,7 +20,7 @@ public class Country extends Model implements Serializable {
     String localeCode;
     String capital;
     double averagePricePerDay;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "country_id", insertable = true, updatable = true)
     List<City> cityList;
 
