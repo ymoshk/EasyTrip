@@ -7,6 +7,7 @@ import container.PriceRange;
 import log.LogsManager;
 import model.Model;
 import model.attraction.Attraction;
+import model.attraction.AttractionImage;
 import model.attraction.AttractionsFactory;
 import model.location.City;
 import model.location.Country;
@@ -128,7 +129,7 @@ public class DataEngine implements Closeable {
         GeoApiContext context = null;
 
         try {
-
+            int i = 0;
             context = new GeoApiContext.Builder()
                     .apiKey(Keys.getKey())
                     .build();
@@ -136,9 +137,6 @@ public class DataEngine implements Closeable {
             PlacesSearchResponse resp = GoogleMapsApiUtils
                     .getTextSearchRequest(context, attractionName, city.getCityName(), priceRange, type)
                     .await();
-
-            int i = 0;
-
             do {
                 Arrays.stream(resp.results)
                         .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceRange, city)));
@@ -149,8 +147,7 @@ public class DataEngine implements Closeable {
                 }
 
                 resp = GoogleMapsApiUtils.getNextPageTextSearchRequest(context, resp.nextPageToken).await();
-                i++;
-            } while (i <= PAGE_COUNT_TO_GET);
+            } while (++i <= PAGE_COUNT_TO_GET);
         } catch (Exception e) {
             LogsManager.logException(e);
         } finally {
@@ -167,8 +164,27 @@ public class DataEngine implements Closeable {
                         " WHERE placeId LIKE " + "'" + placeId + "'").isEmpty();
     }
 
+    /**
+     * @param attraction the attraction to get it's image.
+     * @return an AttractionImage object which contains the photo bytes array.
+     */
+    public AttractionImage getAttractionImage(Attraction attraction) {
+        AttractionImage result = null;
+        List<? extends Model> results = DBContext.getInstance()
+                .selectQuery("FROM AttractionImage WHERE placeId = " + "'" + attraction.getPlaceId() + "'");
+
+        if (results.isEmpty()) {
+            result = new AttractionImage(attraction);
+            DBContext.getInstance().insert(result);
+        } else {
+            result = (AttractionImage) results.get(0);
+        }
+        return result;
+    }
+
     @Override
     public void close() {
+        // TODO - make sure to call this method as the server shut down.
         DBContext.getInstance().close();
     }
 }

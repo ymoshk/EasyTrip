@@ -17,28 +17,27 @@ import java.util.List;
 @Entity()
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Attraction extends Model {
-    protected String formattedAddress;
+    private String formattedAddress;
     @Column(length = 1024)
-    protected Geometry geometry;
-    protected String name;
-    protected URL icon;
+    private Geometry geometry;
+    private String name;
+    private URL icon;
     @Column(unique = true)
-    protected String placeId;
-    protected float rating;
+    private String placeId;
+    private float rating;
     @ElementCollection
-    protected List<String> types;
-    protected OpeningHours openingHours;
-    @Column(length = 10 * 1024)
-    protected String photoReference;
-    protected String vicinity;
-    protected boolean permanentlyClosed;
-    protected int userRatingsTotal;
-    protected String businessStatus;
-    protected PlaceType placeType;
-    protected PriceRange priceRange;
+    private List<String> types;
+    private OpeningHours openingHours;
+    private String photoReference;
+    private String vicinity;
+    private boolean permanentlyClosed;
+    private int userRatingsTotal;
+    private String businessStatus;
+    private PlaceType placeType;
+    private PriceRange priceRange;
     @ManyToOne
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
-    protected City city;
+    private City city;
 
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;
