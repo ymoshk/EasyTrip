@@ -13,16 +13,18 @@ import java.util.List;
 @Cacheable
 public class Country extends Model implements Serializable {
     @ElementCollection
-    List<String> timezones = new ArrayList<>();
-    LatLng countryLatLong;
-    String countryName;
-    @Column(unique = true)
-    String localeCode;
-    String capital;
-    double averagePricePerDay;
-    @OneToMany(cascade = CascadeType.ALL)
+    private List<String> timezones = new ArrayList<>();
+    private LatLng countryLatLong;
+    @Column(nullable = false)
+    private String countryName;
+    @Column(unique = true, nullable = false)
+    private String localeCode;
+    @Column(nullable = false)
+    private String capital;
+    private double averagePricePerDay;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "country_id", insertable = true, updatable = true)
-    List<City> cityList;
+    private List<City> cityList;
 
     public Country() {
         setCreateTime(LocalDateTime.now());

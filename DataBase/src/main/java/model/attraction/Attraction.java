@@ -1,11 +1,13 @@
 package model.attraction;
 
 
-import com.google.maps.model.*;
-import constant.Constants;
+import com.google.maps.model.Geometry;
+import com.google.maps.model.OpeningHours;
+import com.google.maps.model.PlaceType;
+import com.google.maps.model.PlacesSearchResult;
+import container.PriceRange;
 import model.Model;
 import model.location.City;
-import util.GoogleMapsApiUtils;
 
 import javax.persistence.*;
 import java.net.URL;
@@ -15,28 +17,33 @@ import java.util.List;
 @Entity()
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Attraction extends Model {
-    protected String formattedAddress;
-    protected Geometry geometry;
-    protected String name;
-    protected URL icon;
-    @Column(unique = true)
-    protected String placeId;
-    protected float rating;
+    @Column(nullable = false)
+    private String formattedAddress;
+    @Column(length = 1024)
+    private Geometry geometry;
+    @Column(nullable = false)
+    private String name;
+    private URL icon;
+    @Column(unique = true, nullable = false)
+    private String placeId;
+    private float rating;
     @ElementCollection
-    protected List<String> types;
-    protected OpeningHours openingHours;
-    protected String photoUrl;
-    protected String vicinity;
-    protected boolean permanentlyClosed;
-    protected int userRatingsTotal;
-    protected String businessStatus;
-    protected PlaceType placeType;
-    protected PriceLevel priceLevel;
-    @ManyToOne()
+    private List<String> types;
+    private OpeningHours openingHours;
+    @Column(nullable = false)
+    private String photoReference;
+    private String vicinity;
+    private boolean permanentlyClosed;
+    private int userRatingsTotal;
+    private String businessStatus;
+    @Column(nullable = false)
+    private PlaceType placeType;
+    private PriceRange priceRange;
+    @ManyToOne
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
-    protected City city;
+    private City city;
 
-    public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceLevel priceLevel, City city) {
+    public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;
         this.geometry = searchResultObject.geometry;
         this.name = searchResultObject.name;
@@ -47,9 +54,9 @@ public abstract class Attraction extends Model {
         this.openingHours = searchResultObject.openingHours;
 
         if (searchResultObject.photos != null && searchResultObject.photos.length > 0) {
-            this.photoUrl = GoogleMapsApiUtils.getPhotoUrl(Constants.getSaharApiKey(), searchResultObject.photos[0].photoReference);
+            this.photoReference = searchResultObject.photos[0].photoReference;
         } else {
-            this.photoUrl = null;
+            this.photoReference = null;
         }
 
         this.vicinity = searchResultObject.vicinity;
@@ -57,7 +64,7 @@ public abstract class Attraction extends Model {
         this.userRatingsTotal = searchResultObject.userRatingsTotal;
         this.businessStatus = searchResultObject.businessStatus;
         this.placeType = placeType;
-        this.priceLevel = priceLevel;
+        this.priceRange = priceRange;
 
         this.city = city;
     }
@@ -82,12 +89,12 @@ public abstract class Attraction extends Model {
         this.placeType = placeType;
     }
 
-    public PriceLevel getPriceLevel() {
-        return this.priceLevel;
+    public PriceRange getPriceRange() {
+        return this.priceRange;
     }
 
-    public void setPriceLevel(PriceLevel priceLevel) {
-        this.priceLevel = priceLevel;
+    public void setPriceRange(PriceRange priceLevel) {
+        this.priceRange = priceLevel;
     }
 
     public String getFormattedAddress() {
@@ -154,12 +161,12 @@ public abstract class Attraction extends Model {
         this.openingHours = openingHours;
     }
 
-    public String getPhotoUrl() {
-        return this.photoUrl;
+    public String getPhotoReference() {
+        return photoReference;
     }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
+    public void setPhotoReference(String photoReference) {
+        this.photoReference = photoReference;
     }
 
     public String getVicinity() {

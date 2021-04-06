@@ -3,6 +3,8 @@ package model.location;
 import com.google.maps.model.LatLng;
 import model.Model;
 import model.attraction.Attraction;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,16 +16,18 @@ import java.util.List;
 @Table(name = "City")
 @Cacheable
 public class City extends Model {
+    @Column(nullable = false)
     String cityName;
     LatLng cityCenter;
-    @ManyToOne()
-    @JoinColumn(name = "country_id", insertable = true, updatable = true)
+    @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "country_id", insertable = true, updatable = true, nullable = false)
     Country country;
     double averagePricePerDay;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     List<Airport> airportList;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     List<Attraction> attractionList = new ArrayList<>();
 
@@ -46,6 +50,10 @@ public class City extends Model {
 
     public void setAttractionList(List<Attraction> attractionList) {
         this.attractionList = attractionList;
+    }
+
+    public void removeAttraction(Attraction attractionToRemove) {
+        this.attractionList.remove(attractionToRemove);
     }
 
     public String getCityName() {
