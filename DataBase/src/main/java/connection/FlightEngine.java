@@ -39,8 +39,8 @@ public class FlightEngine {
     }
 
     public static void main(String[] args) {
-        new FlightEngine().findFlights("TLV", "JFK", LocalDate.now().plusDays(10),
-                LocalDate.now().plusDays(20), false, 2);
+        new FlightEngine().findFlights("TLV", "NYC", LocalDate.now().plusDays(3),
+                LocalDate.now().plusDays(6), false, 1);
     }
 
 }
