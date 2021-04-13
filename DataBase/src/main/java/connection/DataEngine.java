@@ -1,8 +1,7 @@
 package connection;
 
 import com.google.maps.GeoApiContext;
-import com.google.maps.model.PlaceType;
-import com.google.maps.model.PlacesSearchResponse;
+import com.google.maps.model.*;
 import container.PriceRange;
 import log.LogsManager;
 import model.Model;
@@ -182,9 +181,62 @@ public class DataEngine implements Closeable {
         return result;
     }
 
+    /**
+     * @param source the The place you want to get from.
+     * @param dest the The place you want to get to.
+     * @return an DistanceMatrixElement object which contains the travel time and distance.
+     */
+    public DistanceMatrixElement getDistanceElement(Attraction source, Attraction dest, TravelMode mode) {
+        GeoApiContext context = null;
+        DistanceMatrixElement res = null;
+
+        try {
+            context = new GeoApiContext.Builder()
+                    .apiKey(Keys.getKey())
+                    .build();
+
+            DistanceMatrix response = GoogleMapsApiUtils.getDistanceMatrixApiRequest(context, source, dest, mode).await();
+            if (response.rows.length != 0 && response.rows[0].elements.length != 0) {
+                res = response.rows[0].elements[0];
+            }
+        } catch (Exception e) {
+            LogsManager.logException(e);
+        } finally {
+            if (context != null) {
+                context.shutdown();
+            }
+
+            return res;
+        }
+    }
+
     @Override
     public void close() {
         // TODO - make sure to call this method as the server shut down.
         DBContext.getInstance().close();
+    }
+
+    public static void main(String[] args) {
+        try {
+            GeoApiContext context = new GeoApiContext.Builder()
+                    .apiKey(Keys.getKey())
+                    .build();
+
+            DataEngine eng = new DataEngine();
+            City ramatGan = eng.getCities("Ramat").get(0);
+
+            Attraction source = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Safsal")).toArray()[0];
+            Attraction dest = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Shemesh")).toArray()[0];
+//            ramatGan.getAttractionList().forEach(attraction -> System.out.println(attraction.getName()));
+//            DBContext.getInstance().selectQuery("FROM Attraction WHERE geometry = " + dest.getGeometry());
+
+//            System.out.println(source.getName());
+//            System.out.println(dest.getName());
+            DistanceMatrixElement x = eng.getDistanceElement(source, dest, TravelMode.WALKING);
+            System.out.println(x.duration.humanReadable);
+            System.out.println(x.duration.humanReadable);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
