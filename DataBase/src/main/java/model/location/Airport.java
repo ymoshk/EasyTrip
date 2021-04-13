@@ -18,6 +18,8 @@ public class Airport extends Model implements Serializable {
     @Column(unique = true, nullable = false)
     String threeLetterCode;
     LatLng airportLocation;
+    double lat;
+    double lng;
 
     public Airport(String airportName, City city, String IATA, String threeLetterCode, LatLng airportLocation) {
         this.airportName = airportName;
@@ -25,6 +27,8 @@ public class Airport extends Model implements Serializable {
         this.IATA = IATA;
         this.threeLetterCode = threeLetterCode;
         this.airportLocation = airportLocation;
+        this.lat = this.airportLocation.lat;
+        this.lng = this.airportLocation.lng;
         setCreateTime(LocalDateTime.now());
         setUpdateTime(LocalDateTime.now());
     }

@@ -15,6 +15,8 @@ public class Country extends Model implements Serializable {
     @ElementCollection
     private List<String> timezones = new ArrayList<>();
     private LatLng countryLatLong;
+    double lat;
+    double lng;
     @Column(nullable = false)
     private String countryName;
     @Column(unique = true, nullable = false)
@@ -35,6 +37,8 @@ public class Country extends Model implements Serializable {
                    String capital) {
         this.timezones = timezones;
         this.countryLatLong = countryLatLong;
+        this.lat = this.countryLatLong.lat;
+        this.lng = this.countryLatLong.lng;
         this.countryName = countryName;
         this.localeCode = localeCode;
         this.capital = capital;
