@@ -6,6 +6,7 @@ import com.amadeus.exceptions.ResponseException;
 import com.amadeus.resources.FlightOfferSearch;
 import model.Model;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,16 +14,33 @@ import java.util.Arrays;
 import java.util.Currency;
 import java.util.List;
 
+@Entity
 public class FlightOffer extends Model {
+    private String originLocationCode;
+    private String destinationLocationCode;
+    private LocalDate departureDate;
+    int numberOfPassengers;
+    //Might be null, according to oneWay
+    private LocalDate returnDate;
     private boolean oneWay;
     private LocalDate lastTicketingDate;
     private int numberOfBookableSeats;
     private double price;
     private Currency currency;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "itinerary_id", insertable = true, updatable = true)
     List <Itinerary> itineraryList;
 
-    protected FlightOffer(FlightOfferSearch flightOfferSearch){
-        this.oneWay = flightOfferSearch.isOneWay();
+
+    public FlightOffer(FlightOfferSearch flightOfferSearch, String originLocationCode, String destinationLocationCode,
+                       LocalDate departureDate, LocalDate returnDate, int numberOfPassengers){
+        this.originLocationCode = originLocationCode;
+        this.destinationLocationCode = destinationLocationCode;
+        this.departureDate = departureDate;
+        this.returnDate = returnDate;
+        this.numberOfPassengers = numberOfPassengers;
+        // FlightOfferSearch method isOneWay returns always false --> each object in Itineraries array represent one direction
+        this.oneWay = flightOfferSearch.getItineraries().length == 1;
         this.lastTicketingDate = LocalDate.parse(flightOfferSearch.getLastTicketingDate());
         this.numberOfBookableSeats = flightOfferSearch.getNumberOfBookableSeats();
         this.price = flightOfferSearch.getPrice().getTotal();
@@ -72,8 +90,12 @@ public class FlightOffer extends Model {
         return itineraryList;
     }
 
-    public static class Itinerary {
+    @Entity
+    public static class Itinerary extends Model{
+
         private String durationTotal;
+        @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+        @JoinColumn(name = "segment_id", insertable = true, updatable = true)
         List<Segment> segmentList;
 
         protected Itinerary() {
@@ -104,9 +126,14 @@ public class FlightOffer extends Model {
         }
     }
 
-    public static class Segment {
-        private AirportInfo departure;
+    @Entity
+    public static class Segment extends Model{
+        @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+        @JoinColumn(name = "arrival_id", insertable = true, updatable = true)
         private AirportInfo arrival;
+        @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+        @JoinColumn(name = "departure_id", insertable = true, updatable = true)
+        private AirportInfo departure;
         private String carrierCode;
         private String flightNumber;
         private String duration;
@@ -154,7 +181,8 @@ public class FlightOffer extends Model {
         }
     }
 
-    public static class AirportInfo {
+    @Entity
+    public static class AirportInfo extends Model {
         private String iataCode;
         private String terminal;
         private LocalDateTime at;
@@ -190,29 +218,31 @@ public class FlightOffer extends Model {
         }
     }
 
-    public static void main(String[] args) {
-        Amadeus amadeus = Amadeus
-                .builder(System.getenv().get("AMADEUS_CLIENT_ID"), System.getenv().get("AMADEUS_CLIENT_SECRET"))
-                .build();
-
-        List<FlightOffer> list = new ArrayList<>();
-
-        try {
-            FlightOfferSearch[] flightOffersSearches = amadeus.shopping.flightOffersSearch.get(
-                    Params.with("originLocationCode", "TLV")
-                            .and("destinationLocationCode", "JFK")
-                            .and("departureDate", "2021-04-11")
-                            .and("returnDate", "2021-04-17")
-                            .and("adults", 2)
-                            .and("max", 10));
-
-            Arrays.stream(flightOffersSearches).forEach(flightOfferSearch -> {
-                list.add(new FlightOffer(flightOfferSearch));
-            });
-        } catch (ResponseException e) {
-            e.printStackTrace();
-        }
-
-        list.forEach(System.out::println);
-    }
+//    public static void main(String[] args) {
+//        Amadeus amadeus = Amadeus
+//                .builder(System.getenv().get("AMADEUS_CLIENT_ID"), System.getenv().get("AMADEUS_CLIENT_SECRET"))
+//                .build();
+//
+//        List<FlightOffer> list = new ArrayList<>();
+//
+//        try {
+//            FlightOfferSearch[] flightOffersSearches = amadeus.shopping.flightOffersSearch.get(
+//                    Params.with("originLocationCode", "TLV")
+//                            .and("destinationLocationCode", "JFK")
+//                            .and("departureDate", "2021-04-11")
+//                            .and("returnDate", "2021-04-20")
+//                            .and("adults", 2)
+//                            .and("max", 10));
+//
+//            Arrays.stream(flightOffersSearches).forEach(flightOfferSearch -> {
+//                list.add(new FlightOffer(flightOfferSearch));
+//
+//                System.out.println(flightOfferSearch);
+//            });
+//        } catch (ResponseException e) {
+//            e.printStackTrace();
+//        }
+//
+//        list.forEach(System.out::println);
+//    }
 }
