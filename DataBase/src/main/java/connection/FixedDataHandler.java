@@ -81,31 +81,6 @@ public class FixedDataHandler {
         return lst.size() != 0;
     }
 
-    //    private boolean isValidAirportName(String name) {
-    //        if(name.equals("Hedley Airport"))
-    //            return false;
-    //        else if(name.equals("Seronera Airport"))
-    //            return false;
-    //        else if (name.equals("Maquela do Zombo Airport"))
-    //            return false;
-    //        else if (name.equals("Ambergris Cay International Airport"))
-    //            return false;
-    //        else if (name.equals("Bailey Airport"))
-    //            return false;
-    //        else if(name.equals("Luzamba Airport"))
-    //            return false;
-    //        else if(name.equals("Nansio Airport"))
-    //            return false;
-    //        else if(name.equals("Porto Amboim Airport"))
-    //            return false;
-    //        else if(name.equals("Sanza Pombo Airport"))
-    //            return false;
-    //        else if(name.equals("Negage Airport"))
-    //            return false;
-    //        else if(name.equals("Guangzhou MR Air Base"))
-    //            return false;
-    //        return true;
-    //    }
 
     private void initProjectObjectLists() {
         Arrays.asList(jsonCountries).forEach(jsonCountry -> countries.add(new Country(jsonCountry.timezones,

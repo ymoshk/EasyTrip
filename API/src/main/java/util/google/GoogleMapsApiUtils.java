@@ -6,7 +6,6 @@ import com.google.maps.model.LatLng;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.TravelMode;
 import container.PriceRange;
-import model.attraction.Attraction;
 
 public class GoogleMapsApiUtils {
 

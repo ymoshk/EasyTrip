@@ -18,6 +18,7 @@ import java.util.List;
 public class City extends Model {
     @Column(nullable = false)
     String cityName;
+    int cityNumbeoID;
     LatLng cityCenter;
     double lat;
     double lng;
