@@ -13,6 +13,7 @@ import model.location.Country;
 import model.travel.Travel;
 import util.google.GoogleMapsApiUtils;
 import util.google.Keys;
+
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,8 @@ public class DataEngine implements Closeable {
     private static DataEngine instance = null;
 
     //empty constructor just to make sure the class is a singleton
-    private DataEngine(){}
+    public DataEngine() {
+    }
 
     // only one thread can execute this method at the same time.
     static synchronized DataEngine getInstance() {
@@ -204,7 +206,7 @@ public class DataEngine implements Closeable {
             DistanceMatrixElement distanceMatrixElement =
                     getDistanceMatrixElementFromGoogleApi(source, dest, mode);
 
-            if(distanceMatrixElement != null) {
+            if (distanceMatrixElement != null) {
                 res = new Travel(source, dest, mode, distanceMatrixElement);
                 DBContext.getInstance().insert(res);
             }
@@ -249,26 +251,22 @@ public class DataEngine implements Closeable {
         }
     }
 
+    public List<Attraction> getAttractionInSquare(LatLng origin, double km) {
+        double factor = (km / 1.11) * 0.01;
+        LatLng topRight = new LatLng(origin.lat + factor, origin.lng + factor);
+        LatLng topLeft = new LatLng(origin.lat + factor, origin.lng - factor);
+        LatLng bottomLeft = new LatLng(origin.lat - factor, origin.lng - factor);
+
+        List<Attraction> res = (List<Attraction>) DBContext.getInstance().selectQuery("FROM Attraction WHERE " +
+                "lat > " + bottomLeft.lat + " AND lat < " + topLeft.lat +
+                " AND lng > " + topLeft.lng + " AND lng < " + topRight.lng);
+
+        return res;
+    }
+
     @Override
     public void close() {
         // TODO - make sure to call this method as the server shut down.
         DBContext.getInstance().close();
-    }
-
-    public static void main(String[] args) {
-        try {
-            DataEngine eng = new DataEngine();
-            City ramatGan = eng.getCities("Ramat").get(0);
-
-            Attraction source = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Safsal")).toArray()[0];
-            Attraction dest = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Shemesh")).toArray()[0];
-
-            Travel travel = eng.getTravel(source.getGeometry().location, dest.getGeometry().location, TravelMode.WALKING);
-
-            int x;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 }

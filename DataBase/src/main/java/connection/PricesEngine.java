@@ -23,7 +23,7 @@ public class PricesEngine {
                 dataEngine = DataEngine.getInstance();
                 City cityToUpdate =  dataEngine.getCity(cityLocation.getCity()).orElse(null);
                 if(cityToUpdate != null){
-                    cityToUpdate.set
+//                    cityToUpdate.set
                 }
 
             });

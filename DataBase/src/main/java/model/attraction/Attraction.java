@@ -17,6 +17,16 @@ import java.util.List;
 @Entity()
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Attraction extends Model {
+
+    //TODO - delete setters
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
+
     @Column(nullable = false)
     private String formattedAddress;
     @Column(length = 1024)
