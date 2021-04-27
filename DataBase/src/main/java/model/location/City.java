@@ -19,6 +19,8 @@ public class City extends Model {
     @Column(nullable = false)
     String cityName;
     LatLng cityCenter;
+    double lat;
+    double lng;
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "country_id", insertable = true, updatable = true, nullable = false)
@@ -34,6 +36,8 @@ public class City extends Model {
     public City(String name, LatLng latLng, Country countryToUpdate) {
         this.cityName = name;
         this.cityCenter = latLng;
+        this.lat = this.cityCenter.lat;
+        this.lng = this.cityCenter.lng;
         this.country = countryToUpdate;
         setCreateTime(LocalDateTime.now());
         setUpdateTime(LocalDateTime.now());

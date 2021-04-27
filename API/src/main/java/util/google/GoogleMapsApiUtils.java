@@ -1,10 +1,12 @@
 package util.google;
 
-import com.google.maps.GeoApiContext;
-import com.google.maps.PlacesApi;
-import com.google.maps.TextSearchRequest;
+import com.google.maps.*;
+import com.google.maps.model.Geometry;
+import com.google.maps.model.LatLng;
 import com.google.maps.model.PlaceType;
+import com.google.maps.model.TravelMode;
 import container.PriceRange;
+import model.attraction.Attraction;
 
 public class GoogleMapsApiUtils {
 
@@ -17,5 +19,9 @@ public class GoogleMapsApiUtils {
 
     public static TextSearchRequest getNextPageTextSearchRequest(GeoApiContext context, String pageToken) {
         return PlacesApi.textSearchQuery(context, "").pageToken(pageToken);
+    }
+
+    public static DistanceMatrixApiRequest getDistanceMatrixApiRequest(GeoApiContext context, LatLng source, LatLng dest, TravelMode mode){
+        return DistanceMatrixApi.newRequest(context).mode(mode).origins(source).destinations(dest);
     }
 }

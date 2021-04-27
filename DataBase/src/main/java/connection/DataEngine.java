@@ -1,8 +1,8 @@
 package connection;
 
 import com.google.maps.GeoApiContext;
-import com.google.maps.model.PlaceType;
-import com.google.maps.model.PlacesSearchResponse;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.*;
 import container.PriceRange;
 import log.LogsManager;
 import model.Model;
@@ -11,10 +11,13 @@ import model.attraction.AttractionImage;
 import model.attraction.AttractionsFactory;
 import model.location.City;
 import model.location.Country;
+import model.travel.Travel;
 import util.google.GoogleMapsApiUtils;
 import util.google.Keys;
 
+import javax.jws.WebParam;
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -182,9 +185,83 @@ public class DataEngine implements Closeable {
         return result;
     }
 
+    /**
+     * @param source the The place you want to get from.
+     * @param dest   the The place you want to get to.
+     * @return an DistanceMatrixElement object which contains the travel time and distance.
+     */
+    public Travel getTravel(LatLng source, LatLng dest, TravelMode mode) {
+        Travel res = getTravelFromDB(source, dest, mode);
+
+        if (res == null) {
+            DistanceMatrixElement distanceMatrixElement =
+                    getDistanceMatrixElementFromGoogleApi(source, dest, mode);
+
+            if(distanceMatrixElement != null) {
+                res = new Travel(source, dest, mode, distanceMatrixElement);
+                DBContext.getInstance().insert(res);
+            }
+        }
+
+        return res;
+    }
+
+    private Travel getTravelFromDB(LatLng source, LatLng dest, TravelMode mode) {
+        DBContext dbContext = DBContext.getInstance();
+
+        List<Travel> travels = (List<Travel>) dbContext.selectQuery(
+                "FROM Travel WHERE " +
+                        "destLat = " + dest.lat + " AND destLng = " + dest.lng +
+                        " AND sourceLat = " + source.lat + " AND sourceLng = " + source.lng);
+
+        Travel res = travels.stream().filter(travel -> travel.getMode() == mode).findFirst().orElse(null);
+
+        return res;
+    }
+
+    private DistanceMatrixElement getDistanceMatrixElementFromGoogleApi(LatLng source, LatLng dest, TravelMode mode) {
+        GeoApiContext context = null;
+        DistanceMatrixElement res = null;
+
+        context = new GeoApiContext.Builder()
+                .apiKey(Keys.getKey())
+                .build();
+
+        try {
+            DistanceMatrix response = GoogleMapsApiUtils.getDistanceMatrixApiRequest(context, source, dest, mode).await();
+
+            if (response.rows.length != 0 && response.rows[0].elements.length != 0) {
+                res = response.rows[0].elements[0];
+            }
+        } catch (Exception e) {
+            LogsManager.logException(e);
+        } finally {
+            context.shutdown();
+
+            return res;
+        }
+    }
+
     @Override
     public void close() {
         // TODO - make sure to call this method as the server shut down.
         DBContext.getInstance().close();
+    }
+
+    public static void main(String[] args) {
+        try {
+            DataEngine eng = new DataEngine();
+            City ramatGan = eng.getCities("Ramat").get(0);
+
+            Attraction source = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Safsal")).toArray()[0];
+            Attraction dest = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Shemesh")).toArray()[0];
+
+            Travel travel = eng.getTravel(source.getGeometry().location, dest.getGeometry().location, TravelMode.WALKING);
+
+            int x;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

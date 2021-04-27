@@ -21,6 +21,8 @@ public abstract class Attraction extends Model {
     private String formattedAddress;
     @Column(length = 1024)
     private Geometry geometry;
+    private double lat;
+    private double lng;
     @Column(nullable = false)
     private String name;
     private URL icon;
@@ -46,6 +48,8 @@ public abstract class Attraction extends Model {
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;
         this.geometry = searchResultObject.geometry;
+        this.lat = this.geometry.location.lat;
+        this.lng = this.geometry.location.lng;
         this.name = searchResultObject.name;
         this.icon = searchResultObject.icon;
         this.placeId = searchResultObject.placeId;
