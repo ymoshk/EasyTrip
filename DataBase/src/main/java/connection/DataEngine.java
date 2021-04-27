@@ -1,7 +1,6 @@
 package connection;
 
 import com.google.maps.GeoApiContext;
-import com.google.maps.errors.ApiException;
 import com.google.maps.model.*;
 import container.PriceRange;
 import log.LogsManager;
@@ -14,10 +13,7 @@ import model.location.Country;
 import model.travel.Travel;
 import util.google.GoogleMapsApiUtils;
 import util.google.Keys;
-
-import javax.jws.WebParam;
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
