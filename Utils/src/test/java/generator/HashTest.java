@@ -1,12 +1,10 @@
 package generator;
 
-import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 class HashTest {
 
-    @Test
     void md5Hash() {
         List<Map.Entry<String, String>> lst = new ArrayList<>();
 

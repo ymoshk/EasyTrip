@@ -17,14 +17,6 @@
         <module>UserInterface</module>
         <module>Utils</module>
     </modules>
-    <dependencies>
-        <dependency>
-            <groupId>org.example</groupId>
-            <artifactId>DataBase</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>

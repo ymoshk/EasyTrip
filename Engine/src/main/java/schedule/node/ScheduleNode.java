@@ -1,9 +1,9 @@
 package schedule.node;
 
 import model.Model;
-import org.openqa.selenium.InvalidArgumentException;
 import schedule.DaySchedule;
 
+import java.security.InvalidParameterException;
 import java.time.LocalTime;
 import java.util.UUID;
 
@@ -33,57 +33,57 @@ public class ScheduleNode {
         return id;
     }
 
-    public void addToStart(int minutes) throws IllegalAccessException {
+    public void addToStart(int minutes) throws InvalidParameterException {
         if (this.isTimeChangeable) {
             this.startTime = this.startTime.plusMinutes(minutes);
             this.dayContainer.updateAfterTimeChange();
         } else {
-            throw new IllegalAccessException(TIME_ACCESS_EXCEPTION_ERROR);
+            throw new InvalidParameterException(TIME_ACCESS_EXCEPTION_ERROR);
         }
     }
 
-    public void reduceFromStart(int minutes) throws IllegalAccessException {
+    public void reduceFromStart(int minutes) throws InvalidParameterException {
         if (this.isTimeChangeable) {
             this.startTime = this.startTime.minusMinutes(minutes);
             this.dayContainer.updateAfterTimeChange();
         } else {
-            throw new IllegalAccessException(TIME_ACCESS_EXCEPTION_ERROR);
+            throw new InvalidParameterException(TIME_ACCESS_EXCEPTION_ERROR);
         }
     }
 
-    public void addToEnd(int minutes) throws IllegalAccessException {
+    public void addToEnd(int minutes) throws InvalidParameterException {
         if (this.isTimeChangeable) {
             this.endTime = this.endTime.plusMinutes(minutes);
             this.dayContainer.updateAfterTimeChange();
         } else {
-            throw new IllegalAccessException(TIME_ACCESS_EXCEPTION_ERROR);
+            throw new InvalidParameterException(TIME_ACCESS_EXCEPTION_ERROR);
         }
     }
 
-    public void reduceFromEnd(int minutes) throws IllegalAccessException {
+    public void reduceFromEnd(int minutes) throws InvalidParameterException {
         if (this.isTimeChangeable) {
             this.endTime = this.endTime.minusMinutes(minutes);
             this.dayContainer.updateAfterTimeChange();
         } else {
-            throw new IllegalAccessException(TIME_ACCESS_EXCEPTION_ERROR);
+            throw new InvalidParameterException(TIME_ACCESS_EXCEPTION_ERROR);
         }
     }
 
-    public void setStartTime(LocalTime startTime) throws IllegalAccessException {
+    public void setStartTime(LocalTime startTime) throws InvalidParameterException {
         if (this.isTimeChangeable) {
             this.startTime = startTime;
             this.dayContainer.updateAfterTimeChange();
         } else {
-            throw new IllegalAccessException(TIME_ACCESS_EXCEPTION_ERROR);
+            throw new InvalidParameterException(TIME_ACCESS_EXCEPTION_ERROR);
         }
     }
 
-    public void setEndTime(LocalTime endTime) throws IllegalAccessException {
+    public void setEndTime(LocalTime endTime) throws InvalidParameterException {
         if (this.isTimeChangeable) {
             this.endTime = endTime;
             this.dayContainer.updateAfterTimeChange();
         } else {
-            throw new IllegalAccessException(TIME_ACCESS_EXCEPTION_ERROR);
+            throw new InvalidParameterException(TIME_ACCESS_EXCEPTION_ERROR);
         }
     }
 
@@ -95,10 +95,10 @@ public class ScheduleNode {
         return split(middle);
     }
 
-    public ScheduleNode split(LocalTime splitTime) throws IllegalAccessException {
+    public ScheduleNode split(LocalTime splitTime) throws InvalidParameterException {
 
         if (splitTime.isBefore(this.startTime) || splitTime.isAfter(this.endTime)) {
-            throw new InvalidArgumentException("The split time arg must be a time which is " +
+            throw new InvalidParameterException("The split time arg must be a time which is " +
                     "between the start time and the end time.");
         }
 
@@ -110,10 +110,10 @@ public class ScheduleNode {
         return copy;
     }
 
-    public ScheduleNode split(int afterMinutes) throws IllegalAccessException {
+    public ScheduleNode split(int afterMinutes) throws InvalidParameterException {
 
         if (afterMinutes >= subtractTimesToMinutes(this.startTime, this.endTime)) {
-            throw new InvalidArgumentException("The minutes amount can't be more then the node duration.");
+            throw new InvalidParameterException("The minutes amount can't be more then the node duration.");
         }
 
         ScheduleNode copy = clone();
@@ -133,7 +133,7 @@ public class ScheduleNode {
             this.dayContainer.addAttraction(middle);
             return copy;
         } else {
-            throw new InvalidArgumentException("To split a node with another node, the given node times must be" +
+            throw new InvalidParameterException("To split a node with another node, the given node times must be" +
                     " contained inside the splatted node times");
         }
     }
