@@ -46,6 +46,14 @@ public class FixedDataHandler {
                 city.getCityName().equalsIgnoreCase(cityName)).findFirst().orElse(null);
     }
 
+    public List<Country> getCountries() {
+        if(countries.isEmpty()){
+            initJsonObjectsArrays();
+            initProjectObjectLists();
+        }
+        return countries;
+    }
+
     public void saveToDataBase() {
         DBContext context = DBContext.getInstance();
         initJsonObjectsArrays();
