@@ -39,22 +39,6 @@ public class DataEngine implements Closeable {
         }
         return instance;
     }
-    public static void main(String[] args) {
-        try {
-            DataEngine eng = new DataEngine();
-            City ramatGan = eng.getCities("Ramat").get(0);
-
-            Attraction source = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Safsal")).toArray()[0];
-            Attraction dest = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Shemesh")).toArray()[0];
-
-            Travel travel = eng.getTravel(source.getGeometry().location, dest.getGeometry().location, TravelMode.WALKING);
-
-            int x;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     /**
      * @param cityPrefix The name or a part of the name of the requested city.
