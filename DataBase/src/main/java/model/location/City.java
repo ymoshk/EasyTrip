@@ -18,6 +18,15 @@ import java.util.List;
 public class City extends Model {
     @Column(nullable = false)
     String cityName;
+
+    public int getCityNumbeoID() {
+        return cityNumbeoID;
+    }
+
+    public void setCityNumbeoID(int cityNumbeoID) {
+        this.cityNumbeoID = cityNumbeoID;
+    }
+
     int cityNumbeoID;
     LatLng cityCenter;
     double lat;

@@ -44,23 +44,6 @@ public class DataEngine implements Closeable {
         return instance;
     }
 
-    public static void main(String[] args) {
-        try {
-            DataEngine eng = new DataEngine();
-            City ramatGan = eng.getCities("Ramat").get(0);
-
-            Attraction source = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Safsal")).toArray()[0];
-            Attraction dest = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Shemesh")).toArray()[0];
-
-            Travel travel = eng.getTravel(source.getGeometry().location, dest.getGeometry().location, TravelMode.WALKING);
-
-            int x;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
     /**
      * @param cityPrefix The name or a part of the name of the requested city.
      * @return List of cities that match the search result.
@@ -268,6 +251,19 @@ public class DataEngine implements Closeable {
 
             return res;
         }
+    }
+
+    public List<Attraction> getAttractionInSquare(LatLng origin, double km) {
+        double factor = (km / 1.11) * 0.01;
+        LatLng topRight = new LatLng(origin.lat + factor, origin.lng + factor);
+        LatLng topLeft = new LatLng(origin.lat + factor, origin.lng - factor);
+        LatLng bottomLeft = new LatLng(origin.lat - factor, origin.lng - factor);
+
+        List<Attraction> res = (List<Attraction>) DBContext.getInstance().selectQuery("FROM Attraction WHERE " +
+                "lat > " + bottomLeft.lat + " AND lat < " + topLeft.lat +
+                " AND lng > " + topLeft.lng + " AND lng < " + topRight.lng);
+
+        return res;
     }
 
     public List<User> getUsers() {

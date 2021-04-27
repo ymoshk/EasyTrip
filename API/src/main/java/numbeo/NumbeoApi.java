@@ -1,7 +1,5 @@
 package numbeo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import currency.FixerApi;
 import okhttp3.OkHttpClient;
@@ -10,12 +8,13 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NumbeoApi {
     private static final String NUMBEO_API_KEY =  "?api_key=aiv2tn9h10x9ul";
     private static final String URL_PREFIX =  "https://www.numbeo.com/api/";
     private static final String CITY_PRICES = "city_prices";
-    private static final String CITIES_ID = "city_prices";
+    private static final String CITIES_ID = "cities";
     private static final String COUNTRY_PRICES = "country_prices";
     private static final String CURRENCY_RATES = "currency_exchange_rates";
     private OkHttpClient client = new OkHttpClient();
@@ -28,10 +27,13 @@ public class NumbeoApi {
                 .url(URL_PREFIX + CITIES_ID + NUMBEO_API_KEY).get().build();
         Response response = client.newCall(request).execute();
         String citiesID = response.body().string();
-        CityLocation[] citiesLocations = gson.fromJson(citiesID, CityLocation[].class);
-        List<CityLocation> cityLocationList = new ArrayList<>(Arrays.asList(citiesLocations));
-
-        return cityLocationList;
+        CitiesWrap citiesLocations = gson.fromJson(citiesID, CitiesWrap.class);
+        AtomicInteger i = new AtomicInteger(1);
+        citiesLocations.getCities().forEach(cityLocation -> {
+            System.out.println( i + cityLocation.getCity());
+            i.getAndIncrement();
+        });
+        return citiesLocations.getCities();
     }
 
 
@@ -82,7 +84,7 @@ public class NumbeoApi {
 
     public static void main(String[] args) {
         try {
-            new NumbeoApi().getCurrencyRates();
+            new NumbeoApi().getCitiesLocationsAndID();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,6 +117,14 @@ public class NumbeoApi {
         double one_usd_to_currency;
         String currency;
         double one_eur_to_currency;
+    }
+
+    public static class CitiesWrap {
+        List<CityLocation> cities = new ArrayList<>();
+
+        public List<CityLocation> getCities() {
+            return cities;
+        }
     }
 
     public static class CityLocation{
