@@ -39,7 +39,7 @@ public class FlightEngine {
     }
 
     public static void main(String[] args) {
-        new FlightEngine().findFlights("TLV", "NYC", LocalDate.now().plusDays(3),
+        new FlightEngine().findFlights("TLV", "JFK", LocalDate.now().plusDays(3),
                 LocalDate.now().plusDays(6), false, 1);
     }
 

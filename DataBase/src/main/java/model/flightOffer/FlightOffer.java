@@ -28,7 +28,7 @@ public class FlightOffer extends Model {
     private double price;
     private Currency currency;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "itinerary_id", insertable = true, updatable = true)
+    @JoinColumn(name = "flightOffer_id", insertable = true, updatable = true)
     List <Itinerary> itineraryList;
 
 
@@ -95,7 +95,7 @@ public class FlightOffer extends Model {
 
         private String durationTotal;
         @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-        @JoinColumn(name = "segment_id", insertable = true, updatable = true)
+        @JoinColumn(name = "itinerary_id", insertable = true, updatable = true)
         List<Segment> segmentList;
 
         protected Itinerary() {
@@ -129,10 +129,10 @@ public class FlightOffer extends Model {
     @Entity
     public static class Segment extends Model{
         @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-        @JoinColumn(name = "arrival_id", insertable = true, updatable = true)
+        @JoinColumn(name = "airportInfo_arrival_id", insertable = true, updatable = true)
         private AirportInfo arrival;
         @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-        @JoinColumn(name = "departure_id", insertable = true, updatable = true)
+        @JoinColumn(name = "airportInfo_depature_id", insertable = true, updatable = true)
         private AirportInfo departure;
         private String carrierCode;
         private String flightNumber;
