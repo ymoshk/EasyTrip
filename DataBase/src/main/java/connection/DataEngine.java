@@ -195,7 +195,7 @@ public class DataEngine implements Closeable {
                     .apiKey(Keys.getKey())
                     .build();
 
-            DistanceMatrix response = GoogleMapsApiUtils.getDistanceMatrixApiRequest(context, source, dest, mode).await();
+            DistanceMatrix response = GoogleMapsApiUtils.getDistanceMatrixApiRequest(context, source.getGeometry(), dest.getGeometry(), mode).await();
             if (response.rows.length != 0 && response.rows[0].elements.length != 0) {
                 res = response.rows[0].elements[0];
             }

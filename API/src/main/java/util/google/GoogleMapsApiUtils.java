@@ -1,6 +1,7 @@
 package util.google;
 
 import com.google.maps.*;
+import com.google.maps.model.Geometry;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.TravelMode;
 import container.PriceRange;
@@ -19,7 +20,7 @@ public class GoogleMapsApiUtils {
         return PlacesApi.textSearchQuery(context, "").pageToken(pageToken);
     }
 
-    public static DistanceMatrixApiRequest getDistanceMatrixApiRequest(GeoApiContext context, Attraction source, Attraction dest, TravelMode mode){
-        return DistanceMatrixApi.newRequest(context).mode(mode).origins(source.getGeometry().location).destinations(dest.getGeometry().location);
+    public static DistanceMatrixApiRequest getDistanceMatrixApiRequest(GeoApiContext context, Geometry sourceGeo, Geometry destGeo, TravelMode mode){
+        return DistanceMatrixApi.newRequest(context).mode(mode).origins(sourceGeo.location).destinations(destGeo.location);
     }
 }
