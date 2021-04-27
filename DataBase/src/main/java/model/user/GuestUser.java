@@ -1,5 +1,8 @@
 package model.user;
 
+import generator.GUID;
+import generator.Hash;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -10,7 +13,7 @@ public class GuestUser extends User {
 
     public GuestUser() {
         setUserName(guestNameGenerator());
-        setPassword("");
+        setPassword(Hash.md5Hash(GUID.generate()));
         setAdmin(false);
         setActive(false);
     }

@@ -1,4 +1,4 @@
-package crypto;
+package generator;
 
 import org.junit.jupiter.api.Test;
 

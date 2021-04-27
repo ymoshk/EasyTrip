@@ -8,6 +8,7 @@ public class Application {
         System.out.println("Application is starting...");
         DataEngine data = new DataEngine();
         data.getCity("");
+        data.close();
 
         //
         //        List<Attraction> attractionList = data.getAttractions(PlaceType.RESTAURANT, "RAMAT GAN", new PriceRange());

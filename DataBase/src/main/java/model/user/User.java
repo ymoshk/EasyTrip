@@ -2,6 +2,7 @@ package model.user;
 
 import model.Model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -9,7 +10,9 @@ import javax.persistence.InheritanceType;
 @Entity()
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class User extends Model {
+    @Column(nullable = false)
     private String userName;
+    @Column(nullable = false)
     private String password;
     private boolean isAdmin;
     private boolean isActive;

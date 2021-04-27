@@ -1,4 +1,4 @@
-package crypto;
+package generator;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
