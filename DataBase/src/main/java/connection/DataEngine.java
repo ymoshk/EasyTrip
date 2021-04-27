@@ -31,7 +31,7 @@ public class DataEngine implements Closeable {
     private static DataEngine instance = null;
 
     //empty constructor just to make sure the class is a singleton
-    public DataEngine() {
+    private DataEngine() {
     }
 
     // only one thread can execute this method at the same time.

@@ -16,7 +16,7 @@ class DataEngineTest {
     @Test
     void test(){
         try {
-            DataEngine eng = new DataEngine();
+            DataEngine eng = DataEngine.getInstance();
             City ramatGan = eng.getCities("Ramat").get(0);
 
             Attraction source = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Safsal")).toArray()[0];

@@ -12,10 +12,13 @@ public class PricesEngine {
     private DBContext context;
     private DataEngine dataEngine;
     private NumbeoApi numbeoApi = new NumbeoApi();
+    private static PricesEngine instance = null;
 
 
+    //empty constructor just to make sure the class is a singleton
+    private PricesEngine() {}
 
-    public PricesEngine() {
+    private void updateCitiesID(){
         try {
             List<NumbeoApi.CityLocation> cityLocationList = numbeoApi.getCitiesLocationsAndID();
             cityLocationList.forEach(cityLocation -> {
@@ -23,14 +26,22 @@ public class PricesEngine {
                 dataEngine = DataEngine.getInstance();
                 City cityToUpdate =  dataEngine.getCity(cityLocation.getCity()).orElse(null);
                 if(cityToUpdate != null){
-//                    cityToUpdate.set
+                    cityToUpdate.setCityNumbeoID(cityLocation.getCity_id());
+                    context.update(cityToUpdate);
                 }
 
             });
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    // only one thread can execute this method at the same time.
+    static synchronized PricesEngine getInstance() {
+        if (instance == null) {
+            instance = new PricesEngine();
+        }
+        return instance;
     }
 
     public void test(){
