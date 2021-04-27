@@ -7,13 +7,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Server" />
         <module name="UserInterface" />
-        <module name="Engine" />
-      </profile>
-      <profile name="denied">
-        <module name="Utils" />
         <module name="API" />
+        <module name="Server" />
+        <module name="Utils" />
+        <module name="Engine" />
         <module name="DataBase" />
       </profile>
     </annotationProcessing>
