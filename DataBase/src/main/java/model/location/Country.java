@@ -15,8 +15,8 @@ public class Country extends Model implements Serializable {
     @ElementCollection
     private List<String> timezones = new ArrayList<>();
     private LatLng countryLatLong;
-    double lat;
-    double lng;
+    private double lat;
+    private double lng;
     @Column(nullable = false)
     private String countryName;
     @Column(unique = true, nullable = false)

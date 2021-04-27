@@ -10,16 +10,16 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Airport")
 public class Airport extends Model implements Serializable {
-    String airportName;
+    private String airportName;
     @ManyToOne
     @JoinColumn(name = "city_id", insertable = true, updatable = true, nullable = false)
-    City city;
-    String IATA;
+    private City city;
+    private String IATA;
     @Column(unique = true, nullable = false)
-    String threeLetterCode;
-    LatLng airportLocation;
-    double lat;
-    double lng;
+    private String threeLetterCode;
+    private LatLng airportLocation;
+    private double lat;
+    private double lng;
 
     public Airport(String airportName, City city, String IATA, String threeLetterCode, LatLng airportLocation) {
         this.airportName = airportName;

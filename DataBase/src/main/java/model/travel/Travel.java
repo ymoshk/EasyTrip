@@ -7,13 +7,19 @@ import com.google.maps.model.TravelMode;
 import model.Model;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
-@Entity()
+@Entity
+@Table(name = "Travel")
 public class Travel extends Model {
-    LatLng source;
-    LatLng dest;
-    TravelMode mode;
-    DistanceMatrixElement distanceMatrixElement;
+    private LatLng source;
+    private double sourceLat;
+    private double sourceLng;
+    private LatLng dest;
+    private double destLat;
+    private double destLng;
+    private TravelMode mode;
+    private DistanceMatrixElement distanceMatrixElement;
 
     public Travel()
     {
@@ -22,7 +28,11 @@ public class Travel extends Model {
 
     public Travel(LatLng source, LatLng dest, TravelMode mode, DistanceMatrixElement distanceMatrixElement) {
         this.source = source;
+        this.sourceLat = this.source.lat;
+        this.sourceLng = this.source.lng;
         this.dest = dest;
+        this.sourceLat = this.dest.lat;
+        this.sourceLng = this.dest.lng;
         this.mode = mode;
         this.distanceMatrixElement = distanceMatrixElement;
     }

@@ -19,7 +19,7 @@ public class FlightOffer extends Model {
     private String originLocationCode;
     private String destinationLocationCode;
     private LocalDate departureDate;
-    int numberOfPassengers;
+    private int numberOfPassengers;
     //Might be null, according to oneWay
     private LocalDate returnDate;
     private boolean oneWay;
@@ -29,7 +29,7 @@ public class FlightOffer extends Model {
     private Currency currency;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "flightOffer_id", insertable = true, updatable = true)
-    List <Itinerary> itineraryList;
+    private List <Itinerary> itineraryList;
 
 
     public FlightOffer(FlightOfferSearch flightOfferSearch, String originLocationCode, String destinationLocationCode,
