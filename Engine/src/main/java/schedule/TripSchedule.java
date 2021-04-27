@@ -2,6 +2,7 @@ package schedule;
 
 import com.google.maps.model.TravelMode;
 import model.flightOffer.FlightOffer;
+import model.user.User;
 import schedule.node.ScheduleNode;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -12,13 +13,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TripSchedule {
     private final List<FlightOffer> flights;
     private final TravelMode defaultTransportation;
-    // TODO - Add a trip owner as we implement the User class.
+    private final User owner;
     private final List<DaySchedule> days;
 
 
-    public TripSchedule(List<FlightOffer> flights, TravelMode defaultTransportation) {
+    public TripSchedule(List<FlightOffer> flights, TravelMode defaultTransportation, User owner) {
         this.flights = flights;
         this.defaultTransportation = defaultTransportation;
+        this.owner = owner;
         this.days = new ArrayList<>();
         init();
     }

@@ -14,6 +14,10 @@ public class RegisteredUser extends User {
     }
 
     public RegisteredUser(String userName, String password) {
-        super(userName, password);
+        super(userName, Hash.md5Hash(password));
+    }
+
+    public RegisteredUser() {
+
     }
 }

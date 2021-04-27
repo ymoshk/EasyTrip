@@ -3,6 +3,7 @@ package connection;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.*;
 import container.PriceRange;
+import generator.Hash;
 import log.LogsManager;
 import model.Model;
 import model.attraction.Attraction;
@@ -11,8 +12,10 @@ import model.attraction.AttractionsFactory;
 import model.location.City;
 import model.location.Country;
 import model.travel.Travel;
+import model.user.User;
 import util.google.GoogleMapsApiUtils;
 import util.google.Keys;
+
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +33,8 @@ public class DataEngine implements Closeable {
     private static DataEngine instance = null;
 
     //empty constructor just to make sure the class is a singleton
-    private DataEngine(){}
+    private DataEngine() {
+    }
 
     // only one thread can execute this method at the same time.
     static synchronized DataEngine getInstance() {
@@ -38,6 +42,23 @@ public class DataEngine implements Closeable {
             instance = new DataEngine();
         }
         return instance;
+    }
+
+    public static void main(String[] args) {
+        try {
+            DataEngine eng = new DataEngine();
+            City ramatGan = eng.getCities("Ramat").get(0);
+
+            Attraction source = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Safsal")).toArray()[0];
+            Attraction dest = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Shemesh")).toArray()[0];
+
+            Travel travel = eng.getTravel(source.getGeometry().location, dest.getGeometry().location, TravelMode.WALKING);
+
+            int x;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -204,7 +225,7 @@ public class DataEngine implements Closeable {
             DistanceMatrixElement distanceMatrixElement =
                     getDistanceMatrixElementFromGoogleApi(source, dest, mode);
 
-            if(distanceMatrixElement != null) {
+            if (distanceMatrixElement != null) {
                 res = new Travel(source, dest, mode, distanceMatrixElement);
                 DBContext.getInstance().insert(res);
             }
@@ -249,26 +270,32 @@ public class DataEngine implements Closeable {
         }
     }
 
+    public List<User> getUsers() {
+        DBContext dbContext = DBContext.getInstance();
+
+        return (List<User>) dbContext.getToList(User.class);
+    }
+
+    public User getUser(String userName, String password) {
+        DBContext dbContext = DBContext.getInstance();
+
+        List<User> users = (List<User>) dbContext.selectQuery("FROM User WHERE userName = " + "'" + userName + "'");
+        return users.stream()
+                .filter(user -> user.getPassword().equals(Hash.md5Hash(password))).findFirst().orElse(null);
+    }
+
+    public boolean isUserExist(String userName, String password) {
+        return getUser(userName, password) != null;
+    }
+
+    public void addUser(User userToAdd) {
+        DBContext dbContext = DBContext.getInstance();
+        dbContext.insert(userToAdd);
+    }
+
     @Override
     public void close() {
         // TODO - make sure to call this method as the server shut down.
         DBContext.getInstance().close();
-    }
-
-    public static void main(String[] args) {
-        try {
-            DataEngine eng = new DataEngine();
-            City ramatGan = eng.getCities("Ramat").get(0);
-
-            Attraction source = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Safsal")).toArray()[0];
-            Attraction dest = (Attraction) ramatGan.getAttractionList().stream().filter(attraction -> attraction.getName().equals("Shemesh")).toArray()[0];
-
-            Travel travel = eng.getTravel(source.getGeometry().location, dest.getGeometry().location, TravelMode.WALKING);
-
-            int x;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 }
