@@ -4,24 +4,16 @@ import com.amadeus.Amadeus;
 import com.amadeus.Params;
 
 import com.amadeus.exceptions.ResponseException;
-import com.amadeus.resources.Activity;
-import com.amadeus.resources.Airline;
 import com.amadeus.resources.FlightOfferSearch;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import log.LogsManager;
-
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-import java.util.logging.LogManager;
 
 
 //TODO maybe make the AmadeusApi singleton
 public class AmadeusApi {
     public FlightOfferSearch[] searchFlights(String originLocationCode, String destinationLocationCode,
-                                          LocalDate departureDate, LocalDate returnDate, int adults, boolean oneWay,
-                                          int maxNumberOfResults) {
+                                             LocalDate departureDate, LocalDate returnDate, int adults, boolean oneWay,
+                                             int maxNumberOfResults) {
         //TODO maybe change to a class member
         Amadeus amadeus = Amadeus
                 .builder(System.getenv().get("AMADEUS_CLIENT_ID"), System.getenv().get("AMADEUS_CLIENT_SECRET"))

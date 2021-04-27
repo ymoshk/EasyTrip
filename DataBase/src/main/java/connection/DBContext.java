@@ -110,6 +110,19 @@ class DBContext implements Closeable {
         }
     }
 
+    Query createQuery(String queryString){
+        return this.entityManager.createQuery(queryString);
+    }
+
+    List<? extends Model> selectQuery(Query query) {
+        try {
+            return query.getResultList();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
     /**
      * @param objectToAdd A model to insert into the DB. The model will be mapped automatically to the relevant table.
      */

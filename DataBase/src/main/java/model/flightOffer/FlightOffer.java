@@ -18,12 +18,12 @@ import java.util.List;
 public class FlightOffer extends Model {
     private String originLocationCode;
     private String destinationLocationCode;
-    private LocalDate departureDate;
+    private LocalDateTime departureDate;
     private int numberOfPassengers;
     //Might be null, according to oneWay
-    private LocalDate returnDate;
+    private LocalDateTime returnDate;
     private boolean oneWay;
-    private LocalDate lastTicketingDate;
+    private LocalDateTime lastTicketingDate;
     private int numberOfBookableSeats;
     private double price;
     private Currency currency;
@@ -36,12 +36,13 @@ public class FlightOffer extends Model {
                        LocalDate departureDate, LocalDate returnDate, int numberOfPassengers){
         this.originLocationCode = originLocationCode;
         this.destinationLocationCode = destinationLocationCode;
-        this.departureDate = departureDate;
-        this.returnDate = returnDate;
+        // set time to 12:00, in order to save on the data base:
+        this.departureDate = departureDate.atTime(12, 0);
+        this.returnDate = returnDate.atTime(12, 0);
         this.numberOfPassengers = numberOfPassengers;
         // FlightOfferSearch method isOneWay returns always false --> each object in Itineraries array represent one direction
         this.oneWay = flightOfferSearch.getItineraries().length == 1;
-        this.lastTicketingDate = LocalDate.parse(flightOfferSearch.getLastTicketingDate());
+        this.lastTicketingDate = LocalDate.parse(flightOfferSearch.getLastTicketingDate()).atStartOfDay();
         this.numberOfBookableSeats = flightOfferSearch.getNumberOfBookableSeats();
         this.price = flightOfferSearch.getPrice().getTotal();
         this.currency = Currency.getInstance(flightOfferSearch.getPrice().getCurrency());
@@ -70,7 +71,7 @@ public class FlightOffer extends Model {
         return oneWay;
     }
 
-    public LocalDate getLastTicketingDate() {
+    public LocalDateTime getLastTicketingDate() {
         return lastTicketingDate;
     }
 
