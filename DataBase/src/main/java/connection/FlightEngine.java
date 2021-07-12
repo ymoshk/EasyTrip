@@ -18,11 +18,21 @@ public class FlightEngine {
 
     public List<FlightOffer> getFlightsFromDB(String originLocationCode, String destinationLocationCode, LocalDateTime departureDate,
                                               LocalDateTime returnDate, boolean oneWay, int numberOfPassengers){
-        Query q = DBContext.getInstance().createQuery("FROM FlightOffer WHERE departureDate = :departureDate");
+        Query q = DBContext.getInstance().createQuery(
+                "FROM FlightOffer WHERE " +
+                        "originLocationCode = :originLocationCode AND " +
+                        "destinationLocationCode = :destinationLocationCode AND " +
+                        "departureDate = :departureDate AND " +
+                        "returnDate = :returnDate AND " +
+                        "oneWay =: oneWay");
+        q.setParameter("originLocationCode", originLocationCode);
+        q.setParameter("destinationLocationCode", destinationLocationCode);
         q.setParameter("departureDate", departureDate);
+        q.setParameter("returnDate", returnDate);
+        q.setParameter("oneWay", oneWay);
+        q.setMaxResults(MAX_NUMBER_OF_RESULTS);
+
         return (List<FlightOffer>) DBContext.getInstance().selectQuery(q);
-//        return (List<FlightOffer>) DBContext.getInstance().selectQuery(
-//                "FROM FlightOffer WHERE departureDate = " + "'" +  departureDate + "'");// + " AND returnDate = " + "'" + returnDate + "'");
     }
 
     public List <FlightOffer> findFlights(String originLocationCode, String destinationLocationCode, LocalDate departureDate,
@@ -51,7 +61,7 @@ public class FlightEngine {
 
     // TODO: remove this method
     public static void main(String[] args) {
-        new FlightEngine().findFlights("TLV", "JFK", LocalDate.parse("2021-06-04"),
-                LocalDate.parse("2021-06-15"), false, 1);
+        new FlightEngine().findFlights("TLV", "JFK", LocalDate.parse("2021-07-14"),
+                LocalDate.parse("2021-07-23"), true, 1);
     }
 }

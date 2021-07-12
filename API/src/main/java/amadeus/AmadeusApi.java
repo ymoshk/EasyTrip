@@ -6,6 +6,7 @@ import com.amadeus.Params;
 import com.amadeus.exceptions.ResponseException;
 import com.amadeus.resources.FlightOfferSearch;
 import log.LogsManager;
+
 import java.time.LocalDate;
 
 
@@ -15,6 +16,7 @@ public class AmadeusApi {
                                              LocalDate departureDate, LocalDate returnDate, int adults, boolean oneWay,
                                              int maxNumberOfResults) {
         //TODO maybe change to a class member
+        //Initialize using parameters
         Amadeus amadeus = Amadeus
                 .builder(System.getenv().get("AMADEUS_CLIENT_ID"), System.getenv().get("AMADEUS_CLIENT_SECRET"))
                 .build();
@@ -28,8 +30,7 @@ public class AmadeusApi {
                                 .and("departureDate", departureDate.toString())
                                 .and("adults", adults)
                                 .and("max", maxNumberOfResults));
-            }
-            else {
+            } else {
                 flightOffersSearches = amadeus.shopping.flightOffersSearch.get(
                         Params.with("originLocationCode", originLocationCode)
                                 .and("destinationLocationCode", destinationLocationCode)
@@ -38,7 +39,7 @@ public class AmadeusApi {
                                 .and("adults", adults)
                                 .and("max", maxNumberOfResults));
             }
-        }catch (ResponseException exception){
+        } catch (ResponseException exception) {
             LogsManager.log(exception.getMessage());
         }
         //TODO make sure the return value isn't null
