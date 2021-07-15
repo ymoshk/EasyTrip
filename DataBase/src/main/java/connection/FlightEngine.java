@@ -1,6 +1,8 @@
 package connection;
 
 import amadeus.AmadeusApi;
+import com.amadeus.Params;
+import com.amadeus.resources.FlightDate;
 import com.amadeus.resources.FlightOfferSearch;
 import log.LogsManager;
 import model.IATACode.IATACode;
@@ -13,14 +15,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import java.io.*;
 import java.util.stream.Collectors;
 
 
 public class FlightEngine {
     private DBContext context;
     final private AmadeusApi amadeusApi = new AmadeusApi();
-    private final static int MAX_NUMBER_OF_RESULTS = 10;
+    private final static int MAX_NUMBER_OF_RESULTS = 5;
 
     /**
      * This method find flights using:
@@ -31,8 +32,8 @@ public class FlightEngine {
      * @param originCity .
      * @param destinationCountry .
      * @param destinationCity .
-     * @param departureDate .
-     * @param returnDate .
+     * @param departureDate LocalDate.
+     * @param returnDate LocalDate.
      * @param oneWay 1 => one way, 0 => round-trip.
      * @param numberOfPassengers not used right now, might help for filter in the future.
      * @return List of flights that match the search result OR empty list.
@@ -73,8 +74,8 @@ public class FlightEngine {
      *
      * @param originLocationCode airport IATA code (e.g TLV)
      * @param destinationLocationCode airport IATA code (e.g NYC)
-     * @param departureDate .
-     * @param returnDate .
+     * @param departureDate LocalDateTime.
+     * @param returnDate LocalDateTime.
      * @param oneWay 1 => one way, 0 => round-trip.
      * @param numberOfPassengers not used right now, might help for filter in the future.
      * @return List of flights that match the search result OR empty list.
@@ -103,8 +104,8 @@ public class FlightEngine {
      *
      * @param originIATACode airport code.
      * @param destinationIATACode airport code.
-     * @param departureDate .
-     * @param returnDate .
+     * @param departureDate LocalDate.
+     * @param returnDate LocalDate.
      * @param oneWay 1 => one way, 0 => round-trip.
      * @param numberOfPassengers not used right now, might help for filter in the future.
      * @return List of flights OR empty list.
@@ -131,7 +132,7 @@ public class FlightEngine {
 
             // Save new flights to DB
             // TODO: it takes a lot of time to save the flights on the database, maybe async?
-            if(FlightsFromApi.length > 0){
+            if(FlightsFromApi != null && FlightsFromApi.length > 0){
                 Arrays.stream(FlightsFromApi).forEach(flightOffer ->{
                     flightOfferList.add(new FlightOffer(flightOffer,
                             originIATACode,
@@ -154,8 +155,8 @@ public class FlightEngine {
     /**
      * This method parsing country & city to airports IATA code (e.g {"Israel", "Tel Aviv"} => "TLV")
      *
-     * @param country .
-     * @param city .
+     * @param country country is insensitive case.
+     * @param city city is insensitive case.
      * @return list of airports IATA code OR empty list
      * Notice: table was generated out of an HTML page via sed & regex, in case airport not found check the table in DB
      * or reach Ori for further help
@@ -171,18 +172,26 @@ public class FlightEngine {
         return IATACodeList.stream().map(IATACode::getCode).collect(Collectors.toList());
     }
 
+
     // TODO: remove this method
     public static void main(String[] args) {
         FlightEngine flightEngine = new FlightEngine();
         List<FlightOffer> flightOfferList = flightEngine.findFlights("Israel",
                 "Tel Aviv",
-                "Spain",
-                "Madrid",
+                "Germany",
+                "Berlin",
                 LocalDate.parse("2021-07-17"),
                 LocalDate.parse("2021-07-23"),
-                true,
+                false,
                 1);
 
-        flightOfferList.forEach(System.out::println);
+
+        flightOfferList.forEach(flightOffer -> {
+            System.out.println(flightOffer);
+            System.out.println(flightOffer.getDepartureDateTime(0));
+            System.out.println(flightOffer.getArrivalDateTime(0));
+            System.out.println(flightOffer.getDepartureDateTime(1));
+            System.out.println(flightOffer.getArrivalDateTime(1));
+        });
     }
 }

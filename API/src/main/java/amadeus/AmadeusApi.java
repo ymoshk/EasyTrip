@@ -12,14 +12,26 @@ import java.time.LocalDate;
 
 //TODO maybe make the AmadeusApi singleton
 public class AmadeusApi {
+    // Initialize using parameters (Must define keys in global environment in order to use this API)
+    Amadeus amadeus = Amadeus
+            .builder(System.getenv().get("AMADEUS_CLIENT_ID"), System.getenv().get("AMADEUS_CLIENT_SECRET"))
+            .build();
+
+    /**
+     * This function returns an array of FlightOfferSearch objects using amadeus API.
+     *
+     * @param originLocationCode airport IATA code.
+     * @param destinationLocationCode airport IATA code.
+     * @param departureDate .
+     * @param returnDate .
+     * @param adults number of passengers.
+     * @param oneWay 1 => One way, 0 => Round-trip
+     * @param maxNumberOfResults define the maximum number of flights returned.
+     * @return FlightOfferSearch array (amadeus object) OR null
+     */
     public FlightOfferSearch[] searchFlights(String originLocationCode, String destinationLocationCode,
                                              LocalDate departureDate, LocalDate returnDate, int adults, boolean oneWay,
                                              int maxNumberOfResults) {
-        //TODO maybe change to a class member
-        //Initialize using parameters
-        Amadeus amadeus = Amadeus
-                .builder(System.getenv().get("AMADEUS_CLIENT_ID"), System.getenv().get("AMADEUS_CLIENT_SECRET"))
-                .build();
         FlightOfferSearch[] flightOffersSearches = null;
 
         try {
@@ -42,10 +54,10 @@ public class AmadeusApi {
         } catch (ResponseException exception) {
             LogsManager.log(exception.getMessage());
         }
-        //TODO make sure the return value isn't null
+
+        // The returned value might be null.
         return flightOffersSearches;
     }
-
 }
 
 
