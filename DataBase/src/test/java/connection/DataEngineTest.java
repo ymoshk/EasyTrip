@@ -1,7 +1,10 @@
 package connection;
 
 import com.google.maps.model.LatLng;
+import com.google.maps.model.PlaceType;
+import com.google.maps.model.PriceLevel;
 import com.google.maps.model.TravelMode;
+import container.PriceRange;
 import model.attraction.Attraction;
 import model.location.City;
 import model.travel.Travel;
@@ -55,6 +58,20 @@ class DataEngineTest {
                 " AND lng > " + topLeft.lng + " AND lng < " + topRight.lng);
 
         return res;
+    }
+
+    @Test
+    void touristAttraction()
+    {
+        DataEngine eng = DataEngine.getInstance();
+
+        List<Attraction> res = eng.getAttractions(PlaceType.RESTAURANT,"Hadera", new PriceRange());
+
+        AtomicInteger i = new AtomicInteger(1);
+        res.forEach(attraction -> {
+            System.out.println(i + "." + attraction.getName());
+            i.getAndIncrement();
+        });
     }
 
 }

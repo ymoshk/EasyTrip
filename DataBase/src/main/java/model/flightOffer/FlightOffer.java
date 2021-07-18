@@ -1,9 +1,7 @@
 package model.flightOffer;
 
-import com.amadeus.Amadeus;
-import com.amadeus.Params;
-import com.amadeus.exceptions.ResponseException;
 import com.amadeus.resources.FlightOfferSearch;
+import log.LogsManager;
 import model.Model;
 
 import javax.persistence.*;
@@ -13,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.List;
+
 
 @Entity
 public class FlightOffer extends Model {
@@ -31,6 +30,7 @@ public class FlightOffer extends Model {
     @JoinColumn(name = "flightOffer_id", insertable = true, updatable = true)
     private List <Itinerary> itineraryList;
 
+    static final int TO_DESTINATION = 0;
 
     public FlightOffer(FlightOfferSearch flightOfferSearch, String originLocationCode, String destinationLocationCode,
                        LocalDate departureDate, LocalDate returnDate, int numberOfPassengers){
@@ -91,6 +91,49 @@ public class FlightOffer extends Model {
         return itineraryList;
     }
 
+    /**
+     *
+     * @param direction 0 => TO_DESTINATION, 1 => FROM_DESTINATION.
+     * @return departure date.
+     * Notice: in case parameter direction equals 1 (FROM_DESTINATION) and flight is one-way then the current time is returned.
+     */
+    public LocalDateTime getDepartureDateTime(int direction){
+        if(direction == TO_DESTINATION){
+            return itineraryList.get(0).getDepartureDate();
+        }
+        else { // FROM_DESTINATION
+            if(itineraryList.size() == 2){  // Round Trip
+                return itineraryList.get(1).getDepartureDate();
+            }
+            else{
+                LogsManager.log("In function 'getDepartureDateTime' direction=FROM_DESTINATION but flight is one-way");
+                return LocalDateTime.now();
+            }
+        }
+    }
+
+    /**
+     *
+     * @param direction 0 => TO_DESTINATION, 1 => FROM_DESTINATION.
+     * @return arrival date.
+     * Notice: in case parameter direction equals 1 (FROM_DESTINATION) and flight is one-way then the current time is returned.
+     */
+    public LocalDateTime getArrivalDateTime(int direction){
+        if(direction == TO_DESTINATION){
+            return itineraryList.get(0).getArrivalDate();
+        }
+        else { // FROM_DESTINATION
+            if(itineraryList.size() == 2){  // Round Trip
+                return itineraryList.get(1).getArrivalDate();
+            }
+            else{
+                LogsManager.log("In function 'getArrivalDateTime' direction=FROM_DESTINATION but flight is one-way");
+                return LocalDateTime.now();
+            }
+        }
+    }
+
+
     @Entity
     public static class Itinerary extends Model{
 
@@ -124,6 +167,22 @@ public class FlightOffer extends Model {
 
         public List<Segment> getSegmentList() {
             return segmentList;
+        }
+
+        /**
+         * First item in segment list is the first flight in itinerary
+         * @return departure time at origin
+         */
+        public LocalDateTime getDepartureDate(){
+            return segmentList.get(0).getDeparture().getAt();
+        }
+
+        /**
+         * Last item in segment list is the last flight in itinerary
+         * @return arrival time at destination
+         */
+        public LocalDateTime getArrivalDate(){
+            return segmentList.get(segmentList.size() - 1).getArrival().getAt();
         }
     }
 
@@ -218,32 +277,4 @@ public class FlightOffer extends Model {
             return at;
         }
     }
-
-//    public static void main(String[] args) {
-//        Amadeus amadeus = Amadeus
-//                .builder(System.getenv().get("AMADEUS_CLIENT_ID"), System.getenv().get("AMADEUS_CLIENT_SECRET"))
-//                .build();
-//
-//        List<FlightOffer> list = new ArrayList<>();
-//
-//        try {
-//            FlightOfferSearch[] flightOffersSearches = amadeus.shopping.flightOffersSearch.get(
-//                    Params.with("originLocationCode", "TLV")
-//                            .and("destinationLocationCode", "JFK")
-//                            .and("departureDate", "2021-04-11")
-//                            .and("returnDate", "2021-04-20")
-//                            .and("adults", 2)
-//                            .and("max", 10));
-//
-//            Arrays.stream(flightOffersSearches).forEach(flightOfferSearch -> {
-//                list.add(new FlightOffer(flightOfferSearch));
-//
-//                System.out.println(flightOfferSearch);
-//            });
-//        } catch (ResponseException e) {
-//            e.printStackTrace();
-//        }
-//
-//        list.forEach(System.out::println);
-//    }
 }
