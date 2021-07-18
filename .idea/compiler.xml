@@ -7,10 +7,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="UserInterface" />
-        <module name="API" />
         <module name="Server" />
         <module name="Utils" />
+        <module name="UserInterface" />
+        <module name="API" />
+        <module name="ReactUI" />
         <module name="Engine" />
         <module name="DataBase" />
       </profile>
