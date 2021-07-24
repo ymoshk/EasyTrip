@@ -22,7 +22,7 @@ public class CountryNamesProvider extends HttpServlet {
         DataEngine dataEngine = (DataEngine) req.getServletContext()
                 .getAttribute(Constants.DATA_ENGINE);
 
-        List<String> names = dataEngine.getCountries("")
+        List<String> names = dataEngine.getCountries()
                 .stream()
                 .map(Country::getCountryName)
                 .collect(Collectors.toList());

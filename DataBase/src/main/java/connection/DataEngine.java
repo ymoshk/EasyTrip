@@ -62,6 +62,10 @@ public class DataEngine implements Closeable {
                 "FROM Country WHERE countryName LIKE '" + countryPrefix + "%'");
     }
 
+    public List<Country> getCountries() {
+        return getCountries("");
+    }
+
     /**
      * @param cityName The exact name of the desired city.
      * @return an Optional<City> object that contains the desired city or null.
