@@ -6,6 +6,11 @@
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
           <element id="module-output" name="WebServer" />
+          <element id="artifact" artifact-name="DataBase:jar" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Maven: javax.persistence:javax.persistence-api:2.2" />
+          <element id="artifact" artifact-name="DataBase:jar" />
         </element>
       </element>
     </root>

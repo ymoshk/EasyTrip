@@ -37,7 +37,7 @@ public class DataEngine implements Closeable {
     }
 
     // only one thread can execute this method at the same time.
-    static synchronized DataEngine getInstance() {
+    public static synchronized DataEngine getInstance() {
         if (instance == null) {
             instance = new DataEngine();
         }
@@ -59,7 +59,7 @@ public class DataEngine implements Closeable {
      */
     public List<Country> getCountries(String countryPrefix) {
         return (List<Country>) DBContext.getInstance().selectQuery(
-                "FROM City WHERE cityName LIKE '" + countryPrefix + "%'");
+                "FROM Country WHERE countryName LIKE '" + countryPrefix + "%'");
     }
 
     /**
