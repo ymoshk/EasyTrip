@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet("/getCountryNames")
+@WebServlet("/api/getCountryNames")
 public class CountryNamesProvider extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
