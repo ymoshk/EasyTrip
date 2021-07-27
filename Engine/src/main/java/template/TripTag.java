@@ -1,4 +1,4 @@
-package template.tag;
+package template;
 
 import com.google.gson.internal.LinkedTreeMap;
 

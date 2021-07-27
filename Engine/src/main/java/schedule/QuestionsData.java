@@ -4,7 +4,7 @@ import connection.DataEngine;
 import container.PriceRange;
 import model.location.City;
 import model.location.Country;
-import template.tag.TripTag;
+import template.TripTag;
 
 import java.time.LocalDateTime;
 import java.util.Collections;

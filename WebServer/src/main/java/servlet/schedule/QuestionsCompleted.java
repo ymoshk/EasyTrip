@@ -3,7 +3,7 @@ package servlet.schedule;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import schedule.QuestionsData;
-import template.tag.TripTag;
+import template.TripTag;
 import util.Utils;
 
 import javax.servlet.ServletException;

@@ -18,15 +18,6 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Attraction extends Model {
 
-    //TODO - delete setters
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-
-    public void setLng(double lng) {
-        this.lng = lng;
-    }
-
     @Column(nullable = false)
     private String formattedAddress;
     @Column(length = 1024)
@@ -54,7 +45,6 @@ public abstract class Attraction extends Model {
     @ManyToOne
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     private City city;
-
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;
         this.geometry = searchResultObject.geometry;
@@ -85,6 +75,23 @@ public abstract class Attraction extends Model {
 
     public Attraction() {
 
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    //TODO - delete setters
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
     }
 
     public City getCity() {

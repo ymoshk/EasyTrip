@@ -257,6 +257,18 @@ public class DataEngine implements Closeable {
         }
     }
 
+    public Optional<Attraction> getAttractionById(String id) {
+
+        List<? extends Attraction> lst = (List<Attraction>) DBContext.getInstance()
+                .selectQuery("FROM Attraction WHERE placeId = " + "'" + id + "'");
+
+        if (lst.size() == 1) {
+            return Optional.ofNullable(lst.get(0));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public List<Attraction> getAttractionInSquare(LatLng origin, double km) {
         double factor = (km / 1.11) * 0.01;
         LatLng topRight = new LatLng(origin.lat + factor, origin.lng + factor);
