@@ -37,7 +37,6 @@ public class CityNamesProvider extends HttpServlet {
                             .collect(Collectors.toList());
                 }
             }
-            resp.setContentType("text/html; charset=UTF-8");
             out.println(gson.toJson(cities));
         }
     }
