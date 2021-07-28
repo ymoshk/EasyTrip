@@ -42,11 +42,12 @@ public abstract class Attraction extends Model {
     @ManyToOne
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     private City city;
-    //PriceLevel priceLevel
-    //List<PlaceDetails.Review> reviews;
-    //String localNumber;
-    //String internationalNumber;
-    //String website
+    private PriceLevel priceLevel;
+    @ElementCollection
+    private List<PlaceDetails.Review> reviews;
+    private String localNumber;
+    private String internationalNumber;
+    private String website;
 
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;
@@ -127,6 +128,46 @@ public abstract class Attraction extends Model {
 
     public void setFormattedAddress(String formattedAddress) {
         this.formattedAddress = formattedAddress;
+    }
+
+    public PriceLevel getPriceLevel() {
+        return priceLevel;
+    }
+
+    public void setPriceLevel(PriceLevel priceLevel) {
+        this.priceLevel = priceLevel;
+    }
+
+    public List<PlaceDetails.Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<PlaceDetails.Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public String getLocalNumber() {
+        return localNumber;
+    }
+
+    public void setLocalNumber(String localNumber) {
+        this.localNumber = localNumber;
+    }
+
+    public String getInternationalNumber() {
+        return internationalNumber;
+    }
+
+    public void setInternationalNumber(String internationalNumber) {
+        this.internationalNumber = internationalNumber;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 
     public Geometry getGeometry() {
