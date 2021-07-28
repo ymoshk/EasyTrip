@@ -1,5 +1,6 @@
 package model.attraction;
 
+import com.google.maps.model.PlaceDetails;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;
 import container.PriceRange;
@@ -80,5 +81,13 @@ public class AttractionsFactory {
         }
 
         return res;
+    }
+
+    public static void setAttractionDetails(Attraction attraction, PlaceDetails placeDetails){
+        attraction.setOpeningHours(placeDetails.openingHours);
+        //attraction.setPriceLevel(placeDetails.priceLevel);
+        //attraction.setLocalPhoneNumber
+        //attraction.setInternationalPhoneNumber
+        //attraction.setWebsite
     }
 }

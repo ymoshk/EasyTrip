@@ -1,6 +1,8 @@
 package connection;
 
 import com.google.maps.GeoApiContext;
+import com.google.maps.PlaceDetailsRequest;
+import com.google.maps.errors.ApiException;
 import com.google.maps.model.*;
 import container.PriceRange;
 import generator.Hash;
@@ -13,10 +15,12 @@ import model.location.City;
 import model.location.Country;
 import model.travel.Travel;
 import model.user.User;
+import okhttp3.OkHttpClient;
 import util.google.GoogleMapsApiUtils;
 import util.google.Keys;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -142,22 +146,35 @@ public class DataEngine implements Closeable {
      * @param city           The name of the city where the requested attractions should be located.
      * @return a list of attractions that match the search args.
      */
+    //Bar - I'll add another method to handle Place details
     private List<Attraction> getAttractionInStandardTextSearch(String attractionName, PriceRange priceRange, PlaceType type, City city) {
         List<Attraction> result = new ArrayList<>();
         GeoApiContext context = null;
 
         try {
             int i = 0;
-            context = new GeoApiContext.Builder()
-                    .apiKey(Keys.getKey())
-                    .build();
-
+            context = new GeoApiContext.Builder().apiKey(Keys.getKey()).build();
             PlacesSearchResponse resp = GoogleMapsApiUtils
                     .getTextSearchRequest(context, attractionName, city.getCityName(), priceRange, type)
                     .await();
             do {
+                GeoApiContext finalContext = context;
                 Arrays.stream(resp.results)
-                        .forEach(singleRes -> result.add(AttractionsFactory.getAttraction(singleRes, type, priceRange, city)));
+                        .forEach(singleRes ->
+                        {
+                            PlaceDetails placeDetails = null;
+                            try {
+                                placeDetails = GoogleMapsApiUtils.getPlaceDetails(finalContext, singleRes.placeId).await();
+
+                            } catch (ApiException | InterruptedException | IOException e) {
+                                LogsManager.logException(e);
+                            }
+
+                            Attraction attractionToAdd = AttractionsFactory.getAttraction(singleRes, type, priceRange, city);
+                            //this is the method to updates the attraction with reviews, phones, website, ...
+                            AttractionsFactory.setAttractionDetails(attractionToAdd, placeDetails);
+                            result.add(attractionToAdd);
+                        });
                 Thread.sleep(NEXT_PAGE_DELAY);
 
                 if (resp.nextPageToken == null) {

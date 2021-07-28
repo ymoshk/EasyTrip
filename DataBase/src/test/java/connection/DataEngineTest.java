@@ -65,7 +65,7 @@ class DataEngineTest {
     {
         DataEngine eng = DataEngine.getInstance();
 
-        List<Attraction> res = eng.getAttractions(PlaceType.RESTAURANT,"Hadera", new PriceRange());
+        List<Attraction> res = eng.getAttractions(PlaceType.RESTAURANT,"Haifa", new PriceRange());
 
         AtomicInteger i = new AtomicInteger(1);
         res.forEach(attraction -> {
@@ -73,5 +73,6 @@ class DataEngineTest {
             i.getAndIncrement();
         });
     }
+
 
 }

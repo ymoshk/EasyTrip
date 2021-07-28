@@ -17,6 +17,7 @@
     <bytecodeTargetLevel>
       <module name="ReactUI" target="1.5" />
       <module name="Server" target="1.8" />
+      <module name="UserInterface" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

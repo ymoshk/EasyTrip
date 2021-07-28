@@ -1,10 +1,7 @@
 package model.attraction;
 
 
-import com.google.maps.model.Geometry;
-import com.google.maps.model.OpeningHours;
-import com.google.maps.model.PlaceType;
-import com.google.maps.model.PlacesSearchResult;
+import com.google.maps.model.*;
 import container.PriceRange;
 import model.Model;
 import model.location.City;
@@ -45,6 +42,12 @@ public abstract class Attraction extends Model {
     @ManyToOne
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     private City city;
+    //PriceLevel priceLevel
+    //List<PlaceDetails.Review> reviews;
+    //String localNumber;
+    //String internationalNumber;
+    //String website
+
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;
         this.geometry = searchResultObject.geometry;
