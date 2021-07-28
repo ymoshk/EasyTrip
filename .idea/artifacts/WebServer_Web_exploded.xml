@@ -1,0 +1,21 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="WebServer:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/WebServer_Web_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="WebServer/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="WebServer" />
+          <element id="artifact" artifact-name="DataBase:jar" />
+          <element id="artifact" artifact-name="Engine:jar" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Maven: javax.persistence:javax.persistence-api:2.2" />
+          <element id="artifact" artifact-name="DataBase:jar" />
+          <element id="artifact" artifact-name="Engine:jar" />
+          <element id="library" level="project" name="Maven: com.squareup.okhttp3:okhttp:3.14.4" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

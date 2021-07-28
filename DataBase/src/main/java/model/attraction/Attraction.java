@@ -17,10 +17,13 @@ import java.util.List;
 @Entity()
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Attraction extends Model {
+
     @Column(nullable = false)
     private String formattedAddress;
     @Column(length = 1024)
     private Geometry geometry;
+    private double lat;
+    private double lng;
     @Column(nullable = false)
     private String name;
     private URL icon;
@@ -42,10 +45,11 @@ public abstract class Attraction extends Model {
     @ManyToOne
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     private City city;
-
     public Attraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
         this.formattedAddress = searchResultObject.formattedAddress;
         this.geometry = searchResultObject.geometry;
+        this.lat = this.geometry.location.lat;
+        this.lng = this.geometry.location.lng;
         this.name = searchResultObject.name;
         this.icon = searchResultObject.icon;
         this.placeId = searchResultObject.placeId;
@@ -71,6 +75,23 @@ public abstract class Attraction extends Model {
 
     public Attraction() {
 
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    //TODO - delete setters
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
     }
 
     public City getCity() {

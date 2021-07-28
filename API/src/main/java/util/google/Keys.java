@@ -15,7 +15,7 @@ public class Keys {
         keys.add(barApiKey);
     }
 
-    public static String getKey() throws Exception {
+    public static String getKey(){
         //TODO - replace between the comment and the next line.
         return saharApiKey;
 

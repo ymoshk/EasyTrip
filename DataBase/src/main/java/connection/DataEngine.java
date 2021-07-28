@@ -1,9 +1,9 @@
 package connection;
 
 import com.google.maps.GeoApiContext;
-import com.google.maps.model.PlaceType;
-import com.google.maps.model.PlacesSearchResponse;
+import com.google.maps.model.*;
 import container.PriceRange;
+import generator.Hash;
 import log.LogsManager;
 import model.Model;
 import model.attraction.Attraction;
@@ -11,6 +11,8 @@ import model.attraction.AttractionImage;
 import model.attraction.AttractionsFactory;
 import model.location.City;
 import model.location.Country;
+import model.travel.Travel;
+import model.user.User;
 import util.google.GoogleMapsApiUtils;
 import util.google.Keys;
 
@@ -28,7 +30,19 @@ public class DataEngine implements Closeable {
     private static final int PAGE_COUNT_TO_GET = 3; // total of 60 results
     private static final int NEXT_PAGE_DELAY = 2000; // milli sec
     private static final int MIN_SIZE_COLLECTION = 3;
+    private static DataEngine instance = null;
 
+    //empty constructor just to make sure the class is a singleton
+    private DataEngine() {
+    }
+
+    // only one thread can execute this method at the same time.
+    public static synchronized DataEngine getInstance() {
+        if (instance == null) {
+            instance = new DataEngine();
+        }
+        return instance;
+    }
 
     /**
      * @param cityPrefix The name or a part of the name of the requested city.
@@ -45,7 +59,11 @@ public class DataEngine implements Closeable {
      */
     public List<Country> getCountries(String countryPrefix) {
         return (List<Country>) DBContext.getInstance().selectQuery(
-                "FROM City WHERE cityName LIKE '" + countryPrefix + "%'");
+                "FROM Country WHERE countryName LIKE '" + countryPrefix + "%'");
+    }
+
+    public List<Country> getCountries() {
+        return getCountries("");
     }
 
     /**
@@ -180,6 +198,111 @@ public class DataEngine implements Closeable {
             result = (AttractionImage) results.get(0);
         }
         return result;
+    }
+
+    /**
+     * @param source the The place you want to get from.
+     * @param dest   the The place you want to get to.
+     * @return an DistanceMatrixElement object which contains the travel time and distance.
+     */
+    public Travel getTravel(LatLng source, LatLng dest, TravelMode mode) {
+        Travel res = getTravelFromDB(source, dest, mode);
+
+        if (res == null) {
+            DistanceMatrixElement distanceMatrixElement =
+                    getDistanceMatrixElementFromGoogleApi(source, dest, mode);
+
+            if (distanceMatrixElement != null) {
+                res = new Travel(source, dest, mode, distanceMatrixElement);
+                DBContext.getInstance().insert(res);
+            }
+        }
+
+        return res;
+    }
+
+    private Travel getTravelFromDB(LatLng source, LatLng dest, TravelMode mode) {
+        DBContext dbContext = DBContext.getInstance();
+
+        List<Travel> travels = (List<Travel>) dbContext.selectQuery(
+                "FROM Travel WHERE " +
+                        "destLat = " + dest.lat + " AND destLng = " + dest.lng +
+                        " AND sourceLat = " + source.lat + " AND sourceLng = " + source.lng);
+
+        Travel res = travels.stream().filter(travel -> travel.getMode() == mode).findFirst().orElse(null);
+
+        return res;
+    }
+
+    private DistanceMatrixElement getDistanceMatrixElementFromGoogleApi(LatLng source, LatLng dest, TravelMode mode) {
+        GeoApiContext context = null;
+        DistanceMatrixElement res = null;
+
+        context = new GeoApiContext.Builder()
+                .apiKey(Keys.getKey())
+                .build();
+
+        try {
+            DistanceMatrix response = GoogleMapsApiUtils.getDistanceMatrixApiRequest(context, source, dest, mode).await();
+
+            if (response.rows.length != 0 && response.rows[0].elements.length != 0) {
+                res = response.rows[0].elements[0];
+            }
+        } catch (Exception e) {
+            LogsManager.logException(e);
+        } finally {
+            context.shutdown();
+
+            return res;
+        }
+    }
+
+    public Optional<Attraction> getAttractionById(String id) {
+
+        List<? extends Attraction> lst = (List<Attraction>) DBContext.getInstance()
+                .selectQuery("FROM Attraction WHERE placeId = " + "'" + id + "'");
+
+        if (lst.size() == 1) {
+            return Optional.ofNullable(lst.get(0));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public List<Attraction> getAttractionInSquare(LatLng origin, double km) {
+        double factor = (km / 1.11) * 0.01;
+        LatLng topRight = new LatLng(origin.lat + factor, origin.lng + factor);
+        LatLng topLeft = new LatLng(origin.lat + factor, origin.lng - factor);
+        LatLng bottomLeft = new LatLng(origin.lat - factor, origin.lng - factor);
+
+        List<Attraction> res = (List<Attraction>) DBContext.getInstance().selectQuery("FROM Attraction WHERE " +
+                "lat > " + bottomLeft.lat + " AND lat < " + topLeft.lat +
+                " AND lng > " + topLeft.lng + " AND lng < " + topRight.lng);
+
+        return res;
+    }
+
+    public List<User> getUsers() {
+        DBContext dbContext = DBContext.getInstance();
+
+        return (List<User>) dbContext.getToList(User.class);
+    }
+
+    public User getUser(String userName, String password) {
+        DBContext dbContext = DBContext.getInstance();
+
+        List<User> users = (List<User>) dbContext.selectQuery("FROM User WHERE userName = " + "'" + userName + "'");
+        return users.stream()
+                .filter(user -> user.getPassword().equals(Hash.md5Hash(password))).findFirst().orElse(null);
+    }
+
+    public boolean isUserExist(String userName, String password) {
+        return getUser(userName, password) != null;
+    }
+
+    public void addUser(User userToAdd) {
+        DBContext dbContext = DBContext.getInstance();
+        dbContext.insert(userToAdd);
     }
 
     @Override

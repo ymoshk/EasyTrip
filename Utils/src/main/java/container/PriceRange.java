@@ -16,6 +16,11 @@ public class PriceRange implements Serializable {
         this.max = PriceLevel.VERY_EXPENSIVE;
     }
 
+    public PriceRange(int number) {
+        this.min = PriceLevel.FREE;
+        this.max = PriceLevel.values()[number];
+    }
+
     public PriceRange(PriceLevel min, PriceLevel max) {
 
         if (min == null) {

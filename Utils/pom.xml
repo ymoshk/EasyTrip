@@ -22,7 +22,17 @@
             <artifactId>jsoup</artifactId>
             <version>1.13.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.maps</groupId>
+            <artifactId>google-maps-services</artifactId>
+            <version>0.17.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
-
 </project>
