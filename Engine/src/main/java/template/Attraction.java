@@ -3,11 +3,9 @@ package template;
 
 import com.google.gson.Gson;
 import com.google.maps.model.OpeningHours;
-import com.google.maps.model.PlaceDetails;
 
 import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.List;
 
 public class Attraction {
     public String id;
@@ -26,7 +24,7 @@ public class Attraction {
     public double lat;
     public double lng;
     public String address;
-    public List<PlaceDetails.Review> reviews;
+    public String reviews;
     public String localNumber;
     public String internationalNumber;
     public String website;
@@ -43,8 +41,8 @@ public class Attraction {
         this.isTemporarilyClose = attraction.getBusinessStatus().equals("CLOSED_TEMPORARILY");
         this.priceRangeMin = attraction.getPriceRange().getMin().ordinal();
         this.priceRangeMax = attraction.getPriceRange().getMin().ordinal();
+        Gson gson = new Gson();
         if (attraction.getOpeningHours() != null) {
-            Gson gson = new Gson();
             this.openingHoursText = gson.toJson(new OpeningHoursTextContainer(attraction));
             this.openingHoursData = gson.toJson(parseOpeningHours(attraction.getOpeningHours().periods));
         }
@@ -54,16 +52,19 @@ public class Attraction {
         this.localNumber = attraction.getLocalNumber();
         this.internationalNumber = attraction.getInternationalNumber();
         this.website = attraction.getWebsite();
-        this.reviews = attraction.getReviews();
+        this.reviews = gson.toJson(attraction.getReviews());
     }
 
-    private HashMap<String, LocalTime[]> parseOpeningHours(OpeningHours.Period[] periods) {
-        HashMap<String, LocalTime[]> result = new HashMap<>();
+    private HashMap<OpeningHours.Period.OpenClose.DayOfWeek, LocalTime[]>
+    parseOpeningHours(OpeningHours.Period[] periods) {
+        HashMap<OpeningHours.Period.OpenClose.DayOfWeek, LocalTime[]> result = new HashMap<>();
         if (periods != null) {
-
-            for (int i = 1; i <= 7; i++) {
-                result.put(String.valueOf(i),
-                        new LocalTime[]{periods[i].open.time, periods[i].close.time});
+            for (OpeningHours.Period period : periods) {
+                if (!result.containsKey(period.close.day)) {
+                    result.put(period.close.day, new LocalTime[2]);
+                }
+                result.get(period.close.day)[0] = period.open.time;
+                result.get(period.close.day)[1] = period.close.time;
             }
         }
         return result;
