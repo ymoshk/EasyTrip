@@ -2,10 +2,10 @@ package model.attraction;
 
 
 import com.google.maps.model.*;
+import com.google.maps.model.PlaceDetails.*;
 import container.PriceRange;
 import model.Model;
 import model.location.City;
-
 import javax.persistence.*;
 import java.net.URL;
 import java.util.Arrays;
@@ -29,6 +29,7 @@ public abstract class Attraction extends Model {
     private float rating;
     @ElementCollection
     private List<String> types;
+    @Column(length = 1024)
     private OpeningHours openingHours;
     @Column(nullable = false)
     private String photoReference;
@@ -44,6 +45,7 @@ public abstract class Attraction extends Model {
     private City city;
     private PriceLevel priceLevel;
     @ElementCollection
+    @Column(length = 1024)
     private List<PlaceDetails.Review> reviews;
     private String localNumber;
     private String internationalNumber;

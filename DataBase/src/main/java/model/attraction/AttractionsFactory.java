@@ -19,6 +19,8 @@ import model.attraction.shopping.mall.ShoppingMall;
 import model.attraction.zoo.Zoo;
 import model.location.City;
 
+import java.util.Arrays;
+
 public class AttractionsFactory {
 
     public static Attraction getAttraction(PlacesSearchResult searchResultObject, PlaceType placeType, PriceRange priceRange, City city) {
@@ -84,10 +86,21 @@ public class AttractionsFactory {
     }
 
     public static void setAttractionDetails(Attraction attraction, PlaceDetails placeDetails){
+//        StringBuilder res = new StringBuilder();
+//        if(placeDetails.openingHours != null){
+//            placeDetails.openingHours.openNow = null;
+//            placeDetails.openingHours.periods = null;
+//            placeDetails.openingHours.permanentlyClosed = null;
+//            Arrays.stream(placeDetails.openingHours.weekdayText).forEach(day ->{
+//                res.append(day + "\n");
+//            });
+//        }
         attraction.setOpeningHours(placeDetails.openingHours);
-        //attraction.setPriceLevel(placeDetails.priceLevel);
-        //attraction.setLocalPhoneNumber
-        //attraction.setInternationalPhoneNumber
-        //attraction.setWebsite
+        attraction.setPriceLevel(placeDetails.priceLevel);
+        attraction.setLocalNumber(placeDetails.formattedPhoneNumber);
+        attraction.setInternationalNumber(placeDetails.internationalPhoneNumber);
+        if(placeDetails.website != null)
+            attraction.setWebsite(placeDetails.website.toString());
+        attraction.setReviews(Arrays.asList(placeDetails.reviews));
     }
 }
