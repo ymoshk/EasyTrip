@@ -28,6 +28,7 @@ public class Attraction {
     public String localNumber;
     public String internationalNumber;
     public String website;
+    public int priceLevel;
 
     public Attraction(model.attraction.Attraction attraction, boolean isRecommended) {
         this.id = attraction.getPlaceId();
@@ -53,6 +54,7 @@ public class Attraction {
         this.internationalNumber = attraction.getInternationalNumber();
         this.website = attraction.getWebsite();
         this.reviews = gson.toJson(attraction.getReviews());
+        this.priceLevel = attraction.getPriceLevel().ordinal();
     }
 
     private HashMap<OpeningHours.Period.OpenClose.DayOfWeek, LocalTime[]>
