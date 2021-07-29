@@ -39,11 +39,11 @@ public class CityAttractionsProvider extends HttpServlet {
                         .collect(Collectors.toList());
 
                 for (template.Attraction attraction : attractionsTemplatesList) {
-                    if (!hashMap.containsKey(attraction.type)) {
-                        hashMap.put(attraction.type, new ArrayList<>());
+                    if (!hashMap.containsKey(attraction.getClass().getSimpleName())) {
+                        hashMap.put(attraction.getClass().getSimpleName(), new ArrayList<>());
                     }
 
-                    hashMap.get(attraction.type).add(attraction);
+                    hashMap.get(attraction.getClass().getSimpleName()).add(attraction);
                 }
 
                 out.println(gson.toJson(hashMap));
