@@ -28,6 +28,7 @@ public class Attraction {
     public String localNumber;
     public String internationalNumber;
     public String website;
+    public int priceLevel;
 
     public Attraction(model.attraction.Attraction attraction, boolean isRecommended) {
         this.id = attraction.getPlaceId();
@@ -53,6 +54,7 @@ public class Attraction {
         this.internationalNumber = attraction.getInternationalNumber();
         this.website = attraction.getWebsite();
         this.reviews = gson.toJson(attraction.getReviews());
+        this.priceLevel = attraction.getPriceLevel().ordinal();
     }
 
     private HashMap<OpeningHours.Period.OpenClose.DayOfWeek, LocalTime[]>
@@ -82,13 +84,13 @@ public class Attraction {
         public OpeningHoursTextContainer(model.attraction.Attraction attraction) {
             try {
                 if (attraction.getOpeningHours().weekdayText != null) {
-                    this.sunday = attraction.getOpeningHours().weekdayText[0];
-                    this.monday = attraction.getOpeningHours().weekdayText[1];
-                    this.tuesday = attraction.getOpeningHours().weekdayText[2];
-                    this.wednesday = attraction.getOpeningHours().weekdayText[3];
-                    this.thursday = attraction.getOpeningHours().weekdayText[4];
-                    this.friday = attraction.getOpeningHours().weekdayText[5];
-                    this.saturday = attraction.getOpeningHours().weekdayText[6];
+                    this.monday = attraction.getOpeningHours().weekdayText[0];
+                    this.tuesday = attraction.getOpeningHours().weekdayText[1];
+                    this.wednesday = attraction.getOpeningHours().weekdayText[2];
+                    this.thursday = attraction.getOpeningHours().weekdayText[3];
+                    this.friday = attraction.getOpeningHours().weekdayText[4];
+                    this.saturday = attraction.getOpeningHours().weekdayText[5];
+                    this.sunday = attraction.getOpeningHours().weekdayText[6];
                 }
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
