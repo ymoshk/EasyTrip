@@ -2,7 +2,7 @@ package servlet.schedule;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
-import schedule.QuestionsData;
+import itinerary.QuestionsData;
 import template.TripTag;
 import util.Utils;
 

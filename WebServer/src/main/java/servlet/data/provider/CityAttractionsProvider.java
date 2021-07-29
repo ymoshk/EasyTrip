@@ -35,7 +35,7 @@ public class CityAttractionsProvider extends HttpServlet {
                 HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
                 List<Attraction> attractionList = city.getAttractionList();
                 List<template.Attraction> attractionsTemplatesList = attractionList.stream()
-                        .map(attraction -> new template.Attraction(attraction, true, false))
+                        .map(attraction -> new template.Attraction(attraction, true))
                         .collect(Collectors.toList());
 
                 for (template.Attraction attraction : attractionsTemplatesList) {

@@ -3,9 +3,11 @@ package template;
 
 import com.google.gson.Gson;
 import com.google.maps.model.OpeningHours;
+import com.google.maps.model.PlaceDetails;
 
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 
 public class Attraction {
     public String id;
@@ -24,8 +26,12 @@ public class Attraction {
     public double lat;
     public double lng;
     public String address;
+    public List<PlaceDetails.Review> reviews;
+    public String localNumber;
+    public String internationalNumber;
+    public String website;
 
-    public Attraction(model.attraction.Attraction attraction, boolean isRecommended, boolean attachImage) {
+    public Attraction(model.attraction.Attraction attraction, boolean isRecommended) {
         this.id = attraction.getPlaceId();
         this.name = attraction.getName();
         this.isRecommended = isRecommended;
@@ -45,6 +51,10 @@ public class Attraction {
         this.lat = attraction.getLat();
         this.lng = attraction.getLng();
         this.address = attraction.getFormattedAddress();
+        this.localNumber = attraction.getLocalNumber();
+        this.internationalNumber = attraction.getInternationalNumber();
+        this.website = attraction.getWebsite();
+        this.reviews = attraction.getReviews();
     }
 
     private HashMap<String, LocalTime[]> parseOpeningHours(OpeningHours.Period[] periods) {

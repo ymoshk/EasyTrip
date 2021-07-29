@@ -1,4 +1,4 @@
-package schedule;
+package itinerary;
 
 import connection.DataEngine;
 import container.PriceRange;
