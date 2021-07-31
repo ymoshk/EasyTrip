@@ -3,11 +3,14 @@ package itinerary;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ItineraryDay {
     private final LocalDate date;
-    private final List<ActivityNode> activities;
+    private List<ActivityNode> activities;
 
     public ItineraryDay(LocalDate date) {
         this.date = date;
@@ -19,11 +22,15 @@ public class ItineraryDay {
     }
 
     public List<ActivityNode> getActivities() {
-        return activities;
+        return Collections.unmodifiableList(activities);
+    }
+
+    public void setActivities(List<ActivityNode> activities) {
+        this.activities = activities;
     }
 
     public String getStringDate() {
-        return this.date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY"));
+        return this.date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
 }

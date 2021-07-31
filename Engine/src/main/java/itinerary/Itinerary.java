@@ -21,8 +21,12 @@ public class Itinerary {
         itineraryDays = new ArrayList<>();
     }
 
-    //  the first day is dayNumber = 1
+    //  the first day is dayNumber = 0
     public void setItineraryDay(int dayNumber, ItineraryDay newItineraryDay){
-        itineraryDays.set(dayNumber - 1, newItineraryDay);
+        itineraryDays.set(dayNumber, newItineraryDay);
+    }
+
+    public void addItineraryDay(ItineraryDay newItineraryDay){
+        itineraryDays.add(newItineraryDay);
     }
 }
