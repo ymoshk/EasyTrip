@@ -1,6 +1,5 @@
 package itinerary;
 
-import algorithm.Algorithms;
 import generator.GUID;
 
 import java.util.ArrayList;
@@ -9,15 +8,12 @@ import java.util.List;
 
 public class Itinerary {
     final String id;
-    final QuestionsData questionsData;
     HashMap<String, List<template.Attraction>> attractions;
     List<ItineraryDay> itineraryDays;
 
 
-    public Itinerary(QuestionsData questionsData){
+    public Itinerary(){
         id = GUID.generate();
-        this.questionsData = questionsData;
-        attractions = Algorithms.classifyAttractions(this.questionsData);
         itineraryDays = new ArrayList<>();
     }
 
