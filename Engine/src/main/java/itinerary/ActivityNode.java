@@ -1,6 +1,5 @@
 package itinerary;
 
-import model.Model;
 import template.Attraction;
 
 import java.time.LocalTime;

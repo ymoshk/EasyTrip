@@ -110,7 +110,20 @@ class DBContext implements Closeable {
         }
     }
 
-    Query createQuery(String queryString){
+    List<? extends Model> selectQuery(String queryString, int limit) {
+        try {
+            Query query = this.entityManager.createQuery(queryString);
+            query.setFirstResult(0);
+            query.setMaxResults(limit);
+            return query.getResultList();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+
+    Query createQuery(String queryString) {
         return this.entityManager.createQuery(queryString);
     }
 

@@ -1,7 +1,6 @@
 package connection;
 
 import com.google.maps.GeoApiContext;
-import com.google.maps.PlaceDetailsRequest;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.*;
 import container.PriceRange;
@@ -11,11 +10,11 @@ import model.Model;
 import model.attraction.Attraction;
 import model.attraction.AttractionImage;
 import model.attraction.AttractionsFactory;
+import model.itinerary.ItineraryModel;
 import model.location.City;
 import model.location.Country;
 import model.travel.Travel;
 import model.user.User;
-import okhttp3.OkHttpClient;
 import util.google.GoogleMapsApiUtils;
 import util.google.Keys;
 
@@ -320,6 +319,34 @@ public class DataEngine implements Closeable {
     public void addUser(User userToAdd) {
         DBContext dbContext = DBContext.getInstance();
         dbContext.insert(userToAdd);
+    }
+
+    public List<ItineraryModel> getRecentItineraries() {
+        DBContext dbContext = DBContext.getInstance();
+
+        List<ItineraryModel> result = (List<ItineraryModel>) dbContext
+                .selectQuery("FROM ItineraryModel", 100);
+
+        return result;
+    }
+
+    public ItineraryModel getItinerary(String itineraryId) {
+        ItineraryModel result = null;
+
+        DBContext dbContext = DBContext.getInstance();
+        List<ItineraryModel> lst = (List<ItineraryModel>) dbContext.selectQuery(
+                "FROM Itinerary WHERE itineraryId = " + "'" + itineraryId + "'");
+
+        if (lst.size() == 1) {
+            result = lst.get(0);
+        }
+
+        return result;
+    }
+
+    public void saveItinerary(ItineraryModel itinerary) {
+        DBContext dbContext = DBContext.getInstance();
+        dbContext.insert(itinerary);
     }
 
     @Override

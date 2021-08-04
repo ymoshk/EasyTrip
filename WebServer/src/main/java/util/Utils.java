@@ -2,6 +2,7 @@ package util;
 
 import com.google.gson.Gson;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,5 +20,9 @@ public class Utils {
         temp.forEach((key, value) -> result.put(key, value.trim()));
 
         return result;
+    }
+
+    public static ServletContext getContext(HttpServletRequest req) {
+        return req.getServletContext();
     }
 }

@@ -1,4 +1,4 @@
-package servlet.schedule;
+package servlet.itinerary;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;

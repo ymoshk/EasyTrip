@@ -16,18 +16,18 @@ import java.util.stream.Collectors;
 //https://www.geeksforgeeks.org/introduction-hill-climbing-artificial-intelligence/
 
 public class HillClimbing {
-//    Define the current state as an initial state
-//    Loop until the goal state is achieved or no more operators can be applied on the current state:
-//    Apply an operation to current state and get a new state
-//    Compare the new state with the goal
-//    Quit if the goal state is achieved
-//    Evaluate new state with heuristic function and compare it with the current state
-//    If the newer state is closer to the goal compared to current state, update the current state
+    //    Define the current state as an initial state
+    //    Loop until the goal state is achieved or no more operators can be applied on the current state:
+    //    Apply an operation to current state and get a new state
+    //    Compare the new state with the goal
+    //    Quit if the goal state is achieved
+    //    Evaluate new state with heuristic function and compare it with the current state
+    //    If the newer state is closer to the goal compared to current state, update the current state
 
     private final QuestionsData preferences;
-    private double goalValue;
-    private List<Attraction> attractionsList;
-    private HashMap<Attraction, Boolean> attractionToBooleanMap;
+    private final double goalValue;
+    private final List<Attraction> attractionsList;
+    private final HashMap<Attraction, Boolean> attractionToBooleanMap;
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList, double goalValue) {
         this.preferences = preferences;
@@ -38,7 +38,7 @@ public class HillClimbing {
 
     public Itinerary getItineraryWithHillClimbingAlgorithm(State initState, Double goalValue) {
         List<State> stateList = new ArrayList<>();
-        stateList.add(new State(new Itinerary(), 0.0));     // Empty itinerary is initial state
+        //        stateList.add(new State(new Itinerary(), 0.0));     // Empty itinerary is initial state
 
         State currentState = initState;
         boolean noStateFound = false;
