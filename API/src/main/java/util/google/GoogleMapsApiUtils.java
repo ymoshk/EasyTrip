@@ -11,9 +11,10 @@ public class GoogleMapsApiUtils {
 
     public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName, String cityName, PriceRange priceRange, PlaceType type) {
         return PlacesApi.textSearchQuery(context, attractionName + " in " + cityName)
-                .minPrice(priceRange.getMin())
-                .maxPrice(priceRange.getMax())
                 .type(type);
+//                .minPrice(priceRange.getMin())
+//                .maxPrice(priceRange.getMax())
+//                .type(type);
     }
 
     public static TextSearchRequest getNextPageTextSearchRequest(GeoApiContext context, String pageToken) {
