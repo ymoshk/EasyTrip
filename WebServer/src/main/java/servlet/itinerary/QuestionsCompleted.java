@@ -2,6 +2,7 @@ package servlet.itinerary;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import template.TripTag;
 import util.Utils;
@@ -12,8 +13,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +48,28 @@ public class QuestionsCompleted extends HttpServlet {
             QuestionsData data = new QuestionsData(country, city, adultsCount, childrenCount, budget,
                     startDate, endDate, favoriteAttraction, tripVibes);
 
-            //TODO create a schedule object that contains the data and return the client it's unique id.
+            // TODO delete
+
+            HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
+            List<model.attraction.Attraction> attractionList = data.getCity().getAttractionList();
+            List<template.Attraction> attractionsTemplatesList = attractionList.stream()
+                    .map(attraction -> new template.Attraction(attraction, true))
+                    .collect(Collectors.toList());
+
+            for (template.Attraction attraction : attractionsTemplatesList) {
+                if (!hashMap.containsKey(attraction.getClass().getSimpleName())) {
+                    hashMap.put(attraction.getClass().getSimpleName(), new ArrayList<>());
+                }
+
+                hashMap.get(attraction.getClass().getSimpleName()).add(attraction);
+            }
+
+            Itinerary itinerary = new Itinerary(hashMap, data);
+
+            try (PrintWriter out = resp.getWriter()) {
+                out.println(gson.toJson(itinerary));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

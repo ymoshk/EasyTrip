@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class QuestionsData {
-    private final Country country;
+    private final String country;
     private final City city;
     private final int adultsCount;
     private final int childrenCount;
@@ -39,11 +39,11 @@ public class QuestionsData {
         }
 
         this.city = cityList.get(0);
-        this.country = countryList.get(0);
+        this.country = countryList.get(0).getCountryName();
         this.priceRange = new PriceRange(budget);
     }
 
-    public Country getCountry() {
+    public String getCountry() {
         return country;
     }
 

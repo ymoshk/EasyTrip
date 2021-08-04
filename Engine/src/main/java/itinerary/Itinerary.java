@@ -1,7 +1,6 @@
 package itinerary;
 
 import generator.GUID;
-import model.attraction.Attraction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,18 +8,18 @@ import java.util.List;
 
 public class Itinerary {
     private final String itineraryId;
-    private final HashMap<String, List<Attraction>> attractions;
+    private final HashMap<String, List<template.Attraction>> attractions;
     private final List<ItineraryDay> itineraryDays;
     private final QuestionsData questionsData;
 
-    public Itinerary(HashMap<String, List<Attraction>> attractions, QuestionsData questionsData) {
+    public Itinerary(HashMap<String, List<template.Attraction>> attractions, QuestionsData questionsData) {
         this.itineraryId = GUID.generate();
         this.itineraryDays = new ArrayList<>();
         this.attractions = new HashMap<>(attractions);
         this.questionsData = questionsData;
     }
 
-    public HashMap<String, List<Attraction>> getAttractions() {
+    public HashMap<String, List<template.Attraction>> getAttractions() {
         return attractions;
     }
 
