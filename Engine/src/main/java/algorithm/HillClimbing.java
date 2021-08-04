@@ -5,6 +5,7 @@ import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.location.City;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,9 +37,8 @@ public class HillClimbing {
         this.attractionToBooleanMap = new HashMap<>();
     }
 
-    public Itinerary getItineraryWithHillClimbingAlgorithm(State initState, Double goalValue) {
+    public Itinerary getItineraryWithHillClimbingAlgorithm(State initState) {
         List<State> stateList = new ArrayList<>();
-        //        stateList.add(new State(new Itinerary(), 0.0));     // Empty itinerary is initial state
 
         State currentState = initState;
         boolean noStateFound = false;
@@ -50,7 +50,6 @@ public class HillClimbing {
             if (nextState != null) {
                 noStateFound = false;
                 currentState = nextState;
-//                stateList.add(new State(nextState));
             }
         }
 
@@ -84,5 +83,20 @@ public class HillClimbing {
         }
 
         return res;
+    }
+
+    public static void main(String[] args) {
+        try{
+            QuestionsData questionsData = new QuestionsData("Israel", "Tel Aviv", 2,
+                    0, 3, LocalDateTime.now(), LocalDateTime.now().plusDays(1), new ArrayList<>(),
+                    new ArrayList<>());
+            List<Attraction> attractionList = questionsData.getCity().getAttractionList();
+            HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList, 100.0);
+            State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
+
+            hillClimbing.getItineraryWithHillClimbingAlgorithm(state);
+        }catch (Exception exception){
+            System.out.println(exception.getMessage());
+        }
     }
 }
