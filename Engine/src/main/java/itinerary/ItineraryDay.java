@@ -1,5 +1,7 @@
 package itinerary;
 
+import model.attraction.Attraction;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ public class ItineraryDay {
         this.date = date;
         this.activities = new ArrayList<>();
     }
+
 
     public LocalDate getDate() {
         return date;
@@ -30,5 +33,4 @@ public class ItineraryDay {
     public String getStringDate() {
         return this.date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
-
 }

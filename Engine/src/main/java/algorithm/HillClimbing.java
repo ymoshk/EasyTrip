@@ -1,14 +1,17 @@
 package algorithm;
 
+import com.google.maps.model.PlaceType;
 import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.location.City;
+import util.google.GoogleMapsApiUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 
@@ -27,38 +30,81 @@ public class HillClimbing {
 
     private final QuestionsData preferences;
     private final double goalValue;
-    private final List<Attraction> attractionsList;
-    private final HashMap<Attraction, Boolean> attractionToBooleanMap;
+    private final HashMap<PlaceType, List<Attraction>> placeTypeToAttraction;
+    //make sure the both maps hold the same reference
+    private final HashMap<Long, Boolean> attractionToBooleanMap;
+    private final Random rand;
+
+    private HashMap<PlaceType, List<Attraction>> attractionListToAttractionHashMap(List<Attraction> attractionList){
+        HashMap<PlaceType, List<Attraction>> res = new HashMap<>();
+
+        attractionList.forEach(attraction -> {
+            if(! res.containsKey(attraction.getPlaceType()))
+                res.put(attraction.getPlaceType(), new ArrayList<>());
+
+            res.get(attraction.getPlaceType()).add(attraction);
+
+        });
+
+        return res;
+    }
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList, double goalValue) {
         this.preferences = preferences;
         this.goalValue = goalValue;
-        this.attractionsList = attractionList;
+        this.placeTypeToAttraction = attractionListToAttractionHashMap(attractionList);
         this.attractionToBooleanMap = new HashMap<>();
+        this.rand = new Random();
     }
 
     public Itinerary getItineraryWithHillClimbingAlgorithm(State initState) {
-        List<State> stateList = new ArrayList<>();
-
         State currentState = initState;
-        boolean noStateFound = false;
 
-        // TODO: add a timer - maximum time instead of noStateFound
-        while (currentState.getHeuristicValue() < goalValue || noStateFound) {
-            noStateFound = true;
-            State nextState = findNextState(currentState);
-            if (nextState != null) {
-                noStateFound = false;
-                currentState = nextState;
+        while(currentState.getHeuristicValue() < goalValue){
+            double prevHeuristic = currentState.getHeuristicValue();
+            findNextState(currentState);
+
+            System.out.println(currentState.getHeuristicValue());
+            if(currentState.getHeuristicValue() < prevHeuristic){
+                // remove last attraction
             }
         }
 
-        return null;
+        return currentState.getItinerary();
     }
 
-    private State findNextState(State currentState) {
+    private void findNextState(State currentState){
 
-        return null;
+        addAttraction(currentState);
+        currentState.setHeuristicValue(currentState.getHeuristicValue() + evaluate(currentState));
+
+        // find best attraction (X attractions)
+        // add attraction to nextState
+        // set nextState heuristic
+        // return nextState
+    }
+
+    private void addAttraction(State currentState) {
+        placeTypeToAttraction.values().forEach(attractionList -> {
+            attractionList.forEach(attraction -> {
+                if(!attractionToBooleanMap.containsKey(attraction.getId())){
+                    System.out.println(attraction.getName());
+                    attractionToBooleanMap.put(attraction.getId(), true);
+                    return;
+                }
+            });
+        });
+    }
+
+    private int evaluate(State currentState){
+        int res = rand.nextInt(100);
+        int sign = rand.nextInt(10);
+
+        if(sign > 5){
+            res *= -1;
+        }
+
+        return res;
     }
 
     public static HashMap<String, List<template.Attraction>> classifyAttractions(QuestionsData questionsData) {
@@ -91,10 +137,14 @@ public class HillClimbing {
                     0, 3, LocalDateTime.now(), LocalDateTime.now().plusDays(1), new ArrayList<>(),
                     new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
+            //TODO: convert to hashmap or retrieve by type from DB.
             HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList, 100.0);
             State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
 
+
             hillClimbing.getItineraryWithHillClimbingAlgorithm(state);
+
+
         }catch (Exception exception){
             System.out.println(exception.getMessage());
         }
