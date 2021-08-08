@@ -106,7 +106,8 @@ public class DataEngine implements Closeable {
                     .collect(Collectors.toList());
 
             try {
-                if (res.isEmpty()) {
+                //TODO: make sure there're enough attractions
+                if (res.isEmpty() || res.size() < 5) {
                     res = getAttractionsAndSaveToDB(priceRange, type, theCity);
                 } else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
                     res.forEach(theCity::removeAttraction);

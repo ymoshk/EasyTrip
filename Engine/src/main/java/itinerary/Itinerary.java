@@ -32,6 +32,16 @@ public class Itinerary {
         }
     }
 
+//    public Itinerary(Itinerary itinerary) {
+//        this.itineraryId = itinerary.getItineraryId();
+//        //TODO: remove this map from that object, we have that map in HillClimbing
+//        this.attractions = new HashMap<>();
+//        this.itineraryDays = new ArrayList<>();
+//        itinerary.itineraryDays.forEach(itineraryDay -> {
+//            this.itineraryDays.add(new ItineraryDay(itineraryDay));
+//        });
+//    }
+
     public HashMap<String, List<template.Attraction>> getAttractions() {
         return attractions;
     }

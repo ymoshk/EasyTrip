@@ -92,6 +92,8 @@ public class AttractionsFactory {
         attraction.setInternationalNumber(placeDetails.internationalPhoneNumber);
         if(placeDetails.website != null)
             attraction.setWebsite(placeDetails.website.toString());
-        attraction.setReviews(Arrays.asList(placeDetails.reviews));
+        if(placeDetails.reviews != null){
+            attraction.setReviews(Arrays.asList(placeDetails.reviews));
+        }
     }
 }
