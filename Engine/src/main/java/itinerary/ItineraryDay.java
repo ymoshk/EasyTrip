@@ -1,6 +1,7 @@
 package itinerary;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -36,6 +37,13 @@ public class ItineraryDay {
 
     public String getStringDate() {
         return this.date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    public void addAttractionToEnd(Attraction attraction, LocalDateTime startTime, LocalDateTime endTime) {
+        activities.add(new ActivityNode(startTime.toLocalTime(),
+                endTime.toLocalTime(),
+                ActivityNode.Types.ATTRACTION,
+                new template.Attraction(attraction, true)));
     }
 
     public void clean() {

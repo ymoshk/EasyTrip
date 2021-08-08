@@ -1,8 +1,10 @@
 package itinerary;
 
 import generator.GUID;
+import model.attraction.Attraction;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +25,12 @@ public class Itinerary {
         setDays();
     }
 
+    ItineraryDay getItineraryDay(LocalDate date){
+        return itineraryDays.stream().
+                filter(itineraryDay ->
+                        itineraryDay.getDate().isEqual(date)).findFirst().orElse(null);
+    }
+
     private void setDays() {
         LocalDate start = this.questionsData.getStartDate().toLocalDate();
         LocalDate end = this.questionsData.getEndDate().toLocalDate();
@@ -31,16 +39,6 @@ public class Itinerary {
             this.itineraryDays.add(new ItineraryDay(current));
         }
     }
-
-//    public Itinerary(Itinerary itinerary) {
-//        this.itineraryId = itinerary.getItineraryId();
-//        //TODO: remove this map from that object, we have that map in HillClimbing
-//        this.attractions = new HashMap<>();
-//        this.itineraryDays = new ArrayList<>();
-//        itinerary.itineraryDays.forEach(itineraryDay -> {
-//            this.itineraryDays.add(new ItineraryDay(itineraryDay));
-//        });
-//    }
 
     public HashMap<String, List<template.Attraction>> getAttractions() {
         return attractions;
@@ -65,5 +63,16 @@ public class Itinerary {
 
     public void addItineraryDay(ItineraryDay newItineraryDay) {
         itineraryDays.add(newItineraryDay);
+    }
+
+    public void addAttraction(Attraction attraction, LocalDateTime startTime, LocalDateTime endTime){
+        ItineraryDay dayToUpdate = getItineraryDay(startTime.toLocalDate());
+
+        if(dayToUpdate == null){
+            itineraryDays.add(new ItineraryDay(startTime.toLocalDate()));
+            dayToUpdate = getItineraryDay(startTime.toLocalDate());
+        }
+
+        dayToUpdate.addAttractionToEnd(attraction, startTime, endTime);
     }
 }
