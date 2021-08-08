@@ -5,13 +5,11 @@ import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.location.City;
-import util.google.GoogleMapsApiUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -31,30 +29,34 @@ public class HillClimbing {
     private final QuestionsData preferences;
     private final double goalValue;
     private final HashMap<PlaceType, List<Attraction>> placeTypeToAttraction;
-    //make sure the both maps hold the same reference
     private final HashMap<Long, Boolean> attractionToBooleanMap;
     private final Random rand;
-
-    private HashMap<PlaceType, List<Attraction>> attractionListToAttractionHashMap(List<Attraction> attractionList){
-        HashMap<PlaceType, List<Attraction>> res = new HashMap<>();
-
-        attractionList.forEach(attraction -> {
-            if(! res.containsKey(attraction.getPlaceType()))
-                res.put(attraction.getPlaceType(), new ArrayList<>());
-
-            res.get(attraction.getPlaceType()).add(attraction);
-
-        });
-
-        return res;
-    }
+    private LocalDateTime currentTime;
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList, double goalValue) {
         this.preferences = preferences;
         this.goalValue = goalValue;
         this.placeTypeToAttraction = attractionListToAttractionHashMap(attractionList);
         this.attractionToBooleanMap = new HashMap<>();
+        currentTime = getStartTimeByTravelerType();
         this.rand = new Random();
+    }
+
+    private LocalDateTime getStartTimeByTravelerType(){
+        return preferences.getStartDate().withHour(8).withMinute(0).withSecond(0).withNano(0);
+    }
+
+    private HashMap<PlaceType, List<Attraction>> attractionListToAttractionHashMap(List<Attraction> attractionList){
+        HashMap<PlaceType, List<Attraction>> res = new HashMap<>();
+
+        attractionList.forEach(attraction -> {
+            if(!res.containsKey(attraction.getPlaceType()))
+                res.put(attraction.getPlaceType(), new ArrayList<>());
+
+            res.get(attraction.getPlaceType()).add(attraction);
+        });
+
+        return res;
     }
 
     public Itinerary getItineraryWithHillClimbingAlgorithm(State initState) {
@@ -85,26 +87,31 @@ public class HillClimbing {
     }
 
     private void addAttraction(State currentState) {
-        placeTypeToAttraction.values().forEach(attractionList -> {
-            attractionList.forEach(attraction -> {
-                if(!attractionToBooleanMap.containsKey(attraction.getId())){
-                    System.out.println(attraction.getName());
-                    attractionToBooleanMap.put(attraction.getId(), true);
-                    return;
-                }
-            });
-        });
+        Attraction attractionToAdd = placeTypeToAttraction.values().stream().flatMap(Collection::stream).
+                filter(attraction -> !attractionToBooleanMap.containsKey(attraction.getId())).findFirst().orElse(null);
+        if(attractionToAdd != null){
+            System.out.println(attractionToAdd.getName());
+            attractionToBooleanMap.put(attractionToAdd.getId(), true);
+
+            System.out.println(currentTime.toString());
+            currentState.getItinerary().addAttraction(attractionToAdd, currentTime, currentTime.plusHours(2));
+
+            advanceCurrentTime();
+        }
+    }
+
+    private void advanceCurrentTime(){
+        LocalDateTime prevTime = currentTime;
+
+        currentTime = currentTime.plusHours(2);
+        // check if moved to the next day
+        if(!prevTime.toLocalDate().isEqual(currentTime.toLocalDate())){
+            currentTime = currentTime.withHour(8).withMinute(0).withSecond(0).withNano(0);
+        }
     }
 
     private int evaluate(State currentState){
-        int res = rand.nextInt(100);
-        int sign = rand.nextInt(10);
-
-        if(sign > 5){
-            res *= -1;
-        }
-
-        return res;
+        return rand.nextInt(10);
     }
 
     public static HashMap<String, List<template.Attraction>> classifyAttractions(QuestionsData questionsData) {
