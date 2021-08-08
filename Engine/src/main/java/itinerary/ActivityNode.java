@@ -1,5 +1,6 @@
 package itinerary;
 
+import generator.GUID;
 import template.Attraction;
 
 import java.time.LocalTime;
@@ -7,16 +8,26 @@ import java.time.format.DateTimeFormatter;
 
 public class ActivityNode {
 
-    public Types type;
+    private Types type;
     private String startTime;
     private String endTime;
     private Attraction attraction;
+    private String uniqueKey;
 
     public ActivityNode(LocalTime startTime, LocalTime endTime, Types type, Attraction attraction) {
         this.startTime = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
         this.endTime = endTime.format(DateTimeFormatter.ofPattern("HH:mm"));
         this.type = type;
         this.attraction = attraction;
+        this.uniqueKey = GUID.generate();
+    }
+
+    public String getUniqueKey() {
+        return uniqueKey;
+    }
+
+    public void setUniqueKey(String uniqueKey) {
+        this.uniqueKey = uniqueKey;
     }
 
     public Attraction getAttraction() {

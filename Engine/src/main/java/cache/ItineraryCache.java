@@ -95,12 +95,19 @@ public class ItineraryCache implements Closeable {
     }
 
     public void updateData(boolean forceUpdate) {
+        Queue<Map.Entry<String, LocalTime>> newQueue = new LinkedList<>();
+
         this.queue.forEach(pair -> {
             if (forceUpdate || pair.getValue().plusMinutes(UPDATE_INTERVAL).isAfter(LocalTime.now())) {
                 saveItinerary(this.memory.get(pair.getKey()), true);
-                pair.setValue(LocalTime.now());
+                newQueue.offer(new AbstractMap.SimpleImmutableEntry<>(pair.getKey(), LocalTime.now()));
+            } else {
+                newQueue.offer(pair);
             }
         });
+
+        this.queue.clear();
+        this.queue.addAll(newQueue);
     }
 
     private void updateHandler() {

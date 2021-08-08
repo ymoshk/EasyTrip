@@ -16,7 +16,7 @@ public class StartupServlet implements ServletContextListener {
         ServletContext context = servletContextEvent.getServletContext();
 
         context.setAttribute(Constants.DATA_ENGINE, DataEngine.getInstance());
-//        context.setAttribute(Constants.ITINERARY_CACHE, new ItineraryCache());
+        context.setAttribute(Constants.ITINERARY_CACHE, new ItineraryCache());
     }
 
     @Override
@@ -26,7 +26,7 @@ public class StartupServlet implements ServletContextListener {
 
         ServletContext context = servletContextEvent.getServletContext();
 
-//        ((ItineraryCache) context.getAttribute(Constants.ITINERARY_CACHE)).close();
-//        dataEngine.close();
+        ((ItineraryCache) context.getAttribute(Constants.ITINERARY_CACHE)).close();
+        dataEngine.close();
     }
 }
