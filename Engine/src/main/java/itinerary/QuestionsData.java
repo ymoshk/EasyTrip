@@ -12,7 +12,7 @@ import java.util.List;
 
 public class QuestionsData {
     private final String country;
-    private final City city;
+    private final String city;
     private final int adultsCount;
     private final int childrenCount;
     private final PriceRange priceRange;
@@ -38,7 +38,7 @@ public class QuestionsData {
             throw new Exception("Found more than one city/country with that name");
         }
 
-        this.city = cityList.get(0);
+        this.city = cityList.get(0).getCityName();
         this.country = countryList.get(0).getCountryName();
         this.priceRange = new PriceRange(budget);
     }
@@ -48,7 +48,7 @@ public class QuestionsData {
     }
 
     public City getCity() {
-        return city;
+        return DataEngine.getInstance().getCity(this.city).orElse(null);
     }
 
     public int getAdultsCount() {

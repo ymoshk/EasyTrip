@@ -1,6 +1,7 @@
 package model.itinerary;
 
 import model.Model;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +10,8 @@ import javax.persistence.Entity;
 public class ItineraryModel extends Model {
     @Column(unique = true, nullable = false)
     private String itineraryId;
-    @Column(length = 1024 * 2, unique = true, nullable = false)
+    @Type(type = "text")
+    @Column(nullable = false)
     private String jsonData;
 
     public ItineraryModel() {

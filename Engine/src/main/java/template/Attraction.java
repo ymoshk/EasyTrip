@@ -29,12 +29,13 @@ public class Attraction {
     public String internationalNumber;
     public String website;
     public int priceLevel;
+    public int minDurationAsSeconds;
 
     public Attraction(model.attraction.Attraction attraction, boolean isRecommended) {
         this.id = attraction.getPlaceId();
         this.name = attraction.getName();
         this.isRecommended = isRecommended;
-        this.type = attraction.getPlaceType().toString();
+        this.type = attraction.getClass().getSimpleName();
         this.rating = attraction.getRating();
         this.userTotalRating = attraction.getUserRatingsTotal();
         this.image = attraction.getPhotoReference();
@@ -54,7 +55,8 @@ public class Attraction {
         this.internationalNumber = attraction.getInternationalNumber();
         this.website = attraction.getWebsite();
         this.reviews = gson.toJson(attraction.getReviews());
-        this.priceLevel = attraction.getPriceLevel().ordinal();
+        this.priceLevel = attraction.getPriceLevel() != null ? attraction.getPriceLevel().ordinal() : 0;
+        this.minDurationAsSeconds = TypesDefaultDuration.getMinDurationAsSeconds(this.type);
     }
 
     private HashMap<OpeningHours.Period.OpenClose.DayOfWeek, LocalTime[]>

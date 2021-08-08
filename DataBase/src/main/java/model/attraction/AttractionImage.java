@@ -92,7 +92,6 @@ public class AttractionImage extends Model {
         BufferedImage result = null;
 
         if (response.body() != null) {
-            // TODO - make sure the JavaFx is installed in the server.
             try {
                 result = ImageIO.read(response.body().byteStream());
             } catch (IOException e) {

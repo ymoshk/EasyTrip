@@ -1,7 +1,9 @@
 package servlet.itinerary;
 
+import cache.ItineraryCache;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import constant.Constants;
 import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import template.TripTag;
@@ -57,17 +59,22 @@ public class QuestionsCompleted extends HttpServlet {
                     .collect(Collectors.toList());
 
             for (template.Attraction attraction : attractionsTemplatesList) {
-                if (!hashMap.containsKey(attraction.getClass().getSimpleName())) {
-                    hashMap.put(attraction.getClass().getSimpleName(), new ArrayList<>());
+                if (!hashMap.containsKey(attraction.type)) {
+                    hashMap.put(attraction.type, new ArrayList<>());
                 }
 
-                hashMap.get(attraction.getClass().getSimpleName()).add(attraction);
+                hashMap.get(attraction.type).add(attraction);
             }
 
             Itinerary itinerary = new Itinerary(hashMap, data);
+            ItineraryCache cache = (ItineraryCache) req.getServletContext()
+                    .getAttribute(Constants.ITINERARY_CACHE);
+
+            Thread savingThread = new Thread(() -> cache.addNewItinerary(itinerary));
+            savingThread.start();
 
             try (PrintWriter out = resp.getWriter()) {
-                out.println(gson.toJson(itinerary));
+                out.println(gson.toJson(itinerary.getItineraryId()));
             }
 
         } catch (Exception e) {

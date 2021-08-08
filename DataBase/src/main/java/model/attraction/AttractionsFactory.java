@@ -86,15 +86,6 @@ public class AttractionsFactory {
     }
 
     public static void setAttractionDetails(Attraction attraction, PlaceDetails placeDetails){
-//        StringBuilder res = new StringBuilder();
-//        if(placeDetails.openingHours != null){
-//            placeDetails.openingHours.openNow = null;
-//            placeDetails.openingHours.periods = null;
-//            placeDetails.openingHours.permanentlyClosed = null;
-//            Arrays.stream(placeDetails.openingHours.weekdayText).forEach(day ->{
-//                res.append(day + "\n");
-//            });
-//        }
         attraction.setOpeningHours(placeDetails.openingHours);
         attraction.setPriceLevel(placeDetails.priceLevel);
         attraction.setLocalNumber(placeDetails.formattedPhoneNumber);

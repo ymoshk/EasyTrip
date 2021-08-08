@@ -31,7 +31,7 @@ public class ItineraryCache implements Closeable {
         updateHandler();
     }
 
-    public void removeOldestItinerary() {
+    private void removeOldestItinerary() {
         if (!this.queue.isEmpty()) {
             String idToRemove = this.queue.poll().getKey();
             memory.remove(idToRemove);
@@ -48,10 +48,10 @@ public class ItineraryCache implements Closeable {
                 itinerary.getItineraryId(),
                 LocalTime.now()));
 
-        saveItinerary(itinerary);
+        saveItinerary(itinerary, false);
     }
 
-    public Itinerary loadItineraryToCache(String id) {
+    private Itinerary loadItineraryToCache(String id) {
         Gson gson = new Gson();
         DataEngine dataEngine = DataEngine.getInstance();
         ItineraryModel itineraryModel = dataEngine.getItinerary(id);
@@ -80,23 +80,30 @@ public class ItineraryCache implements Closeable {
         return result;
     }
 
-    public void saveItinerary(Itinerary itinerary) {
+
+    private void saveItinerary(Itinerary itinerary, boolean isUpdate) {
         Gson gson = new Gson();
         ItineraryModel model = new ItineraryModel(itinerary.getItineraryId(),
                 gson.toJson(itinerary));
-        DataEngine.getInstance().saveItinerary(model);
+
+        if (isUpdate) {
+            DataEngine.getInstance().updateItinerary(model);
+
+        } else {
+            DataEngine.getInstance().saveItinerary(model);
+        }
     }
 
     public void updateData(boolean forceUpdate) {
         this.queue.forEach(pair -> {
             if (forceUpdate || pair.getValue().plusMinutes(UPDATE_INTERVAL).isAfter(LocalTime.now())) {
-                saveItinerary(this.memory.get(pair.getKey()));
+                saveItinerary(this.memory.get(pair.getKey()), true);
                 pair.setValue(LocalTime.now());
             }
         });
     }
 
-    public void updateHandler() {
+    private void updateHandler() {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -107,7 +114,7 @@ public class ItineraryCache implements Closeable {
         this.timer.scheduleAtFixedRate(timerTask, 60 * 1000, UPDATE_INTERVAL * 60 * 1000);
     }
 
-    public List<Itinerary> mapFromModel(List<ItineraryModel> list) {
+    private List<Itinerary> mapFromModel(List<ItineraryModel> list) {
         Gson gson = new Gson();
         List<Itinerary> result = new ArrayList<>();
 

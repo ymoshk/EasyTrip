@@ -17,7 +17,7 @@ public class Keys {
 
     public static String getKey(){
         //TODO - replace between the comment and the next line.
-        return barApiKey;
+        return saharApiKey;
 
         //        if (keys.isEmpty()) {
         //            throw new Exception("You must define at least one google API key.");

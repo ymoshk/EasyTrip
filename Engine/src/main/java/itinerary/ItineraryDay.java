@@ -1,6 +1,7 @@
 package itinerary;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +14,11 @@ public class ItineraryDay {
     public ItineraryDay(LocalDate date) {
         this.date = date;
         this.activities = new ArrayList<>();
+
+        ActivityNode padding = new ActivityNode(LocalTime.of(8, 0),
+                LocalTime.of(8, 0), ActivityNode.Types.FREE_TIME, null);
+
+        this.activities.add(padding);
     }
 
     public LocalDate getDate() {

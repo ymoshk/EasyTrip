@@ -21,6 +21,6 @@ public class SetItinerary extends HttpServlet {
         Itinerary itinerary = gson.fromJson(itineraryJson, Itinerary.class);
 
         ItineraryCache cache = (ItineraryCache) req.getServletContext().getAttribute(Constants.ITINERARY_CACHE);
-        cache.saveItinerary(itinerary);
+        cache.addNewItinerary(itinerary);
     }
 }

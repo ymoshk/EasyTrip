@@ -335,7 +335,7 @@ public class DataEngine implements Closeable {
 
         DBContext dbContext = DBContext.getInstance();
         List<ItineraryModel> lst = (List<ItineraryModel>) dbContext.selectQuery(
-                "FROM Itinerary WHERE itineraryId = " + "'" + itineraryId + "'");
+                "FROM ItineraryModel WHERE itineraryId = " + "'" + itineraryId + "'");
 
         if (lst.size() == 1) {
             result = lst.get(0);
@@ -349,9 +349,15 @@ public class DataEngine implements Closeable {
         dbContext.insert(itinerary);
     }
 
+    public void updateItinerary(ItineraryModel model) {
+        DBContext dbContext = DBContext.getInstance();
+        dbContext.update(model);
+    }
+
     @Override
     public void close() {
         // TODO - make sure to call this method as the server shut down.
         DBContext.getInstance().close();
     }
+
 }

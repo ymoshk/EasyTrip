@@ -7,7 +7,6 @@ import model.attraction.AttractionImage;
 import util.Utils;
 
 import javax.imageio.ImageIO;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +20,7 @@ import java.util.HashMap;
 @WebServlet("/api/getAttractionImage")
 public class GetAttractionImage extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HashMap<String, String> reqData = Utils.parsePostData(req);
 
         DataEngine dataEngine = (DataEngine) req.getServletContext().getAttribute(Constants.DATA_ENGINE);
@@ -52,7 +51,7 @@ public class GetAttractionImage extends HttpServlet {
             if (attachImage) {
                 try {
                     ImageIO.write(image.getImage(), "jpg", byteArrayOutputStream);
-                    byte[] bytes = byteArrayOutputStream.toByteArray();
+                    //                    byte[] bytes = byteArrayOutputStream.toByteArray();
                     this.base64 = Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
                 } catch (IOException ignore) {
                 }
