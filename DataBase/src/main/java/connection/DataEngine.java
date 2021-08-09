@@ -122,6 +122,32 @@ public class DataEngine implements Closeable {
         return res;
     }
 
+    public List<Attraction> getAttractions(String cityName, PriceRange priceRange) {
+        List<Attraction> res = new ArrayList<>();
+        List<PlaceType> types = (Arrays.asList(
+                PlaceType.AMUSEMENT_PARK,
+                PlaceType.AQUARIUM,
+                PlaceType.ART_GALLERY,
+                PlaceType.CAFE,
+                PlaceType.CAMPGROUND,
+                PlaceType.CASINO,
+                PlaceType.LODGING,
+                PlaceType.MUSEUM,
+                PlaceType.NIGHT_CLUB,
+                PlaceType.BAR,
+                PlaceType.TOURIST_ATTRACTION,
+                PlaceType.PARK,
+                PlaceType.RESTAURANT,
+                PlaceType.SHOPPING_MALL,
+                PlaceType.SPA,
+                PlaceType.ZOO
+        ));
+
+        types.forEach(type -> res.addAll(getAttractions(type, cityName, priceRange)));
+
+        return res;
+    }
+
     /**
      * This method will call google API to find attractions that match the search args and save the result to the DB.
      *
