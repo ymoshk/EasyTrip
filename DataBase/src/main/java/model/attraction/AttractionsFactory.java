@@ -94,6 +94,10 @@ public class AttractionsFactory {
     }
 
     public static void setAttractionDetails(Attraction attraction, PlaceDetails placeDetails){
+        if(placeDetails == null){
+            return;
+        }
+
         if(placeDetails.openingHours != null)
             attraction.setOpeningHours(placeDetails.openingHours);
         if(placeDetails.priceLevel != null)

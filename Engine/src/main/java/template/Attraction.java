@@ -46,7 +46,7 @@ public class Attraction {
         Gson gson = new Gson();
         if (attraction.getOpeningHours() != null) {
             this.openingHoursText = gson.toJson(new OpeningHoursTextContainer(attraction));
-            this.openingHoursData = gson.toJson(parseOpeningHours(attraction.getOpeningHours().periods));
+            //this.openingHoursData = gson.toJson(parseOpeningHours(attraction.getOpeningHours().periods));
         }
         this.lat = attraction.getLat();
         this.lng = attraction.getLng();
