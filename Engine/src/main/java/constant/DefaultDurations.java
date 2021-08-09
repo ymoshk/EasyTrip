@@ -1,4 +1,4 @@
-package Constant;
+package constant;
 
 import model.attraction.Attraction;
 import model.attraction.amusement.park.AmusementPark;
@@ -18,10 +18,9 @@ import model.attraction.shopping.mall.ShoppingMall;
 import model.attraction.spa.Spa;
 import model.attraction.zoo.Zoo;
 
-import java.util.Base64;
 import java.util.HashMap;
 
-public class Constants {
+public class DefaultDurations {
 
     private static final HashMap<String, Integer> AttractionsEST = new HashMap<>();
 
@@ -44,15 +43,19 @@ public class Constants {
         AttractionsEST.put(Zoo.class.getSimpleName(), 150);
     }
 
-    public static int getESTOfAttraction(String attractionType){
+    public static int getESTOfAttraction(String attractionType) {
         return AttractionsEST.get(attractionType);
     }
 
-    public static int getESTOfAttraction(Class attractionClass){
+    public static HashMap<String, Integer> getAttractionsEST() {
+        return AttractionsEST;
+    }
+
+    public static int getESTOfAttraction(Class attractionClass) {
         return AttractionsEST.get(attractionClass.getSimpleName());
     }
 
-    public static int getESTOfAttraction(Attraction attraction){
+    public static int getESTOfAttraction(Attraction attraction) {
         return AttractionsEST.get(attraction.getClass().getSimpleName());
     }
 }
