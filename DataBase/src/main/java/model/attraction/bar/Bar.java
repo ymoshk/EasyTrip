@@ -1,4 +1,4 @@
-package model.bar;
+package model.attraction.bar;
 
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;

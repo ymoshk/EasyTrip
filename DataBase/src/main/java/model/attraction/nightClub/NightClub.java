@@ -1,4 +1,4 @@
-package model.nightClub;
+package model.attraction.nightClub;
 
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;

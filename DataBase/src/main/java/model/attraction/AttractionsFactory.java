@@ -12,15 +12,14 @@ import model.attraction.camp.ground.CampGround;
 import model.attraction.casino.Casino;
 import model.attraction.hotel.Hotel;
 import model.attraction.museum.Museum;
-import model.attraction.night.life.NightLife;
 import model.attraction.other.OtherAttraction;
 import model.attraction.park.Park;
 import model.attraction.restaurant.Restaurant;
 import model.attraction.shopping.mall.ShoppingMall;
 import model.attraction.zoo.Zoo;
-import model.bar.Bar;
+import model.attraction.bar.Bar;
 import model.location.City;
-import model.nightClub.NightClub;
+import model.attraction.nightClub.NightClub;
 
 import java.util.Arrays;
 
