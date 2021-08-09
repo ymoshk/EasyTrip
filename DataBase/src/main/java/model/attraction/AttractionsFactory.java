@@ -7,6 +7,7 @@ import container.PriceRange;
 import model.attraction.amusement.park.AmusementPark;
 import model.attraction.aquarium.Aquarium;
 import model.attraction.art.gallery.ArtGallery;
+import model.attraction.cafe.Cafe;
 import model.attraction.camp.ground.CampGround;
 import model.attraction.casino.Casino;
 import model.attraction.hotel.Hotel;
@@ -17,7 +18,9 @@ import model.attraction.park.Park;
 import model.attraction.restaurant.Restaurant;
 import model.attraction.shopping.mall.ShoppingMall;
 import model.attraction.zoo.Zoo;
+import model.bar.Bar;
 import model.location.City;
+import model.nightClub.NightClub;
 
 import java.util.Arrays;
 
@@ -31,8 +34,11 @@ public class AttractionsFactory {
                 res = new Hotel(searchResultObject, placeType, priceRange, city);
                 break;
 
-            case RESTAURANT:
             case CAFE:
+                res = new Cafe(searchResultObject, placeType, priceRange, city);
+                break;
+
+            case RESTAURANT:
                 res = new Restaurant(searchResultObject, placeType, priceRange, city);
                 break;
 
@@ -53,8 +59,11 @@ public class AttractionsFactory {
                 break;
 
             case BAR:
+                res = new Bar(searchResultObject, placeType, priceRange, city);
+                break;
+
             case NIGHT_CLUB:
-                res = new NightLife(searchResultObject, placeType, priceRange, city);
+                res = new NightClub(searchResultObject, placeType, priceRange, city);
                 break;
 
             case CASINO:
