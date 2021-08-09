@@ -94,10 +94,14 @@ public class AttractionsFactory {
     }
 
     public static void setAttractionDetails(Attraction attraction, PlaceDetails placeDetails){
-        attraction.setOpeningHours(placeDetails.openingHours);
-        attraction.setPriceLevel(placeDetails.priceLevel);
-        attraction.setLocalNumber(placeDetails.formattedPhoneNumber);
-        attraction.setInternationalNumber(placeDetails.internationalPhoneNumber);
+        if(placeDetails.openingHours != null)
+            attraction.setOpeningHours(placeDetails.openingHours);
+        if(placeDetails.priceLevel != null)
+            attraction.setPriceLevel(placeDetails.priceLevel);
+        if(placeDetails.formattedPhoneNumber != null)
+            attraction.setLocalNumber(placeDetails.formattedPhoneNumber);
+        if(placeDetails.internationalPhoneNumber != null)
+            attraction.setInternationalNumber(placeDetails.internationalPhoneNumber);
         if(placeDetails.website != null)
             attraction.setWebsite(placeDetails.website.toString());
         if(placeDetails.reviews != null){
