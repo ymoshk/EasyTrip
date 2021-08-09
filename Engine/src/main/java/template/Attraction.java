@@ -64,11 +64,13 @@ public class Attraction {
         HashMap<OpeningHours.Period.OpenClose.DayOfWeek, LocalTime[]> result = new HashMap<>();
         if (periods != null) {
             for (OpeningHours.Period period : periods) {
-                if (!result.containsKey(period.close.day)) {
-                    result.put(period.close.day, new LocalTime[2]);
+                if (period.close != null && period.open != null) {
+                    if (!result.containsKey(period.close.day)) {
+                        result.put(period.close.day, new LocalTime[2]);
+                    }
+                    result.get(period.close.day)[0] = period.open.time;
+                    result.get(period.close.day)[1] = period.close.time;
                 }
-                result.get(period.close.day)[0] = period.open.time;
-                result.get(period.close.day)[1] = period.close.time;
             }
         }
         return result;

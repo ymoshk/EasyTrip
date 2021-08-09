@@ -20,10 +20,7 @@ import util.google.Keys;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,9 +31,11 @@ public class DataEngine implements Closeable {
     private static final int NEXT_PAGE_DELAY = 2000; // milli sec
     private static final int MIN_SIZE_COLLECTION = 3;
     private static DataEngine instance = null;
+    private final Set<City> loadingCities;
 
     //empty constructor just to make sure the class is a singleton
     private DataEngine() {
+        this.loadingCities = new HashSet<>();
     }
 
     // only one thread can execute this method at the same time.
@@ -160,7 +159,18 @@ public class DataEngine implements Closeable {
         List<Attraction> attractionsToAdd =
                 getAttractionInStandardTextSearch(type.name().replace("_", " "), priceRange, type, city);
 
-        DBContext.getInstance().insertAll(attractionsToAdd);
+        if (!loadingCities.contains(city)) {
+            Thread thread = new Thread(() -> {
+                try {
+                    this.loadingCities.add(city);
+                    DBContext.getInstance().insertAll(attractionsToAdd);
+                    this.loadingCities.remove(city);
+                } catch (Exception ex) {
+                    LogsManager.logException(ex);
+                }
+            });
+            thread.start();
+        }
 
         return attractionsToAdd;
     }
@@ -305,7 +315,7 @@ public class DataEngine implements Closeable {
         List<? extends Attraction> lst = (List<Attraction>) DBContext.getInstance()
                 .selectQuery("FROM Attraction WHERE placeId = " + "'" + id + "'");
 
-        if (lst.size() == 1) {
+        if (lst.size() >= 1) {
             return Optional.ofNullable(lst.get(0));
         } else {
             return Optional.empty();
