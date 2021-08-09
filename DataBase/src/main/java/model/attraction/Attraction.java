@@ -24,14 +24,13 @@ public abstract class Attraction extends Model {
     @Column(nullable = false)
     private String name;
     private URL icon;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String placeId;
     private float rating;
     @ElementCollection
     private List<String> types;
     @Column(length = 1024)
     private OpeningHours openingHours;
-    @Column(nullable = false)
     private String photoReference;
     private String vicinity;
     private boolean permanentlyClosed;
