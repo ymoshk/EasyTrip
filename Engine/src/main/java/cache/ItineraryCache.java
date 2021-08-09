@@ -32,82 +32,108 @@ public class ItineraryCache implements Closeable {
     }
 
     private void removeOldestItinerary() {
-        if (!this.queue.isEmpty()) {
-            String idToRemove = this.queue.poll().getKey();
-            memory.remove(idToRemove);
+        try {
+            if (!this.queue.isEmpty()) {
+                String idToRemove = this.queue.poll().getKey();
+                memory.remove(idToRemove);
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
     }
 
     public void addNewItinerary(Itinerary itinerary) {
-        if (this.memory.size() >= CACHE_CAPACITY) {
-            removeOldestItinerary();
-        }
-
-        this.memory.put(itinerary.getItineraryId(), itinerary);
-        this.queue.offer(new AbstractMap.SimpleImmutableEntry<>(
-                itinerary.getItineraryId(),
-                LocalTime.now()));
-
-        saveItinerary(itinerary, false);
-    }
-
-    private Itinerary loadItineraryToCache(String id) {
-        Gson gson = new Gson();
-        DataEngine dataEngine = DataEngine.getInstance();
-        ItineraryModel itineraryModel = dataEngine.getItinerary(id);
-        Itinerary itinerary = null;
-
-        if (itineraryModel != null) {
-            itinerary = gson.fromJson(itineraryModel.getJsonData(), Itinerary.class);
-
-            if (itinerary != null) {
-                this.addNewItinerary(itinerary);
+        try {
+            if (this.memory.size() >= CACHE_CAPACITY) {
+                removeOldestItinerary();
             }
-        }
 
-        return itinerary;
+            this.memory.put(itinerary.getItineraryId(), itinerary);
+            this.queue.offer(new AbstractMap.SimpleImmutableEntry<>(
+                    itinerary.getItineraryId(),
+                    LocalTime.now()));
+
+            saveItinerary(itinerary, false);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
-    public Itinerary getItinerary(String id) {
-        Itinerary result;
+    private Optional<Itinerary> loadItineraryToCache(String id) {
+        try {
+            Gson gson = new Gson();
+            DataEngine dataEngine = DataEngine.getInstance();
+            ItineraryModel itineraryModel = dataEngine.getItinerary(id);
+            Itinerary itinerary = null;
 
-        if (!this.memory.containsKey(id)) {
-            result = loadItineraryToCache(id);
-        } else {
-            result = this.memory.get(id);
+            if (itineraryModel != null) {
+                itinerary = gson.fromJson(itineraryModel.getJsonData(), Itinerary.class);
+
+                if (itinerary != null) {
+                    this.addNewItinerary(itinerary);
+                }
+            }
+
+            return Optional.ofNullable(itinerary);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return Optional.empty();
         }
+    }
 
-        return result;
+    public Optional<Itinerary> getItinerary(String id) {
+        try {
+            Optional<Itinerary> result;
+
+            if (!this.memory.containsKey(id)) {
+                result = loadItineraryToCache(id);
+            } else {
+                result = Optional.ofNullable(this.memory.get(id));
+            }
+
+            return result;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return Optional.empty();
+        }
     }
 
 
     private void saveItinerary(Itinerary itinerary, boolean isUpdate) {
-        Gson gson = new Gson();
-        ItineraryModel model = new ItineraryModel(itinerary.getItineraryId(),
-                gson.toJson(itinerary));
+        try {
+            Gson gson = new Gson();
+            ItineraryModel model = new ItineraryModel(itinerary.getItineraryId(),
+                    gson.toJson(itinerary));
 
-        if (isUpdate) {
-            DataEngine.getInstance().updateItinerary(model);
+            if (isUpdate) {
+                DataEngine.getInstance().updateItinerary(model);
 
-        } else {
-            DataEngine.getInstance().saveItinerary(model);
+            } else {
+                DataEngine.getInstance().saveItinerary(model);
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
     }
 
     public void updateData(boolean forceUpdate) {
-        Queue<Map.Entry<String, LocalTime>> newQueue = new LinkedList<>();
+        try {
+            Queue<Map.Entry<String, LocalTime>> newQueue = new LinkedList<>();
 
-        this.queue.forEach(pair -> {
-            if (forceUpdate || pair.getValue().plusMinutes(UPDATE_INTERVAL).isAfter(LocalTime.now())) {
-                saveItinerary(this.memory.get(pair.getKey()), true);
-                newQueue.offer(new AbstractMap.SimpleImmutableEntry<>(pair.getKey(), LocalTime.now()));
-            } else {
-                newQueue.offer(pair);
-            }
-        });
+            this.queue.forEach(pair -> {
+                if (forceUpdate || pair.getValue().plusMinutes(UPDATE_INTERVAL).isAfter(LocalTime.now())) {
+                    saveItinerary(this.memory.get(pair.getKey()), true);
+                    newQueue.offer(new AbstractMap.SimpleImmutableEntry<>(pair.getKey(), LocalTime.now()));
+                } else {
+                    newQueue.offer(pair);
+                }
+            });
 
-        this.queue.clear();
-        this.queue.addAll(newQueue);
+            this.queue.clear();
+            this.queue.addAll(newQueue);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private void updateHandler() {

@@ -26,6 +26,7 @@ public class CityNamesProvider extends HttpServlet {
         try (PrintWriter out = resp.getWriter()) {
             Gson gson = new Gson();
             List<String> cities = new ArrayList<>();
+            resp.setStatus(500);
 
             if (!req.getParameter("country").isEmpty()) {
                 List<Country> countryList = dataEngine.getCountries(req.getParameter("country"));
@@ -35,6 +36,7 @@ public class CityNamesProvider extends HttpServlet {
                             .stream()
                             .map(City::getCityName)
                             .collect(Collectors.toList());
+                    resp.setStatus(200);
                 }
             }
             out.println(gson.toJson(cities));

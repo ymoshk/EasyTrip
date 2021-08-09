@@ -2,7 +2,6 @@ package servlet.itinerary;
 
 import cache.ItineraryCache;
 import constant.Constants;
-import itinerary.Itinerary;
 import itinerary.ItineraryDay;
 import util.Utils;
 
@@ -20,15 +19,15 @@ public class CleanItinerary extends HttpServlet {
         ItineraryCache cache = (ItineraryCache) Utils.getContext(req).getAttribute(Constants.ITINERARY_CACHE);
 
         HashMap<String, String> data = Utils.parsePostData(req);
+        res.setStatus(500);
 
         String id = data.get("id");
 
         if (!id.isEmpty()) {
-            Itinerary itineraryToEdit = cache.getItinerary(id);
-
-            if (itineraryToEdit != null) {
-                itineraryToEdit.getItineraryDays().forEach(ItineraryDay::clean);
-            }
+            cache.getItinerary(id).ifPresent(itinerary -> {
+                res.setStatus(200);
+                itinerary.getItineraryDays().forEach(ItineraryDay::clean);
+            });
         }
     }
 }

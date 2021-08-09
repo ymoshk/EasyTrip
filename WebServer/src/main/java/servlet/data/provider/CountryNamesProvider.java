@@ -30,6 +30,9 @@ public class CountryNamesProvider extends HttpServlet {
         Gson gson = new Gson();
 
         try (PrintWriter out = resp.getWriter()) {
+            if (names.isEmpty()) {
+                resp.setStatus(500);
+            }
             out.println(gson.toJson(names));
         }
     }

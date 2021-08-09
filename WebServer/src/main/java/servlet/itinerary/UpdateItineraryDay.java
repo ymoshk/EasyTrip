@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Optional;
 
 @WebServlet("/api/updateItinerary")
 public class UpdateItineraryDay extends HttpServlet {
@@ -20,7 +21,7 @@ public class UpdateItineraryDay extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
         Gson gson = new Gson();
         ItineraryCache cache = (ItineraryCache) Utils.getContext(req).getAttribute(Constants.ITINERARY_CACHE);
-
+        res.setStatus(500);
         HashMap<String, String> data = Utils.parsePostData(req);
 
         String id = data.get("id");
@@ -28,12 +29,13 @@ public class UpdateItineraryDay extends HttpServlet {
         String dayIndex = data.get("index");
 
         if (!id.isEmpty() && !dayJson.isEmpty() && !dayIndex.isEmpty()) {
-            Itinerary itineraryToEdit = cache.getItinerary(id);
+            Optional<Itinerary> itineraryToEdit = cache.getItinerary(id);
 
-            if (itineraryToEdit != null) {
+            itineraryToEdit.ifPresent(itinerary -> {
                 ItineraryDay itineraryDay = gson.fromJson(dayJson, ItineraryDay.class);
-                itineraryToEdit.setItineraryDay(Integer.parseInt(dayIndex), itineraryDay);
-            }
+                itinerary.setItineraryDay(Integer.parseInt(dayIndex), itineraryDay);
+                res.setStatus(200);
+            });
         }
     }
 }

@@ -34,6 +34,8 @@ public class GetAttractionImage extends HttpServlet {
             try (PrintWriter out = resp.getWriter()) {
                 out.println(gson.toJson(container));
             }
+        } else {
+            resp.setStatus(500);
         }
     }
 

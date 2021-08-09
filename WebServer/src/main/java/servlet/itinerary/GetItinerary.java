@@ -3,7 +3,6 @@ package servlet.itinerary;
 import cache.ItineraryCache;
 import com.google.gson.Gson;
 import constant.Constants;
-import itinerary.Itinerary;
 import util.Utils;
 
 import javax.servlet.annotation.WebServlet;
@@ -24,14 +23,14 @@ public class GetItinerary extends HttpServlet {
         HashMap<String, String> data = Utils.parsePostData(req);
 
         String id = data.get("id");
+        res.setStatus(500);
 
-        if (!id.isEmpty()) {
-            Itinerary result = cache.getItinerary(id);
-
-            try (PrintWriter out = res.getWriter()) {
-                if (result != null) {
-                    out.println(gson.toJson(result));
-                }
+        try (PrintWriter out = res.getWriter()) {
+            if (!id.isEmpty()) {
+                cache.getItinerary(id).ifPresent(itinerary -> {
+                    res.setStatus(200);
+                    out.println(gson.toJson(itinerary));
+                });
             }
         }
     }

@@ -30,9 +30,10 @@ public class CityAttractionsProvider extends HttpServlet {
         Gson gson = new Gson();
 
         try (PrintWriter out = resp.getWriter()) {
+            HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
+
             if (city != null) {
                 // TODO this method returns any attraction marked as recommended - change it
-                HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
                 List<Attraction> attractionList = city.getAttractionList();
                 List<template.Attraction> attractionsTemplatesList = attractionList.stream()
                         .map(attraction -> new template.Attraction(attraction, true))
@@ -46,11 +47,10 @@ public class CityAttractionsProvider extends HttpServlet {
                     hashMap.get(attraction.getClass().getSimpleName()).add(attraction);
                 }
 
-                out.println(gson.toJson(hashMap));
             } else {
-                HashMap<String, List<template.Attraction>> result = new HashMap<>();
-                out.println(gson.toJson(result));
+                resp.setStatus(500);
             }
+            out.println(gson.toJson(hashMap));
         }
     }
 }

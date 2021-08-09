@@ -50,7 +50,7 @@ public class QuestionsCompleted extends HttpServlet {
             QuestionsData data = new QuestionsData(country, city, adultsCount, childrenCount, budget,
                     startDate, endDate, favoriteAttraction, tripVibes);
 
-            // TODO delete
+            // TODO the attraction mapping algorithm should create the new itinerary.
 
             HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
             List<model.attraction.Attraction> attractionList = data.getCity().getAttractionList();
@@ -78,6 +78,7 @@ public class QuestionsCompleted extends HttpServlet {
             }
 
         } catch (Exception e) {
+            resp.setStatus(500);
             e.printStackTrace();
         }
     }
