@@ -35,7 +35,8 @@ public class Attraction {
         this.id = attraction.getPlaceId();
         this.name = attraction.getName();
         this.isRecommended = isRecommended;
-        this.type = attraction.getClass().getSimpleName();
+//        this.type = attraction.getClass().getSimpleName();
+        this.type = parseAttractionType(attraction); //TODO - Sahar change
         this.rating = attraction.getRating();
         this.userTotalRating = attraction.getUserRatingsTotal();
         this.image = attraction.getPhotoReference();
@@ -74,6 +75,31 @@ public class Attraction {
             }
         }
         return result;
+    }
+
+    private String parseAttractionType(model.attraction.Attraction attraction) {
+        StringBuilder res = new StringBuilder();
+        int count = 0;
+        String simpleName = attraction.getClass().getSimpleName();
+        boolean spaceAdded = false;
+
+        for (int i = 0; i < simpleName.length(); i++) {
+            char character = simpleName.charAt(i);
+
+            if (character >= 'A' && character <= 'Z') {
+                count++;
+            }
+
+            if(count == 2 && !spaceAdded){
+                res.append(" " + character);
+                spaceAdded = true;
+            }
+            else {
+                res.append(character);
+            }
+        }
+
+        return res.toString();
     }
 
     public static class OpeningHoursTextContainer {
