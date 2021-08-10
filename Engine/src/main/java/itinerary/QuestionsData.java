@@ -25,8 +25,8 @@ public class QuestionsData {
                          LocalDateTime endDate, List<TripTag> favoriteAttractions, List<TripTag> tripVibes) throws Exception {
         this.adultsCount = adultsCount;
         this.childrenCount = childrenCount;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.startDate = startDate.withHour(8).withMinute(0).withSecond(0).withNano(0);
+        this.endDate = endDate.withHour(23).withMinute(59).withSecond(59).withNano(0);
         this.favoriteAttractions = favoriteAttractions;
         this.tripVibes = tripVibes;
 

@@ -11,10 +11,6 @@ public class State {
         this.heuristicValue = heuristicValue;
     }
 
-//    public State(State state) {
-//        this.itinerary = new Itinerary(state.itinerary);
-//        this.heuristicValue = state.heuristicValue;
-//    }
 
     public void setItinerary(Itinerary itinerary) {
         this.itinerary = itinerary;
