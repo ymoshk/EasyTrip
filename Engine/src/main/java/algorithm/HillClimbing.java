@@ -81,8 +81,8 @@ public class HillClimbing {
         }
 
         public boolean checkOpeningHours(Attraction attraction, LocalDateTime startTime, LocalDateTime endTime) {
+            boolean attractionInOpeningHours = true;
             OpeningHours attractionOpeningHours =attraction.getOpeningHours();
-            boolean startTimeInRange = true;
 
             if(attractionOpeningHours != null){
                 if(attractionOpeningHours.permanentlyClosed != null && attractionOpeningHours.permanentlyClosed){
@@ -94,14 +94,41 @@ public class HillClimbing {
                     if(attractionPeriods != null){
                         DayOfWeek currentDay = startTime.getDayOfWeek();
                         //convert java day object to google day object according to ordinal
-                        int googleDayIndex = (currentDay.ordinal() + 1) % 7;
-                        OpeningHours.Period googlePeriodDay = attractionPeriods[currentDay.ordinal()];
-                        startTimeInRange = startTime.toLocalTime().isAfter(googlePeriodDay.open.time);
+                        //int googleDayIndex = (currentDay.ordinal() + 1) % 7;
+                        //OpeningHours.Period googlePeriodDay = attractionPeriods[currentDay.ordinal()];
+                        for (OpeningHours.Period period:attractionPeriods) {
+                            if(period.open != null){
+                                if(period.open.day.getName().equalsIgnoreCase(currentDay.toString())){
+                                    attractionInOpeningHours = checkAttractionInPeriod(period, startTime, endTime);
+                                }
+                            }
+                        }
                     }
 
                 }
             }
-            return startTimeInRange;
+            return attractionInOpeningHours;
+        }
+
+        private boolean checkAttractionInPeriod(OpeningHours.Period period, LocalDateTime startTime, LocalDateTime endTime) {
+            LocalTime periodStartTime = null;
+            LocalTime periodEndTime = null;
+            if(period.open.time !=null){
+        //in case both attraction and period starts at the same time we want to make the period start a bit earlier
+                periodStartTime = period.open.time.minusMinutes(1);
+            }
+            if(period.close.time !=null){
+        //in case both attraction and period ends at the same time we want to make the period end a bit later
+                periodEndTime = period.close.time.plusMinutes(1);
+            }
+            if(periodStartTime !=null && periodEndTime != null){
+                return startTime.toLocalTime().isAfter(periodStartTime) &&
+                        endTime.toLocalTime().isBefore(periodEndTime);
+            }
+            //no period start time or period end time means the place is opened 24 h probably
+            else{
+                return true;
+            }
         }
     }
 
@@ -147,7 +174,7 @@ public class HillClimbing {
             double prevHeuristic = currentState.getHeuristicValue();
             findNextState(currentState);
 
-            System.out.println(currentState.getHeuristicValue());
+            System.out.println("Heuristic: " + currentState.getHeuristicValue());
             if(currentState.getHeuristicValue() < prevHeuristic){
                 // remove last attraction
             }
@@ -191,16 +218,14 @@ public class HillClimbing {
 
 
         if(attractionToAdd != null){
-            System.out.println(attractionToAdd.getName());
             attractionToBooleanMap.put(attractionToAdd.getId(), true);
 
             int attractionDurationMinutes = DefaultDurations.getESTOfAttraction(attractionToAdd);
-            System.out.println("duration: " + attractionDurationMinutes);
-            System.out.println(attractionToAdd.getPlaceType().toString());
 
             LocalDateTime attractionStartTime = currentTime;
             LocalDateTime attractionEndTime = currentTime.plusMinutes(attractionDurationMinutes);
 
+            //cutting the end time to 00:00, although the attractions filter checks the whole durations
             if(attractionStartTime.toLocalDate().isBefore(attractionEndTime.toLocalDate())){
                 attractionEndTime = attractionEndTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
             }
@@ -208,6 +233,7 @@ public class HillClimbing {
             currentState.getItinerary().addAttraction(attractionToAdd,
                     attractionStartTime,
                     attractionEndTime);
+            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
 
             advanceCurrentTime(attractionDurationMinutes);
         }
@@ -215,11 +241,10 @@ public class HillClimbing {
 
     private boolean isRelevantAttraction(Attraction attraction) {
         boolean notRestaurantAttraction = !attraction.getPlaceType().equals(PlaceType.RESTAURANT);
-//        boolean isOpenNow = scheduleRestrictions.checkOpeningHours(attraction, currentTime,
-//                currentTime.plusMinutes(DefaultDurations.getESTOfAttraction(attraction)));
-//
-//        return notRestaurantAttraction && isOpenNow;
-        return notRestaurantAttraction;
+        boolean isOpenNow = scheduleRestrictions.checkOpeningHours(attraction, currentTime,
+                currentTime.plusMinutes(DefaultDurations.getESTOfAttraction(attraction)));
+
+        return notRestaurantAttraction && isOpenNow;
     }
 
     private void advanceCurrentTime(int attractionDurationMinutes){
@@ -262,7 +287,25 @@ public class HillClimbing {
 
         return res;
     }
+    private void debugPrintAttraction(Attraction attractionToAdd,LocalDateTime attractionStartTime,LocalDateTime attractionEndTime){
+        System.out.println("Attraction name: " + attractionToAdd.getName());
+        System.out.println("Duration: " + DefaultDurations.getESTOfAttraction(attractionToAdd));
+        System.out.println("Place Type: " + attractionToAdd.getPlaceType().toString());
+        if(attractionToAdd.getOpeningHours() != null && attractionToAdd.getOpeningHours().weekdayText != null){
+            StringBuilder weekText = new StringBuilder();
+            for (String dayData: attractionToAdd.getOpeningHours().weekdayText) {
+                weekText.append(dayData + '\n');
+            }
+            System.out.println("Opening Hours: " + weekText.toString());
+        }
+        else{
+            System.out.println("No opening hours data");
+        }
 
+        System.out.println("Start time: " + attractionStartTime);
+        System.out.println("End time: " + attractionEndTime);
+        System.out.println("\n\n");
+    }
 
     public static void main(String[] args) {
         try{

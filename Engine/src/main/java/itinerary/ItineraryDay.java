@@ -46,8 +46,6 @@ public class ItineraryDay {
                 endTime.toLocalTime(),
                 ActivityNode.Types.ATTRACTION,
                 new template.Attraction(attraction, true)));
-        System.out.println(startTime);
-        System.out.println(endTime);
     }
 
     public void clean() {
