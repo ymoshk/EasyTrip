@@ -80,8 +80,9 @@ public class HillClimbing {
             return false;
         }
 
-        public boolean checkOpeningHours(Attraction attraction, LocalDateTime startTime, LocalDateTime endTime) {
+        public boolean checkOpeningHours(Attraction attraction, LocalDateTime startTime) {
             boolean attractionInOpeningHours = true;
+            LocalDateTime endTime = startTime.plusMinutes(DefaultDurations.getESTOfAttraction(attraction));
             OpeningHours attractionOpeningHours =attraction.getOpeningHours();
 
             if(attractionOpeningHours != null){
@@ -93,13 +94,25 @@ public class HillClimbing {
 
                     if(attractionPeriods != null){
                         DayOfWeek currentDay = startTime.getDayOfWeek();
-                        //convert java day object to google day object according to ordinal
-                        //int googleDayIndex = (currentDay.ordinal() + 1) % 7;
-                        //OpeningHours.Period googlePeriodDay = attractionPeriods[currentDay.ordinal()];
+                        //In case attraction periods exist check if open
+                        attractionInOpeningHours = false;
+
+                        // Open 24 hours is saved as "SUNDAY 00:00 - null"
+                        if(attractionPeriods.length == 1){
+                            OpeningHours.Period.OpenClose openClose = attractionPeriods[0].open;
+
+                            if(openClose.day.getName().equalsIgnoreCase("Sunday")){
+                                attractionInOpeningHours = openClose.time.getHour() == 0 && openClose.time.getMinute() == 0;
+                            }
+
+                            return attractionInOpeningHours;
+                        }
+
                         for (OpeningHours.Period period:attractionPeriods) {
                             if(period.open != null){
                                 if(period.open.day.getName().equalsIgnoreCase(currentDay.toString())){
                                     attractionInOpeningHours = checkAttractionInPeriod(period, startTime, endTime);
+                                    break;
                                 }
                             }
                         }
@@ -107,18 +120,25 @@ public class HillClimbing {
 
                 }
             }
+
             return attractionInOpeningHours;
         }
 
         private boolean checkAttractionInPeriod(OpeningHours.Period period, LocalDateTime startTime, LocalDateTime endTime) {
             LocalTime periodStartTime = null;
             LocalTime periodEndTime = null;
+
+            //cutting the end time to 23:59, although the attractions filter checks the whole durations
+            if(startTime.toLocalDate().isBefore(endTime.toLocalDate())){
+                endTime = endTime.withHour(23).withMinute(59).withSecond(0).withNano(0);
+            }
+
             if(period.open.time !=null){
-        //in case both attraction and period starts at the same time we want to make the period start a bit earlier
+            //in case both attraction and period starts at the same time we want to make the period start a bit earlier
                 periodStartTime = period.open.time.minusMinutes(1);
             }
             if(period.close.time !=null){
-        //in case both attraction and period ends at the same time we want to make the period end a bit later
+            //in case both attraction and period ends at the same time we want to make the period end a bit later
                 periodEndTime = period.close.time.plusMinutes(1);
             }
             if(periodStartTime !=null && periodEndTime != null){
@@ -208,12 +228,17 @@ public class HillClimbing {
 
         if(scheduleRestrictions.isRestaurantSchedule(currentTime)){
             attractionList = fetchAttractionByTypes(PlaceType.RESTAURANT);
+            attractionList = attractionList.stream().
+                    filter(attraction -> scheduleRestrictions.checkOpeningHours(attraction, currentTime)).
+                    collect(Collectors.toList());
             attractionToAdd = attractionList.get(rand.nextInt(15));
         }
         else{
             attractionList = placeTypeToAttraction.values().stream().flatMap(Collection::stream).
-                    filter(this::isRelevantAttraction).collect(Collectors.toList());
-            attractionToAdd = attractionList.get(rand.nextInt(500));
+                    filter(attraction -> !attraction.getPlaceType().equals(PlaceType.RESTAURANT) &&
+                            scheduleRestrictions.checkOpeningHours(attraction, currentTime)).
+                    collect(Collectors.toList());
+            attractionToAdd = attractionList.get(rand.nextInt(300));
         }
 
 
@@ -225,6 +250,8 @@ public class HillClimbing {
             LocalDateTime attractionStartTime = currentTime;
             LocalDateTime attractionEndTime = currentTime.plusMinutes(attractionDurationMinutes);
 
+            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
+
             //cutting the end time to 00:00, although the attractions filter checks the whole durations
             if(attractionStartTime.toLocalDate().isBefore(attractionEndTime.toLocalDate())){
                 attractionEndTime = attractionEndTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -233,19 +260,11 @@ public class HillClimbing {
             currentState.getItinerary().addAttraction(attractionToAdd,
                     attractionStartTime,
                     attractionEndTime);
-            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
 
             advanceCurrentTime(attractionDurationMinutes);
         }
     }
 
-    private boolean isRelevantAttraction(Attraction attraction) {
-        boolean notRestaurantAttraction = !attraction.getPlaceType().equals(PlaceType.RESTAURANT);
-        boolean isOpenNow = scheduleRestrictions.checkOpeningHours(attraction, currentTime,
-                currentTime.plusMinutes(DefaultDurations.getESTOfAttraction(attraction)));
-
-        return notRestaurantAttraction && isOpenNow;
-    }
 
     private void advanceCurrentTime(int attractionDurationMinutes){
         LocalDateTime prevTime = currentTime;
@@ -307,6 +326,7 @@ public class HillClimbing {
         System.out.println("\n\n");
     }
 
+    //TODO: attractionToAdd.getOpeningHours() == null && attractionToAdd.getOpeningHours().weekdayText == null --> lower rating
     public static void main(String[] args) {
         try{
             QuestionsData questionsData = new QuestionsData("Israel", "Tel Aviv", 2,
