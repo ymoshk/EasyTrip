@@ -12,10 +12,11 @@ import model.attraction.camp.ground.CampGround;
 import model.attraction.casino.Casino;
 import model.attraction.hotel.Hotel;
 import model.attraction.museum.Museum;
-import model.attraction.other.OtherAttraction;
+import model.attraction.touristAttraction.TouristAttraction;
 import model.attraction.park.Park;
 import model.attraction.restaurant.Restaurant;
 import model.attraction.shopping.mall.ShoppingMall;
+import model.attraction.spa.Spa;
 import model.attraction.zoo.Zoo;
 import model.attraction.bar.Bar;
 import model.location.City;
@@ -86,15 +87,18 @@ public class AttractionsFactory {
                 break;
 
             case TOURIST_ATTRACTION:
-                res = new OtherAttraction(searchResultObject, placeType, priceRange, city);
+                res = new TouristAttraction(searchResultObject, placeType, priceRange, city);
                 break;
+
+            case SPA:
+                res = new Spa(searchResultObject, placeType, priceRange, city);
         }
 
         return res;
     }
 
     public static void setAttractionDetails(Attraction attraction, PlaceDetails placeDetails){
-        if(placeDetails == null){
+        if(placeDetails == null || attraction == null){
             return;
         }
 
