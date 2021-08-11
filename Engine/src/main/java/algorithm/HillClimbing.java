@@ -28,29 +28,35 @@ public class HillClimbing {
     //    Evaluate new state with heuristic function and compare it with the current state
     //    If the newer state is closer to the goal compared to current state, update the current state
 
+    //TODO: add breaks depending on traveler type.
+    //TODO: change attraction durations, lunch & dinner
     static private class ScheduleRestrictions {
-        private LocalTime lunchTime;
+        private final LocalTime LUNCH_TIME;
         private boolean scheduledLunch;
-        private LocalTime dinnerTime;
+        private final LocalTime DINNER_TIME;
         private boolean scheduledDinner;
+        private final LocalTime BAR_TIME;
+        private final LocalTime NIGHT_CLUB_TIME;
 
         public ScheduleRestrictions(QuestionsData preferences) {
-            this.lunchTime = LocalTime.of(12,0, 0, 0);
-            this.dinnerTime = LocalTime.of(19,0, 0, 0);
+            this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
+            this.DINNER_TIME = LocalTime.of(18,59, 0, 0);
             this.scheduledLunch = false;
             this.scheduledDinner = false;
+            this.BAR_TIME = LocalTime.of(16, 59,0,0);
+            this.NIGHT_CLUB_TIME = LocalTime.of(20,59,0,0);
         }
 
-        public LocalTime getLunchTime() {
-            return lunchTime;
+        public LocalTime getLUNCH_TIME() {
+            return LUNCH_TIME;
         }
 
         public boolean isScheduledLunch() {
             return scheduledLunch;
         }
 
-        public LocalTime getDinnerTime() {
-            return dinnerTime;
+        public LocalTime getDINNER_TIME() {
+            return DINNER_TIME;
         }
 
         public boolean isScheduledDinner() {
@@ -66,8 +72,8 @@ public class HillClimbing {
         }
 
         private boolean isRestaurantSchedule(LocalDateTime currentTime){
-            boolean needLunch = !scheduledLunch && currentTime.toLocalTime().isAfter(lunchTime);
-            boolean needDinner = !scheduledDinner && currentTime.toLocalTime().isAfter(dinnerTime);
+            boolean needLunch = !scheduledLunch && currentTime.toLocalTime().isAfter(LUNCH_TIME);
+            boolean needDinner = !scheduledDinner && currentTime.toLocalTime().isAfter(DINNER_TIME);
             if(needLunch){
                 scheduledLunch = true;
                 return true;
@@ -150,6 +156,20 @@ public class HillClimbing {
                 return true;
             }
         }
+
+        public boolean isPartyTime(Attraction attraction, LocalDateTime startTime){
+            if(!attraction.getPlaceType().equals(PlaceType.BAR) && !attraction.getPlaceType().equals(PlaceType.NIGHT_CLUB)){
+                return true;
+            }
+            if(attraction.getPlaceType().equals(PlaceType.BAR) && startTime.toLocalTime().isAfter(BAR_TIME)){
+                return true;
+            }
+            if(attraction.getPlaceType().equals(PlaceType.NIGHT_CLUB) && startTime.toLocalTime().isAfter(NIGHT_CLUB_TIME)){
+                return true;
+            }
+
+            return false;
+        }
     }
 
     private final QuestionsData preferences;
@@ -219,12 +239,8 @@ public class HillClimbing {
     }
 
     private void addAttraction(State currentState) {
-//        int randomAttractionIndex = rand.nextInt(10);
         List<Attraction> attractionList;
         Attraction attractionToAdd;
-
-//        Attraction attractionToAdd = placeTypeToAttraction.values().stream().flatMap(Collection::stream).
-//                filter(attraction -> !attractionToBooleanMap.containsKey(attraction.getId())).findFirst().orElse(null);
 
         if(scheduleRestrictions.isRestaurantSchedule(currentTime)){
             attractionList = fetchAttractionByTypes(PlaceType.RESTAURANT);
@@ -236,7 +252,8 @@ public class HillClimbing {
         else{
             attractionList = placeTypeToAttraction.values().stream().flatMap(Collection::stream).
                     filter(attraction -> !attraction.getPlaceType().equals(PlaceType.RESTAURANT) &&
-                            scheduleRestrictions.checkOpeningHours(attraction, currentTime)).
+                            scheduleRestrictions.checkOpeningHours(attraction, currentTime) &&
+                            scheduleRestrictions.isPartyTime(attraction, currentTime)).
                     collect(Collectors.toList());
             attractionToAdd = attractionList.get(rand.nextInt(300));
         }
@@ -306,6 +323,8 @@ public class HillClimbing {
 
         return res;
     }
+
+
     private void debugPrintAttraction(Attraction attractionToAdd,LocalDateTime attractionStartTime,LocalDateTime attractionEndTime){
         System.out.println("Attraction name: " + attractionToAdd.getName());
         System.out.println("Duration: " + DefaultDurations.getESTOfAttraction(attractionToAdd));
