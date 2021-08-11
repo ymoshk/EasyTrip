@@ -106,7 +106,7 @@ public class DataEngine implements Closeable {
 
             try {
                 //TODO: make sure there're enough attractions
-                if (res.isEmpty() || res.size() < 5) {
+                if (res.isEmpty()) {
                     res = getAttractionsAndSaveToDB(priceRange, type, theCity);
                 } else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
                     res.forEach(theCity::removeAttraction);
@@ -209,7 +209,10 @@ public class DataEngine implements Closeable {
                             Attraction attractionToAdd = AttractionsFactory.getAttraction(singleRes, type, priceRange, city);
                             //this is the method to updates the attraction with reviews, phones, website, ...
                             AttractionsFactory.setAttractionDetails(attractionToAdd, placeDetails);
-                            result.add(attractionToAdd);
+                            //we wish to add attraction only if it has at least 1 review
+                            if(attractionToAdd.getUserRatingsTotal() > 5 && attractionToAdd.getRating() > 3.0) {
+                                result.add(attractionToAdd);
+                            }
                         });
                 Thread.sleep(NEXT_PAGE_DELAY);
 
