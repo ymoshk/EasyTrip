@@ -30,11 +30,11 @@ public class DefaultDurations {
         AttractionsEST.put(NightClub.class.getSimpleName(), 180);
         AttractionsEST.put(Hotel.class.getSimpleName(), 30); //TODO - handle the time
         AttractionsEST.put(Aquarium.class.getSimpleName(), 180);
-        AttractionsEST.put(ArtGallery.class.getSimpleName(), 120);
+        AttractionsEST.put(ArtGallery.class.getSimpleName(), 60);
         AttractionsEST.put(AmusementPark.class.getSimpleName(), 120);
         AttractionsEST.put(CampGround.class.getSimpleName(), 120);
         AttractionsEST.put(Casino.class.getSimpleName(), 120);
-        AttractionsEST.put(Museum.class.getSimpleName(), 180);
+        AttractionsEST.put(Museum.class.getSimpleName(), 120);
         AttractionsEST.put(OtherAttraction.class.getSimpleName(), 60);
         AttractionsEST.put(Park.class.getSimpleName(), 90);
         AttractionsEST.put(Restaurant.class.getSimpleName(), 90);
