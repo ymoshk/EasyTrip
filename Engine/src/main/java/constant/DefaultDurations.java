@@ -11,7 +11,7 @@ import model.attraction.casino.Casino;
 import model.attraction.hotel.Hotel;
 import model.attraction.museum.Museum;
 import model.attraction.nightClub.NightClub;
-import model.attraction.other.OtherAttraction;
+import model.attraction.touristAttraction.TouristAttraction;
 import model.attraction.park.Park;
 import model.attraction.restaurant.Restaurant;
 import model.attraction.shopping.mall.ShoppingMall;
@@ -35,7 +35,7 @@ public class DefaultDurations {
         AttractionsEST.put(CampGround.class.getSimpleName(), 120);
         AttractionsEST.put(Casino.class.getSimpleName(), 120);
         AttractionsEST.put(Museum.class.getSimpleName(), 120);
-        AttractionsEST.put(OtherAttraction.class.getSimpleName(), 60);
+        AttractionsEST.put(TouristAttraction.class.getSimpleName(), 60);
         AttractionsEST.put(Park.class.getSimpleName(), 90);
         AttractionsEST.put(Restaurant.class.getSimpleName(), 90);
         AttractionsEST.put(Spa.class.getSimpleName(), 60);
