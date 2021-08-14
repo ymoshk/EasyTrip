@@ -1,6 +1,5 @@
 package evaluators;
 
-import com.google.maps.model.PlaceType;
 import model.attraction.Attraction;
 
 import java.util.Comparator;
@@ -38,7 +37,7 @@ public class AttractionEvaluator {
         }
     }
 
-    private HashMap<PlaceType, ReviewsData> reviewsDataMap;
+    private HashMap<String, ReviewsData> reviewsDataMap;
     private HashMap<String, Integer> attractionToIndexMap;
     private final double TOP_ATTRACTION_SCORE = 100;
     private final double AVG_ATTRACTION_SCORE = 80;
@@ -46,7 +45,7 @@ public class AttractionEvaluator {
     private final double BOTTOM_ATTRACTION_SCORE = 25;
 
 
-    public AttractionEvaluator(HashMap<PlaceType, List<Attraction>> placeTypeToAttractionMap) {
+    public AttractionEvaluator(HashMap<String, List<Attraction>> placeTypeToAttractionMap) {
         reviewsDataMap = new HashMap<>();
         attractionToIndexMap = new HashMap<>();
         placeTypeToAttractionMap.forEach((placeType, attractionList) -> {
@@ -58,7 +57,7 @@ public class AttractionEvaluator {
             reviewsDataMap.put(placeType, reviewsDataOfType);
 
             // create indexes map for restaurants
-            if(placeType.equals(PlaceType.RESTAURANT)){
+            if(placeType.equalsIgnoreCase("Restaurant")){
                 initialAttractionIndexMap(sortedAttractionList);
             }
         });
@@ -129,14 +128,14 @@ public class AttractionEvaluator {
 
     public double evaluateByReviewsNumber(Attraction attraction) {
         // restaurant has another type of evaluation
-        if(attraction.getPlaceType().equals(PlaceType.RESTAURANT)){
-            double placeTypeStep = reviewsDataMap.get(attraction.getPlaceType()).step;
+        if(attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant")){
+            double placeTypeStep = reviewsDataMap.get(attraction.getClass().getSimpleName()).step;
             int attractionIndex = attractionToIndexMap.get(attraction.getPlaceId());
 
             return placeTypeStep * attractionIndex;
         }
         else{
-            ReviewsData reviewsData = reviewsDataMap.get(attraction.getPlaceType());
+            ReviewsData reviewsData = reviewsDataMap.get(attraction.getClass().getSimpleName());
 
             if(reviewsData.isTopAttraction(attraction.getPlaceId())){
                 return TOP_ATTRACTION_SCORE;
