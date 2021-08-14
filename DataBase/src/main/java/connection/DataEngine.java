@@ -204,9 +204,10 @@ public class DataEngine implements Closeable {
             case CAMPGROUND:
             case ZOO:
             case GROCERY_OR_SUPERMARKET:
-                pageCountToGet = 1;
-            case PARK:
             case DOCTOR:    // DOCTOR == BEACH
+            case PARK:
+                pageCountToGet = 1;
+            case MUSEUM:
                 pageCountToGet = 2;
             case RESTAURANT:
                 pageCountToGet = 4;
