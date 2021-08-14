@@ -41,6 +41,8 @@ public class HillClimbing {
         private boolean scheduledDinner;
         private final LocalTime BAR_TIME;
         private final LocalTime NIGHT_CLUB_TIME;
+        private final LocalTime BEACH_TIME;
+        private boolean scheduledBeach;
 
         public ScheduleRestrictions(QuestionsData preferences) {
             this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
@@ -49,6 +51,8 @@ public class HillClimbing {
             this.scheduledDinner = false;
             this.BAR_TIME = LocalTime.of(16, 59,0,0);
             this.NIGHT_CLUB_TIME = LocalTime.of(20,59,0,0);
+            this.BEACH_TIME = LocalTime.of(16, 1, 0, 0);
+            this.scheduledBeach = false;
         }
 
         public LocalTime getLUNCH_TIME() {
@@ -65,6 +69,14 @@ public class HillClimbing {
 
         public boolean isScheduledDinner() {
             return scheduledDinner;
+        }
+
+        public boolean isScheduledBeach() {
+            return scheduledBeach;
+        }
+
+        public void setScheduledBeach(boolean scheduledBeach) {
+            this.scheduledBeach = scheduledBeach;
         }
 
         public void setScheduledLunch(boolean scheduledLunch) {
@@ -178,6 +190,20 @@ public class HillClimbing {
             return false;
         }
 
+        public boolean isBeachTime(Attraction attraction, LocalDateTime startTime){
+            if(!attraction.getClass().getSimpleName().equalsIgnoreCase("Beach")){
+                return true;
+            }
+            if(scheduledBeach){
+                return false;
+            }
+            if(startTime.toLocalTime().isBefore(BEACH_TIME)){
+                return true;
+            }
+
+            return false;
+        }
+
         // TODO: limit attraction list to X attractions?
         public List<Attraction> getNeighbourAttractions(LocalDateTime currentTime,
                                                         HashMap<String, List<Attraction>> placeTypeToAttraction,
@@ -196,6 +222,7 @@ public class HillClimbing {
                         filter(attraction -> !attractionToBooleanMap.containsKey(attraction.getPlaceId()) &&
                                 !attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant") &&
                                 checkOpeningHours(attraction, currentTime) &&
+                                isBeachTime(attraction, currentTime) &&
                                 isPartyTime(attraction, currentTime)).
                         collect(Collectors.toList());
             }
@@ -212,7 +239,7 @@ public class HillClimbing {
     private final Random rand;
     private LocalDateTime currentTime;
     private final ScheduleRestrictions scheduleRestrictions;
-    private final int NUM_NEIGHBOURS_TO_CHECK = 10;
+    private final int NUM_NEIGHBOURS_TO_CHECK = 15;
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList, double goalValue) {
         this.preferences = preferences;
@@ -248,14 +275,8 @@ public class HillClimbing {
     public Itinerary getItineraryWithHillClimbingAlgorithm(State initState) {
         State currentState = initState;
 
-        while(currentState.getHeuristicValue() < goalValue && currentTime.isBefore(preferences.getEndDate())){
-            double prevHeuristic = currentState.getHeuristicValue();
-            findNextState(currentState);
-
-            System.out.println("Heuristic: " + currentState.getHeuristicValue());
-            if(currentState.getHeuristicValue() < prevHeuristic){
-                // remove last attraction
-            }
+        while(currentTime.isBefore(preferences.getEndDate())){
+            addAttraction(currentState);
         }
 
         return currentState.getItinerary();
@@ -264,7 +285,7 @@ public class HillClimbing {
     private void findNextState(State currentState){
 
         addAttraction(currentState);
-        currentState.setHeuristicValue(currentState.getHeuristicValue() + evaluate(currentState));
+//        currentState.setHeuristicValue(currentState.getHeuristicValue() + evaluate(currentState));
 
         // find best attraction (X attractions)
         // add attraction to nextState
@@ -321,6 +342,7 @@ public class HillClimbing {
                 attractionEndTime = attractionEndTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
             }
 
+
             currentState.getItinerary().addAttraction(attractionToAdd,
                     attractionStartTime,
                     attractionEndTime);
@@ -339,6 +361,7 @@ public class HillClimbing {
             currentTime = currentTime.withHour(8).withMinute(0).withSecond(0).withNano(0);
             scheduleRestrictions.setScheduledLunch(false);
             scheduleRestrictions.setScheduledDinner(false);
+            scheduleRestrictions.setScheduledBeach(false);
         }
     }
 
@@ -374,18 +397,18 @@ public class HillClimbing {
 
     private void debugPrintAttraction(Attraction attractionToAdd,LocalDateTime attractionStartTime,LocalDateTime attractionEndTime){
         System.out.println("Attraction name: " + attractionToAdd.getName());
-        System.out.println("Duration: " + DefaultDurations.getESTOfAttraction(attractionToAdd));
+//        System.out.println("Duration: " + DefaultDurations.getESTOfAttraction(attractionToAdd));
         System.out.println("Place Type: " + attractionToAdd.getClass().getSimpleName());
-        if(attractionToAdd.getOpeningHours() != null && attractionToAdd.getOpeningHours().weekdayText != null){
-            StringBuilder weekText = new StringBuilder();
-            for (String dayData: attractionToAdd.getOpeningHours().weekdayText) {
-                weekText.append(dayData + '\n');
-            }
-            System.out.println("Opening Hours: " + weekText.toString());
-        }
-        else{
-            System.out.println("No opening hours data");
-        }
+//        if(attractionToAdd.getOpeningHours() != null && attractionToAdd.getOpeningHours().weekdayText != null){
+//            StringBuilder weekText = new StringBuilder();
+//            for (String dayData: attractionToAdd.getOpeningHours().weekdayText) {
+//                weekText.append(dayData + '\n');
+//            }
+//            System.out.println("Opening Hours: " + weekText.toString());
+//        }
+//        else{
+//            System.out.println("No opening hours data");
+//        }
 
         System.out.println("Start time: " + attractionStartTime);
         System.out.println("End time: " + attractionEndTime);

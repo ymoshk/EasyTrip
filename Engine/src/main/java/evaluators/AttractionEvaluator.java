@@ -57,17 +57,20 @@ public class AttractionEvaluator {
             reviewsDataMap.put(placeType, reviewsDataOfType);
 
             // create indexes map for restaurants
-            if(placeType.equalsIgnoreCase("Restaurant")){
-                initialAttractionIndexMap(sortedAttractionList);
-            }
+            initialAttractionIndexMap(sortedAttractionList);
         });
+    }
+
+    private String generateAttractionKey(Attraction attraction){
+        return attraction.getPlaceId() + attraction.getClass().getSimpleName();
     }
 
     private void initialAttractionIndexMap(List<Attraction> attractionListSorted) {
         AtomicInteger index = new AtomicInteger(1);
 
         attractionListSorted.forEach(attraction -> {
-            attractionToIndexMap.put(attraction.getPlaceId(), index.intValue());
+            //we wish to make every attraction unique per type
+            attractionToIndexMap.put(generateAttractionKey(attraction), index.intValue());
             index.getAndIncrement();
         });
     }
@@ -90,7 +93,6 @@ public class AttractionEvaluator {
         int medianOfReviews = attractionsReviewsInt.get(numberOfAttractions/2);
         double averageReviews = (double) attractionsReviewsNumberSum/numberOfAttractions;
         double step = 100.0/numberOfAttractions;
-
 
 //        System.out.println("--------------------------------------------------------");
 //        System.out.println(attractionList.get(0).getPlaceType());
@@ -127,41 +129,30 @@ public class AttractionEvaluator {
     }
 
     public double evaluateByReviewsNumber(Attraction attraction) {
-        // restaurant has another type of evaluation
-        if(attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant")){
             double placeTypeStep = reviewsDataMap.get(attraction.getClass().getSimpleName()).step;
-            int attractionIndex = attractionToIndexMap.get(attraction.getPlaceId());
-
-            return placeTypeStep * attractionIndex;
-        }
-        else{
+            int attractionIndex = attractionToIndexMap.get(generateAttractionKey(attraction));
             ReviewsData reviewsData = reviewsDataMap.get(attraction.getClass().getSimpleName());
 
-            if(reviewsData.isTopAttraction(attraction.getPlaceId())){
-                return TOP_ATTRACTION_SCORE;
-            }
-            else if(attraction.getUserRatingsTotal() >= reviewsData.getAverageReviews()){
-                return AVG_ATTRACTION_SCORE;
+            // Give boost to attractions above average or median
+            if(attraction.getUserRatingsTotal() >= reviewsData.getAverageReviews()){
+                return 0.85 * (placeTypeStep * attractionIndex) + 0.15 * 100;
             }
             else if(attraction.getUserRatingsTotal() >= reviewsData.getMedianReviews()){
-                return MEDIAN_ATTRACTION_SCORE;
+                return 0.9 * (placeTypeStep * attractionIndex) + 0.1 * 100;
             }
-            else{
-                return BOTTOM_ATTRACTION_SCORE;
-            }
-        }
+
+            return placeTypeStep * attractionIndex;
     }
 
     public double evaluateAttraction(Attraction attraction){
         double ratingScore = evaluateByRating(attraction);
-//        double reviewsScore = evaluateByReviewsNumber(attraction);
+        double reviewsScore = evaluateByReviewsNumber(attraction);
 
-//        return (0.5 * ratingScore) + (0.5 * reviewsScore);
-        return ratingScore;
+        return (0.5 * ratingScore) + (0.5 * reviewsScore);
     }
 
     public int getIndex(Attraction attractionToAdd) {
-        return attractionToIndexMap.get(attractionToAdd.getPlaceId());
+        return attractionToIndexMap.get(generateAttractionKey(attractionToAdd));
     }
 
 
