@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class AttractionEvaluator {
+
     public class ReviewsData{
         int maxReviews;
         int medianReviews;
@@ -149,6 +150,32 @@ public class AttractionEvaluator {
         double reviewsScore = evaluateByReviewsNumber(attraction);
 
         return (0.5 * ratingScore) + (0.5 * reviewsScore);
+    }
+
+    public double evaluateAttraction(Attraction curAttraction, double distance) {
+        double ratingScore = evaluateByRating(curAttraction);
+        double reviewsScore = evaluateByReviewsNumber(curAttraction);
+        double distanceScore = evaluateByDistance(distance);
+
+        return 0.4 * ratingScore + 0.4 * reviewsScore + 0.2 * distanceScore;
+    }
+
+    private double evaluateByDistance(double distance) {
+        if(distance < 1.0){
+            return 100;
+        }
+        else if(distance < 2.0){
+            return 80;
+        }
+        else if(distance < 3.0){
+            return 60;
+        }
+        else if(distance < 4.0){
+            return 40;
+        }
+        else{
+            return 20;
+        }
     }
 
     public int getIndex(Attraction attractionToAdd) {

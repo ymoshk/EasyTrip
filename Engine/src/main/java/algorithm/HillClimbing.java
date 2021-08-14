@@ -1,5 +1,6 @@
 package algorithm;
 
+import com.google.maps.model.LatLng;
 import com.google.maps.model.OpeningHours;
 import constant.DefaultDurations;
 import evaluators.AttractionEvaluator;
@@ -238,8 +239,11 @@ public class HillClimbing {
     private final HashMap<String, Boolean> attractionToBooleanMap;
     private final Random rand;
     private LocalDateTime currentTime;
+    private Attraction lastAttraction;
     private final ScheduleRestrictions scheduleRestrictions;
     private final int NUM_NEIGHBOURS_TO_CHECK = 15;
+    private final int EARTH_RADIUS = 6371; // Radius of the earth in km
+
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList, double goalValue) {
         this.preferences = preferences;
@@ -249,7 +253,9 @@ public class HillClimbing {
         this.attractionToBooleanMap = new HashMap<>();
         currentTime = getStartTimeByTravelerType();
         this.rand = new Random();
+        this.lastAttraction = null;
         this.scheduleRestrictions = new ScheduleRestrictions(preferences);
+
     }
 
     private LocalDateTime getStartTimeByTravelerType(){
@@ -304,10 +310,12 @@ public class HillClimbing {
         double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction);
         Attraction curAttraction;
         double curValue;
+        double distance;
 
         for(int i=0; i<NUM_NEIGHBOURS_TO_CHECK; i++){
             curAttraction = attractionList.get(rand.nextInt(attractionListSize - 1));
-            curValue = attractionEvaluator.evaluateAttraction(curAttraction);
+            distance = calculateDistance(lastAttraction, curAttraction);
+            curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance);
 //            System.out.println("type: " + curAttraction.getPlaceType() + " name: " + curAttraction.getName() +
 //                    " grade: " + curValue);
 
@@ -347,6 +355,8 @@ public class HillClimbing {
                     attractionStartTime,
                     attractionEndTime);
 
+            //after adding the attraction, it's now the last attraction we added.
+            lastAttraction = attractionToAdd;
             advanceCurrentTime(attractionDurationMinutes);
         }
     }
@@ -362,7 +372,36 @@ public class HillClimbing {
             scheduleRestrictions.setScheduledLunch(false);
             scheduleRestrictions.setScheduledDinner(false);
             scheduleRestrictions.setScheduledBeach(false);
+            lastAttraction = null;
         }
+    }
+
+//    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
+    private double calculateDistance(Attraction source, Attraction destination){
+        //case we initial an empty route, and there's no last attraction
+        if(source == null){
+            return 0;
+        }
+
+        double latDelta = deg2rad(destination.getLat() - source.getLat());
+        double longDelta = deg2rad(destination.getLng() - source.getLng());
+
+        double a = Math.sin(latDelta/2) * Math.sin(latDelta/2) +
+                Math.cos(deg2rad(destination.getLat())) * Math.cos(deg2rad(source.getLat())) *
+                        Math.sin(longDelta/2) * Math.sin(longDelta/2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        double result = EARTH_RADIUS * c;
+//        System.out.println("source: " + source.getName());
+//        System.out.println("destination: " + destination.getName());
+//        System.out.println("distance: " + result + "KM");
+
+        return result;
+    }
+
+    private double deg2rad(double degree) {
+        return degree * (Math.PI/180);
     }
 
     private int evaluate(State currentState){
@@ -396,7 +435,15 @@ public class HillClimbing {
 
 
     private void debugPrintAttraction(Attraction attractionToAdd,LocalDateTime attractionStartTime,LocalDateTime attractionEndTime){
-        System.out.println("Attraction name: " + attractionToAdd.getName());
+        if(lastAttraction != null){
+            System.out.println("last attraction: " + lastAttraction.getName());
+        }
+        if(lastAttraction !=null && !lastAttraction.equals(attractionToAdd)){
+            System.out.println("Attraction name: " + attractionToAdd.getName());
+            System.out.println("Distance from last attraction: " + calculateDistance(lastAttraction, attractionToAdd));
+            System.out.println("Algorithm Grade: " + attractionEvaluator.evaluateAttraction(attractionToAdd));
+            System.out.println("Algorithm Grade with distance: " + attractionEvaluator.evaluateAttraction(attractionToAdd, calculateDistance(lastAttraction, attractionToAdd)));
+        }
 //        System.out.println("Duration: " + DefaultDurations.getESTOfAttraction(attractionToAdd));
         System.out.println("Place Type: " + attractionToAdd.getClass().getSimpleName());
 //        if(attractionToAdd.getOpeningHours() != null && attractionToAdd.getOpeningHours().weekdayText != null){
@@ -413,9 +460,11 @@ public class HillClimbing {
         System.out.println("Start time: " + attractionStartTime);
         System.out.println("End time: " + attractionEndTime);
         double attractionRate = AttractionEvaluator.evaluateByRating(attractionToAdd);
-        System.out.println("Attraction Rate: " + attractionRate + "\n" + "Google Rate: "  + attractionToAdd.getRating() + "\n"
-        + "Reviews No. " + attractionToAdd.getUserRatingsTotal());
-        System.out.println("Algorithm Grade: " + attractionEvaluator.evaluateAttraction(attractionToAdd));
+//        System.out.println("Attraction Rate: " + attractionRate + "\n" + "Google Rate: "  + attractionToAdd.getRating() + "\n"
+//        + "Reviews No. " + attractionToAdd.getUserRatingsTotal());
+//        System.out.println("Algorithm Grade: " + attractionEvaluator.evaluateAttraction(attractionToAdd));
+//        System.out.println("Algorithm Grade: " + attractionEvaluator.evaluateAttraction(attractionToAdd));
+
 //        System.out.println("Reviews Grade: " + attractionEvaluator.evaluateRestaurantByToNumOfReviews(attractionToAdd));
 //        System.out.println("Attraction  place: " +attractionEvaluator.getIndex(attractionToAdd) + "/" +
 //                placeTypeToAttraction.get(attractionToAdd.getPlaceType()).size() );
