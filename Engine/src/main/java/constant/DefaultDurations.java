@@ -5,10 +5,12 @@ import model.attraction.amusement.park.AmusementPark;
 import model.attraction.aquarium.Aquarium;
 import model.attraction.art.gallery.ArtGallery;
 import model.attraction.bar.Bar;
+import model.attraction.beach.Beach;
 import model.attraction.cafe.Cafe;
 import model.attraction.camp.ground.CampGround;
 import model.attraction.casino.Casino;
 import model.attraction.hotel.Hotel;
+import model.attraction.market.Market;
 import model.attraction.museum.Museum;
 import model.attraction.nightClub.NightClub;
 import model.attraction.touristAttraction.TouristAttraction;
@@ -41,6 +43,8 @@ public class DefaultDurations {
         AttractionsEST.put(Spa.class.getSimpleName(), 60);
         AttractionsEST.put(ShoppingMall.class.getSimpleName(), 120);
         AttractionsEST.put(Zoo.class.getSimpleName(), 150);
+        AttractionsEST.put(Market.class.getSimpleName(), 120);
+        AttractionsEST.put(Beach.class.getSimpleName(), 180);
     }
 
     public static int getESTOfAttraction(String attractionType) {

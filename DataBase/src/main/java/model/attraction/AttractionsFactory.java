@@ -7,10 +7,12 @@ import container.PriceRange;
 import model.attraction.amusement.park.AmusementPark;
 import model.attraction.aquarium.Aquarium;
 import model.attraction.art.gallery.ArtGallery;
+import model.attraction.beach.Beach;
 import model.attraction.cafe.Cafe;
 import model.attraction.camp.ground.CampGround;
 import model.attraction.casino.Casino;
 import model.attraction.hotel.Hotel;
+import model.attraction.market.Market;
 import model.attraction.museum.Museum;
 import model.attraction.touristAttraction.TouristAttraction;
 import model.attraction.park.Park;
@@ -92,6 +94,13 @@ public class AttractionsFactory {
 
             case SPA:
                 res = new Spa(searchResultObject, placeType, priceRange, city);
+
+            case GROCERY_OR_SUPERMARKET:
+                res = new Market(searchResultObject, placeType, priceRange, city);
+
+            // DOCTOR == BEACH (beach doesn't exist on google type & time is short)
+            case DOCTOR:
+                res = new Beach(searchResultObject, placeType, priceRange, city);
         }
 
         return res;

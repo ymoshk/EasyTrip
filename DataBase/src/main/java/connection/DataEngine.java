@@ -139,7 +139,9 @@ public class DataEngine implements Closeable {
                 PlaceType.RESTAURANT,
                 PlaceType.SHOPPING_MALL,
                 PlaceType.SPA,
-                PlaceType.ZOO
+                PlaceType.ZOO,
+                PlaceType.GROCERY_OR_SUPERMARKET,
+                PlaceType.DOCTOR    // DOCTOR == BEACH
         ));
 
         types.forEach(type -> res.addAll(getAttractions(type, cityName, priceRange)));
@@ -170,6 +172,11 @@ public class DataEngine implements Closeable {
                 }
             });
             thread.start();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         return attractionsToAdd;
@@ -186,6 +193,24 @@ public class DataEngine implements Closeable {
     private List<Attraction> getAttractionInStandardTextSearch(String attractionName, PriceRange priceRange, PlaceType type, City city) {
         List<Attraction> result = new ArrayList<>();
         GeoApiContext context = null;
+        int pageCountToGet = 3;
+
+        // get number of results depends on type relevant
+        switch (type){
+            case SPA:
+            case CASINO:
+            case AMUSEMENT_PARK:
+            case AQUARIUM:
+            case CAMPGROUND:
+            case ZOO:
+            case GROCERY_OR_SUPERMARKET:
+                pageCountToGet = 1;
+            case PARK:
+            case DOCTOR:    // DOCTOR == BEACH
+                pageCountToGet = 2;
+            case RESTAURANT:
+                pageCountToGet = 4;
+        }
 
         try {
             int i = 0;
