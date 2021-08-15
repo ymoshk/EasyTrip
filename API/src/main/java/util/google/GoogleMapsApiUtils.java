@@ -17,6 +17,10 @@ public class GoogleMapsApiUtils {
         else if(type.equals(PlaceType.DOCTOR)) {
             return PlacesApi.textSearchQuery(context, "beach" + "+" + cityName);
         }
+        // ATM == TOP SIGHT
+        else if(type.equals(PlaceType.ATM)) {
+            return PlacesApi.textSearchQuery(context, "top sights" + "+" + cityName);
+        }
 
         return PlacesApi.textSearchQuery(context, attractionName + "+" + cityName).type(type);
     }

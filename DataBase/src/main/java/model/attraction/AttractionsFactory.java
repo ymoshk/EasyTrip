@@ -9,11 +9,11 @@ import model.attraction.aquarium.Aquarium;
 import model.attraction.art.gallery.ArtGallery;
 import model.attraction.beach.Beach;
 import model.attraction.cafe.Cafe;
-import model.attraction.camp.ground.CampGround;
 import model.attraction.casino.Casino;
 import model.attraction.hotel.Hotel;
 import model.attraction.market.Market;
 import model.attraction.museum.Museum;
+import model.attraction.topSight.TopSight;
 import model.attraction.touristAttraction.TouristAttraction;
 import model.attraction.park.Park;
 import model.attraction.restaurant.Restaurant;
@@ -72,10 +72,6 @@ public class AttractionsFactory {
                 res = new Casino(searchResultObject, placeType, priceRange, city);
                 break;
 
-            case CAMPGROUND:
-                res = new CampGround(searchResultObject, placeType, priceRange, city);
-                break;
-
             case PARK:
                 res = new Park(searchResultObject, placeType, priceRange, city);
                 break;
@@ -101,6 +97,10 @@ public class AttractionsFactory {
             // DOCTOR == BEACH (beach doesn't exist on google type & time is short)
             case DOCTOR:
                 res = new Beach(searchResultObject, placeType, priceRange, city);
+
+            // ATM == TOP SIGHT
+            case ATM:
+                res = new TopSight(searchResultObject, placeType, priceRange, city);
         }
 
         return res;
