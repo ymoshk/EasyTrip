@@ -51,8 +51,10 @@ public class DataEngine implements Closeable {
      * @return List of cities that match the search result.
      */
     public List<City> getCities(String cityPrefix) {
+//        return (List<City>) DBContext.getInstance().selectQuery(
+//                "FROM City WHERE cityName LIKE '" + cityPrefix + "%'");
         return (List<City>) DBContext.getInstance().selectQuery(
-                "FROM City WHERE cityName LIKE '" + cityPrefix + "%'");
+                "FROM City WHERE cityName = '" + cityPrefix + "'");
     }
 
     /**
@@ -124,12 +126,12 @@ public class DataEngine implements Closeable {
     public List<Attraction> getAttractions(String cityName, PriceRange priceRange) {
         List<Attraction> res = new ArrayList<>();
         List<PlaceType> types = (Arrays.asList(
+                PlaceType.ATM,       // ATM == TOP SIGHT
                 PlaceType.AMUSEMENT_PARK,
                 PlaceType.AQUARIUM,
                 PlaceType.ART_GALLERY,
                 PlaceType.CAFE,
                 PlaceType.CASINO,
-                PlaceType.LODGING,
                 PlaceType.MUSEUM,
                 PlaceType.NIGHT_CLUB,
                 PlaceType.BAR,
@@ -198,18 +200,11 @@ public class DataEngine implements Closeable {
         switch (type){
             case SPA:
             case CASINO:
-            case AMUSEMENT_PARK:
-            case AQUARIUM:
-            case CAMPGROUND:
-            case ZOO:
-            case GROCERY_OR_SUPERMARKET:
-            case DOCTOR:    // DOCTOR == BEACH
-            case PARK:
-                pageCountToGet = 1;
-            case MUSEUM:
                 pageCountToGet = 2;
+                break;
             case RESTAURANT:
                 pageCountToGet = 4;
+                break;
         }
 
         try {
@@ -246,7 +241,7 @@ public class DataEngine implements Closeable {
                 }
 
                 resp = GoogleMapsApiUtils.getNextPageTextSearchRequest(context, resp.nextPageToken).await();
-            } while (++i <= PAGE_COUNT_TO_GET);
+            } while (++i <= pageCountToGet);
         } catch (Exception e) {
             LogsManager.logException(e);
         } finally {
