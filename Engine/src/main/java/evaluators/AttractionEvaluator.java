@@ -161,7 +161,7 @@ public class AttractionEvaluator {
     }
 
     private double evaluateByDistance(double distance) {
-        if(distance < 1.0){
+        if(distance < 1.5){
             return 100;
         }
         else{

@@ -4,12 +4,14 @@ import com.google.maps.model.LatLng;
 import com.google.maps.model.OpeningHours;
 import constant.DefaultDurations;
 import evaluators.AttractionEvaluator;
+import generator.Hash;
 import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.location.City;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -35,6 +37,7 @@ public class HillClimbing {
     //TODO: consider user preferences
     //TODO: change attraction durations, lunch & dinner
     //TODO: save attraction name as constants
+    //TODO: remove beach from top sight
     static private class ScheduleRestrictions {
         private final LocalTime LUNCH_TIME;
         private boolean scheduledLunch;
@@ -44,6 +47,7 @@ public class HillClimbing {
         private final LocalTime NIGHT_CLUB_TIME;
         private final LocalTime BEACH_TIME;
         private boolean scheduledBeach;
+        private final LocalTime PARK_TIME;
 
         public ScheduleRestrictions(QuestionsData preferences) {
             this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
@@ -54,6 +58,7 @@ public class HillClimbing {
             this.NIGHT_CLUB_TIME = LocalTime.of(20,59,0,0);
             this.BEACH_TIME = LocalTime.of(16, 1, 0, 0);
             this.scheduledBeach = false;
+            this.PARK_TIME = LocalTime.of(19, 1, 0, 0);
         }
 
         public LocalTime getLUNCH_TIME() {
@@ -205,6 +210,17 @@ public class HillClimbing {
             return false;
         }
 
+        public boolean isParkTime(Attraction attraction, LocalDateTime startTime){
+            if(!attraction.getClass().getSimpleName().equalsIgnoreCase("Park")){
+                return true;
+            }
+            if(startTime.toLocalTime().isBefore(PARK_TIME)){
+                return true;
+            }
+
+            return false;
+        }
+
         // TODO: limit attraction list to X attractions?
         public List<Attraction> getNeighbourAttractions(LocalDateTime currentTime,
                                                         HashMap<String, List<Attraction>> placeTypeToAttraction,
@@ -224,6 +240,7 @@ public class HillClimbing {
                                 !attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant") &&
                                 checkOpeningHours(attraction, currentTime) &&
                                 isBeachTime(attraction, currentTime) &&
+                                isParkTime(attraction, currentTime) &&
                                 isPartyTime(attraction, currentTime)).
                         collect(Collectors.toList());
             }
@@ -241,7 +258,7 @@ public class HillClimbing {
     private LocalDateTime currentTime;
     private Attraction lastAttraction;
     private final ScheduleRestrictions scheduleRestrictions;
-    private final int NUM_NEIGHBOURS_TO_CHECK = 15;
+    private final int NUM_NEIGHBOURS_TO_CHECK = 20;
     private final int EARTH_RADIUS = 6371; // Radius of the earth in km
 
 
@@ -255,7 +272,59 @@ public class HillClimbing {
         this.rand = new Random();
         this.lastAttraction = null;
         this.scheduleRestrictions = new ScheduleRestrictions(preferences);
+        removeAttractionDuplicationFromTouristAttraction();
+        initTopSights(10);
+    }
 
+    void initTopSights(int numOfAttractions){
+        List<Attraction> attractionList = placeTypeToAttraction.get("TopSight");
+
+        // TODO: temporary bandaid
+        List<Attraction> filteredAttraction = new ArrayList<>();
+        HashMap<String, Boolean> attractionIdToBoolean = new HashMap<>();
+
+        for (Attraction attraction : attractionList){
+            if(!attractionIdToBoolean.containsKey(attraction.getPlaceId())){
+                filteredAttraction.add(attraction);
+                attractionIdToBoolean.put(attraction.getPlaceId(), true);
+            }
+        }
+//
+//
+//        for (Attraction attraction : filteredAttraction) {
+//            System.out.println(attraction.getName());
+//            System.out.println(attraction.getPlaceId());
+//        }
+
+//        System.out.println("----------------------------------");
+
+        if(filteredAttraction.size() < numOfAttractions){
+            numOfAttractions = filteredAttraction.size();
+        }
+
+        filteredAttraction = filteredAttraction.stream().sorted(Comparator.
+                comparingDouble(attraction -> attractionEvaluator.evaluateAttraction(attraction))).
+                collect(Collectors.toList()).
+                subList(filteredAttraction.size() - numOfAttractions, filteredAttraction.size());
+
+//        for (Attraction attraction : filteredAttraction) {
+//            System.out.println(attraction.getName());
+//            System.out.println(attractionEvaluator.evaluateAttraction(attraction));
+//        }
+//
+//        System.out.println("----------------------------------");
+
+        placeTypeToAttraction.put("TopSight", filteredAttraction);
+    }
+
+    void removeAttractionDuplicationFromTouristAttraction(){
+        List<Attraction> attractionList = placeTypeToAttraction.get("TouristAttraction");
+
+        attractionList = attractionList.stream().
+                filter(attraction -> !attraction.getName().toUpperCase().contains("PARK")).
+                collect(Collectors.toList());
+
+        placeTypeToAttraction.put("TouristAttraction", attractionList);
     }
 
     private LocalDateTime getStartTimeByTravelerType(){
@@ -312,18 +381,20 @@ public class HillClimbing {
         double curValue;
         double distance;
 
-        for(int i=0; i<NUM_NEIGHBOURS_TO_CHECK; i++){
-            curAttraction = attractionList.get(rand.nextInt(attractionListSize - 1));
+        for (Attraction attraction : attractionList) {
+            curAttraction = attraction;
             distance = calculateDistance(lastAttraction, curAttraction);
             curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance);
 //            System.out.println("type: " + curAttraction.getPlaceType() + " name: " + curAttraction.getName() +
 //                    " grade: " + curValue);
 
-            if(curValue > maxValue){
+            if (curValue > maxValue) {
                 maxAttraction = curAttraction;
                 maxValue = curValue;
             }
         }
+
+//        System.out.println(maxAttraction.getName());
 
         return maxAttraction;
     }
