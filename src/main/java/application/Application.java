@@ -14,7 +14,7 @@ public class Application {
         System.out.println("Application is starting...");
         DataEngine data = DataEngine.getInstance();
         City city = data.getCity("Tel Aviv").orElse(null);
-        List<Attraction> attractionList = data.getAttractions(PlaceType.MUSEUM, city.getCityName(), new PriceRange(3));
+        List<Attraction> attractionList = data.getAttractions(city.getCityName(), new PriceRange(3));
         attractionList.forEach(attraction -> {
             System.out.println(attraction.getName());
         });

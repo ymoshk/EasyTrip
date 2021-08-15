@@ -157,24 +157,20 @@ public class AttractionEvaluator {
         double reviewsScore = evaluateByReviewsNumber(curAttraction);
         double distanceScore = evaluateByDistance(distance);
 
-        return 0.4 * ratingScore + 0.4 * reviewsScore + 0.2 * distanceScore;
+        return 0.35 * ratingScore + 0.35 * reviewsScore + 0.3 * distanceScore;
     }
 
     private double evaluateByDistance(double distance) {
         if(distance < 1.0){
             return 100;
         }
-        else if(distance < 2.0){
-            return 80;
-        }
-        else if(distance < 3.0){
-            return 60;
-        }
-        else if(distance < 4.0){
-            return 40;
-        }
         else{
-            return 20;
+            // to calculate grade
+            if(distance > 10){
+                distance = 10;
+            }
+
+            return (1 - distance/10.0) * 100;
         }
     }
 

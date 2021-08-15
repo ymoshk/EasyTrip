@@ -11,14 +11,14 @@ public class GoogleMapsApiUtils {
 
     public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName, String cityName, PriceRange priceRange, PlaceType type) {
         if(type.equals(PlaceType.GROCERY_OR_SUPERMARKET)) {
-            return PlacesApi.textSearchQuery(context, "market" + " in " + cityName);
+            return PlacesApi.textSearchQuery(context, "market" + "+" + cityName);
         }
         // DOCTOR == BEACH
         else if(type.equals(PlaceType.DOCTOR)) {
-            return PlacesApi.textSearchQuery(context, "beach" + " in " + cityName);
+            return PlacesApi.textSearchQuery(context, "beach" + "+" + cityName);
         }
 
-        return PlacesApi.textSearchQuery(context, attractionName + " in " + cityName).type(type);
+        return PlacesApi.textSearchQuery(context, attractionName + "+" + cityName).type(type);
     }
 
     public static TextSearchRequest getNextPageTextSearchRequest(GeoApiContext context, String pageToken) {

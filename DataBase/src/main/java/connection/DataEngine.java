@@ -101,7 +101,7 @@ public class DataEngine implements Closeable {
 
         if (theCity != null) {
             res = theCity.getAttractionList().stream()
-                    .filter(attr -> attr.getPlaceType().equals(type) && attr.getPriceRange().containedIn(priceRange))
+                    .filter(attr -> attr.getPlaceType().equals(type))
                     .collect(Collectors.toList());
 
             try {
@@ -128,7 +128,6 @@ public class DataEngine implements Closeable {
                 PlaceType.AQUARIUM,
                 PlaceType.ART_GALLERY,
                 PlaceType.CAFE,
-                PlaceType.CAMPGROUND,
                 PlaceType.CASINO,
                 PlaceType.LODGING,
                 PlaceType.MUSEUM,
