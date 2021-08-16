@@ -32,6 +32,7 @@ public class DataEngine implements Closeable {
     private static final int MIN_SIZE_COLLECTION = 3;
     private static DataEngine instance = null;
     private final Set<City> loadingCities;
+    private final int EARTH_RADIUS = 6371; // Radius of the earth in km
 
     //empty constructor just to make sure the class is a singleton
     private DataEngine() {
@@ -108,7 +109,7 @@ public class DataEngine implements Closeable {
 
             try {
                 //TODO: make sure there're enough attractions
-                if (res.isEmpty()) {
+                if (res.isEmpty() || res.size() < 5) {
                     res = getAttractionsAndSaveToDB(priceRange, type, theCity);
                 } else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
                     res.forEach(theCity::removeAttraction);
@@ -203,7 +204,7 @@ public class DataEngine implements Closeable {
                 pageCountToGet = 2;
                 break;
             case RESTAURANT:
-                pageCountToGet = 4;
+                pageCountToGet = 7;
                 break;
         }
 
@@ -229,9 +230,22 @@ public class DataEngine implements Closeable {
                             Attraction attractionToAdd = AttractionsFactory.getAttraction(singleRes, type, priceRange, city);
                             //this is the method to updates the attraction with reviews, phones, website, ...
                             AttractionsFactory.setAttractionDetails(attractionToAdd, placeDetails);
-                            //we wish to add attraction only if it has at least 1 review
-                            if(attractionToAdd.getUserRatingsTotal() > 5 && attractionToAdd.getRating() > 3.0) {
-                                result.add(attractionToAdd);
+                            //TODO: bar changes
+                            if(attractionToAdd.getWebsite() != null){
+                                if(attractionToAdd.getWebsite().length() > 250){
+                                    attractionToAdd.setWebsite(attractionToAdd.getWebsite().substring(0, 249));
+                                }
+                            }
+                            //we wish to add attraction only if it has at least 5 review
+                            if(attractionToAdd.getUserRatingsTotal() > 10 && attractionToAdd.getRating() > 3.0){
+                                if(calculateDistance(city, attractionToAdd) < 100.0){
+                                    result.add(attractionToAdd);
+                                }
+                                else {
+                                    System.out.println("Attraction above 100 km " + attractionToAdd.getName());
+                                }
+                            }else {
+                                System.out.println("Below 3.0 and 10 reviews " + attractionToAdd.getName());
                             }
                         });
                 Thread.sleep(NEXT_PAGE_DELAY);
@@ -250,6 +264,35 @@ public class DataEngine implements Closeable {
             }
         }
         return result;
+    }
+
+
+    //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
+    private double calculateDistance(City source, Attraction destination){
+        //case we initial an empty route, and there's no last attraction
+        if(source == null){
+            return 0;
+        }
+
+        double latDelta = deg2rad(destination.getLat() - source.getCityCenter().lat);
+        double longDelta = deg2rad(destination.getLng() - source.getCityCenter().lng);
+
+        double a = Math.sin(latDelta/2) * Math.sin(latDelta/2) +
+                Math.cos(deg2rad(destination.getLat())) * Math.cos(deg2rad(source.getCityCenter().lat)) *
+                        Math.sin(longDelta/2) * Math.sin(longDelta/2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        double result = EARTH_RADIUS * c;
+//        System.out.println("source: " + source.getName());
+//        System.out.println("destination: " + destination.getName());
+//        System.out.println("distance: " + result + "KM");
+
+        return result;
+    }
+
+    private double deg2rad(double degree) {
+        return degree * (Math.PI/180);
     }
 
     private boolean isAttractionExist(String tableName, String placeId) {
