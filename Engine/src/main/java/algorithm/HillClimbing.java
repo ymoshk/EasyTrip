@@ -1,17 +1,14 @@
 package algorithm;
 
-import com.google.maps.model.LatLng;
 import com.google.maps.model.OpeningHours;
 import constant.DefaultDurations;
 import evaluators.AttractionEvaluator;
-import generator.Hash;
 import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.location.City;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -22,22 +19,18 @@ import java.util.stream.Collectors;
 //https://www.baeldung.com/java-hill-climbing-algorithm
 //https://www.geeksforgeeks.org/introduction-hill-climbing-artificial-intelligence/
 
-public class HillClimbing {
-    //    Define the current state as an initial state
-    //    Loop until the goal state is achieved or no more operators can be applied on the current state:
-    //    Apply an operation to current state and get a new state
-    //    Compare the new state with the goal
-    //    Quit if the goal state is achieved
-    //    Evaluate new state with heuristic function and compare it with the current state
-    //    If the newer state is closer to the goal compared to current state, update the current state
+//https://bigseventravel.com/most-visited-cities-in-europe/
 
-    //TODO: pick best of 10 attraction depends on: rating, raters No.
-    //TODO: consider distance
+public class HillClimbing {
+    //TODO: fetch 10 cities & check them + Tel Aviv + Jerusalem
     //TODO: add breaks depending on traveler type - depends on transportation time
-    //TODO: consider user preferences
+    //TODO: consider user preferences: children --> times + nightlife
+    //TODO: budget --> filter?
+    //TODO: attraction tags --> relative weights
+    //TODO: vibe tags: early bird / night owl, luxury / street food, fast-paced / chill
     //TODO: change attraction durations, lunch & dinner
     //TODO: save attraction name as constants
-    //TODO: remove beach from top sight
+    //TODO: remove beaches from cities without beach
     static private class ScheduleRestrictions {
         private final LocalTime LUNCH_TIME;
         private boolean scheduledLunch;
@@ -48,6 +41,8 @@ public class HillClimbing {
         private final LocalTime BEACH_TIME;
         private boolean scheduledBeach;
         private final LocalTime PARK_TIME;
+        private boolean scheduledCasino;
+        private boolean scheduledSpa;
 
         public ScheduleRestrictions(QuestionsData preferences) {
             this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
@@ -59,26 +54,16 @@ public class HillClimbing {
             this.BEACH_TIME = LocalTime.of(16, 1, 0, 0);
             this.scheduledBeach = false;
             this.PARK_TIME = LocalTime.of(19, 1, 0, 0);
+            this.scheduledCasino = false;
+            this.scheduledSpa = false;
         }
 
-        public LocalTime getLUNCH_TIME() {
-            return LUNCH_TIME;
+        public void setScheduledCasino(boolean scheduledCasino) {
+            this.scheduledCasino = scheduledCasino;
         }
 
-        public boolean isScheduledLunch() {
-            return scheduledLunch;
-        }
-
-        public LocalTime getDINNER_TIME() {
-            return DINNER_TIME;
-        }
-
-        public boolean isScheduledDinner() {
-            return scheduledDinner;
-        }
-
-        public boolean isScheduledBeach() {
-            return scheduledBeach;
+        public void setScheduledSpa(boolean scheduledSpa) {
+            this.scheduledSpa = scheduledSpa;
         }
 
         public void setScheduledBeach(boolean scheduledBeach) {
@@ -196,6 +181,28 @@ public class HillClimbing {
             return false;
         }
 
+        public boolean isCasinoTime(Attraction attraction, LocalDateTime startTime){
+            if(!attraction.getClass().getSimpleName().equalsIgnoreCase("Casino")){
+                return true;
+            }
+            if(scheduledCasino){
+                return false;
+            }
+
+            return true;
+        }
+
+        public boolean isSpaTime(Attraction attraction, LocalDateTime startTime){
+            if(!attraction.getClass().getSimpleName().equalsIgnoreCase("Spa")){
+                return true;
+            }
+            if(scheduledSpa){
+                return false;
+            }
+
+            return true;
+        }
+
         public boolean isBeachTime(Attraction attraction, LocalDateTime startTime){
             if(!attraction.getClass().getSimpleName().equalsIgnoreCase("Beach")){
                 return true;
@@ -221,10 +228,25 @@ public class HillClimbing {
             return false;
         }
 
+        // don't schedule two sequence cafes
+        public boolean isCoffeeTime(Attraction lastAttraction, Attraction curAttraction){
+            // first attraction on the day
+            if(lastAttraction == null){
+                return true;
+            }
+            if(lastAttraction.getClass().getSimpleName().equalsIgnoreCase("Cafe") &&
+                curAttraction.getClass().getSimpleName().equalsIgnoreCase("Cafe")){
+                return false;
+            }
+
+            return true;
+        }
+
         // TODO: limit attraction list to X attractions?
         public List<Attraction> getNeighbourAttractions(LocalDateTime currentTime,
                                                         HashMap<String, List<Attraction>> placeTypeToAttraction,
-                                                        HashMap<String, Boolean> attractionToBooleanMap) {
+                                                        HashMap<String, Boolean> attractionToBooleanMap,
+                                                        Attraction lastAttraction) {
             List<Attraction> attractionList;
 
             if(isRestaurantSchedule(currentTime)){
@@ -241,7 +263,10 @@ public class HillClimbing {
                                 checkOpeningHours(attraction, currentTime) &&
                                 isBeachTime(attraction, currentTime) &&
                                 isParkTime(attraction, currentTime) &&
-                                isPartyTime(attraction, currentTime)).
+                                isPartyTime(attraction, currentTime) &&
+                                isCasinoTime(attraction, currentTime) &&
+                                isSpaTime(attraction, currentTime) &&
+                                isCoffeeTime(lastAttraction, attraction)).
                         collect(Collectors.toList());
             }
 
@@ -251,20 +276,18 @@ public class HillClimbing {
 
     private final QuestionsData preferences;
     AttractionEvaluator attractionEvaluator;
-    private final double goalValue;
     private final HashMap<String, List<Attraction>> placeTypeToAttraction;
     private final HashMap<String, Boolean> attractionToBooleanMap;
     private final Random rand;
     private LocalDateTime currentTime;
     private Attraction lastAttraction;
     private final ScheduleRestrictions scheduleRestrictions;
-    private final int NUM_NEIGHBOURS_TO_CHECK = 20;
     private final int EARTH_RADIUS = 6371; // Radius of the earth in km
+    private final int TOP_SIGHTS_NUM = 7;
 
 
-    public HillClimbing(QuestionsData preferences, List<Attraction> attractionList, double goalValue) {
+    public HillClimbing(QuestionsData preferences, List<Attraction> attractionList) {
         this.preferences = preferences;
-        this.goalValue = goalValue;
         this.placeTypeToAttraction = attractionListToAttractionHashMap(attractionList);
         this.attractionEvaluator = new AttractionEvaluator(placeTypeToAttraction);
         this.attractionToBooleanMap = new HashMap<>();
@@ -273,13 +296,14 @@ public class HillClimbing {
         this.lastAttraction = null;
         this.scheduleRestrictions = new ScheduleRestrictions(preferences);
         removeAttractionDuplicationFromTouristAttraction();
-        initTopSights(10);
+        initTopSights(TOP_SIGHTS_NUM);
     }
 
     void initTopSights(int numOfAttractions){
         List<Attraction> attractionList = placeTypeToAttraction.get("TopSight");
 
-        // TODO: temporary bandaid
+        // TODO: temporary bandaid -
+        //  remove duplicates
         List<Attraction> filteredAttraction = new ArrayList<>();
         HashMap<String, Boolean> attractionIdToBoolean = new HashMap<>();
 
@@ -289,14 +313,6 @@ public class HillClimbing {
                 attractionIdToBoolean.put(attraction.getPlaceId(), true);
             }
         }
-//
-//
-//        for (Attraction attraction : filteredAttraction) {
-//            System.out.println(attraction.getName());
-//            System.out.println(attraction.getPlaceId());
-//        }
-
-//        System.out.println("----------------------------------");
 
         if(filteredAttraction.size() < numOfAttractions){
             numOfAttractions = filteredAttraction.size();
@@ -307,14 +323,13 @@ public class HillClimbing {
                 collect(Collectors.toList()).
                 subList(filteredAttraction.size() - numOfAttractions, filteredAttraction.size());
 
-//        for (Attraction attraction : filteredAttraction) {
-//            System.out.println(attraction.getName());
-//            System.out.println(attractionEvaluator.evaluateAttraction(attraction));
-//        }
-//
-//        System.out.println("----------------------------------");
+        // pass top attraction to attraction evaluator
+        attractionEvaluator.setTopAttractionIdList(filteredAttraction);
+        System.out.println("TOP SIGHTS");
+        filteredAttraction.forEach(attraction -> System.out.println(attraction.getName()));
+        System.out.println("--------------------------------------------");
 
-        placeTypeToAttraction.put("TopSight", filteredAttraction);
+        placeTypeToAttraction.remove("TopSight");
     }
 
     void removeAttractionDuplicationFromTouristAttraction(){
@@ -350,22 +365,15 @@ public class HillClimbing {
     public Itinerary getItineraryWithHillClimbingAlgorithm(State initState) {
         State currentState = initState;
 
+        // schedule attraction until vacation is over
         while(currentTime.isBefore(preferences.getEndDate())){
-            addAttraction(currentState);
+            // no available attractions to add
+            if(addAttraction(currentState) == null){
+                break;
+            }
         }
 
         return currentState.getItinerary();
-    }
-
-    private void findNextState(State currentState){
-
-        addAttraction(currentState);
-//        currentState.setHeuristicValue(currentState.getHeuristicValue() + evaluate(currentState));
-
-        // find best attraction (X attractions)
-        // add attraction to nextState
-        // set nextState heuristic
-        // return nextState
     }
 
 
@@ -374,8 +382,7 @@ public class HillClimbing {
             return null;
         }
 
-        int attractionListSize = attractionList.size();
-        Attraction maxAttraction = attractionList.get(rand.nextInt(attractionListSize - 1));
+        Attraction maxAttraction = attractionList.get(0);
         double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction);
         Attraction curAttraction;
         double curValue;
@@ -385,8 +392,6 @@ public class HillClimbing {
             curAttraction = attraction;
             distance = calculateDistance(lastAttraction, curAttraction);
             curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance);
-//            System.out.println("type: " + curAttraction.getPlaceType() + " name: " + curAttraction.getName() +
-//                    " grade: " + curValue);
 
             if (curValue > maxValue) {
                 maxAttraction = curAttraction;
@@ -394,16 +399,15 @@ public class HillClimbing {
             }
         }
 
-//        System.out.println(maxAttraction.getName());
-
         return maxAttraction;
     }
 
-    private void addAttraction(State currentState) {
+    private Attraction addAttraction(State currentState) {
         List<Attraction> attractionList;
         Attraction attractionToAdd;
 
-        attractionList = scheduleRestrictions.getNeighbourAttractions(currentTime, placeTypeToAttraction, attractionToBooleanMap);
+        attractionList = scheduleRestrictions.getNeighbourAttractions(currentTime, placeTypeToAttraction,
+                attractionToBooleanMap, lastAttraction);
         attractionToAdd = findBestAttraction(attractionList);
 
         if(attractionToAdd != null){
@@ -421,15 +425,27 @@ public class HillClimbing {
                 attractionEndTime = attractionEndTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
             }
 
-
             currentState.getItinerary().addAttraction(attractionToAdd,
                     attractionStartTime,
                     attractionEndTime);
+
+            // reset restrictions
+            if(attractionToAdd.getClass().getSimpleName().equalsIgnoreCase("Spa")){
+                scheduleRestrictions.setScheduledSpa(true);
+            }
+            if(attractionToAdd.getClass().getSimpleName().equalsIgnoreCase("Beach")){
+                scheduleRestrictions.setScheduledBeach(true);
+            }
+            if(attractionToAdd.getClass().getSimpleName().equalsIgnoreCase("Casino")){
+                scheduleRestrictions.setScheduledCasino(true);
+            }
 
             //after adding the attraction, it's now the last attraction we added.
             lastAttraction = attractionToAdd;
             advanceCurrentTime(attractionDurationMinutes);
         }
+
+        return attractionToAdd;
     }
 
 
@@ -443,6 +459,8 @@ public class HillClimbing {
             scheduleRestrictions.setScheduledLunch(false);
             scheduleRestrictions.setScheduledDinner(false);
             scheduleRestrictions.setScheduledBeach(false);
+            scheduleRestrictions.setScheduledCasino(false);
+            scheduleRestrictions.setScheduledSpa(false);
             lastAttraction = null;
         }
     }
@@ -543,23 +561,34 @@ public class HillClimbing {
         System.out.println("\n\n");
     }
 
-//    private double calculateDistanceBetweenAttractions(Attraction source, Attraction destination){
-//
-//    }
 
-    //TODO: attractionToAdd.getOpeningHours() == null && attractionToAdd.getOpeningHours().weekdayText == null --> lower rating
     public static void main(String[] args) {
         try{
-            QuestionsData questionsData = new QuestionsData("Israel", "Tel Aviv", 2,
-                    0, 3, LocalDateTime.now(), LocalDateTime.now().plusDays(2), new ArrayList<>(),
+            String country, city;
+            int adultsCount = 1, childrenCount, budget;
+            List <String> attractionTripTags =
+                    new ArrayList<>(Arrays.asList("Museum", "Amusement park", "Aquarium", "Art Gallery",
+                    "Bar", "Night Club", "Casino", "Park", "Shopping mall",
+                    "Zoo", "Spa", "Beach", "Market"));
+            List <String> vibeTripTags = new ArrayList<>();
+
+            Scanner scanner = new Scanner(System.in);  // Create a Scanner object
+            System.out.println("Country: ");
+            country = scanner.nextLine();
+            System.out.println("City: ");
+            city = scanner.nextLine();
+            System.out.println("Children: ");
+            childrenCount = Integer.parseInt(scanner.nextLine());
+            System.out.println("Budget: ");
+            budget = Integer.parseInt(scanner.nextLine());
+
+            QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
+                    childrenCount, budget, LocalDateTime.now(), LocalDateTime.now().plusDays(3), new ArrayList<>(),
                     new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
-//            attractionList.forEach(attraction -> System.out.println(attraction.getName()));
 
-            //TODO: convert to hashmap or retrieve by type from DB.
-            HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList, 200.0);
+            HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
             State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
-//            AttractionEvaluator attractionEvaluator = new AttractionEvaluator(hillClimbing.placeTypeToAttraction);
 
             hillClimbing.getItineraryWithHillClimbingAlgorithm(state);
 

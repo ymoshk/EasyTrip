@@ -15,18 +15,12 @@ public class AttractionEvaluator {
         int medianReviews;
         double averageReviews;
         double step;
-        List<String> topAttractions;
 
-        public ReviewsData(int maxReviews, int medianReviews, double averageReviews, double step, List<String> topAttractions) {
+        public ReviewsData(int maxReviews, int medianReviews, double averageReviews, double step) {
             this.maxReviews = maxReviews;
             this.medianReviews = medianReviews;
             this.averageReviews = averageReviews;
             this.step = step;
-            this.topAttractions = topAttractions;
-        }
-
-        public boolean isTopAttraction(String attractionPlaceId){
-            return topAttractions.contains(attractionPlaceId);
         }
 
         public int getMedianReviews() {
@@ -40,11 +34,11 @@ public class AttractionEvaluator {
 
     private HashMap<String, ReviewsData> reviewsDataMap;
     private HashMap<String, Integer> attractionToIndexMap;
+    private List<String> topAttractionIdList;
     private final double TOP_ATTRACTION_SCORE = 100;
     private final double AVG_ATTRACTION_SCORE = 80;
     private final double MEDIAN_ATTRACTION_SCORE = 50;
     private final double BOTTOM_ATTRACTION_SCORE = 25;
-
 
     public AttractionEvaluator(HashMap<String, List<Attraction>> placeTypeToAttractionMap) {
         reviewsDataMap = new HashMap<>();
@@ -60,6 +54,14 @@ public class AttractionEvaluator {
             // create indexes map for restaurants
             initialAttractionIndexMap(sortedAttractionList);
         });
+    }
+
+    public boolean isTopAttraction(Attraction attraction){
+        return topAttractionIdList.contains(attraction.getPlaceId());
+    }
+
+    public void setTopAttractionIdList(List<Attraction> topAttractionIdList) {
+        this.topAttractionIdList = topAttractionIdList.stream().map(Attraction::getPlaceId).collect(Collectors.toList());;
     }
 
     private String generateAttractionKey(Attraction attraction){
@@ -78,16 +80,9 @@ public class AttractionEvaluator {
 
     private ReviewsData calculateReviewsData(List<Attraction> attractionList) {
         int numberOfAttractions = attractionList.size();
-        int topAttractionPercent = (int) Math.ceil(0.1 * (double)numberOfAttractions);
 
         List<Integer> attractionsReviewsInt = attractionList.stream().mapToInt(Attraction::getUserRatingsTotal).
                 boxed().collect(Collectors.toList());
-
-        List<String> topAttractions = attractionList.
-                subList(numberOfAttractions - topAttractionPercent, numberOfAttractions).
-                stream().
-                map(Attraction::getPlaceId).
-                collect(Collectors.toList());
 
         int attractionsReviewsNumberSum = attractionsReviewsInt.stream().reduce(0, Integer::sum);
         int maxNumberOfReviews = attractionsReviewsInt.stream().reduce(0, Integer::max);
@@ -95,22 +90,7 @@ public class AttractionEvaluator {
         double averageReviews = (double) attractionsReviewsNumberSum/numberOfAttractions;
         double step = 100.0/numberOfAttractions;
 
-//        System.out.println("--------------------------------------------------------");
-//        System.out.println(attractionList.get(0).getPlaceType());
-//        System.out.println("max: " + maxNumberOfReviews);
-//        System.out.println("average: " + averageReviews);
-//        System.out.println("median: " + medianOfReviews);
-//        System.out.println("averageGap: " + step);
-//
-//        AtomicInteger i = new AtomicInteger();
-//        attractionsReviewsInt.forEach(review ->{
-//
-//            System.out.println( i + ". "  + review);
-//            i.getAndIncrement();
-//        });
-//        System.out.println("--------------------------------------------------------");
-
-        return new ReviewsData(maxNumberOfReviews, medianOfReviews, averageReviews, step, topAttractions);
+        return new ReviewsData(maxNumberOfReviews, medianOfReviews, averageReviews, step);
     }
 
     public static double evaluateByRating(Attraction attraction){
@@ -146,31 +126,45 @@ public class AttractionEvaluator {
     }
 
     public double evaluateAttraction(Attraction attraction){
+        if(topAttractionIdList != null &&
+                isTopAttraction(attraction)){
+            return TOP_ATTRACTION_SCORE;
+        }
+
         double ratingScore = evaluateByRating(attraction);
         double reviewsScore = evaluateByReviewsNumber(attraction);
 
         return (0.5 * ratingScore) + (0.5 * reviewsScore);
     }
 
-    public double evaluateAttraction(Attraction curAttraction, double distance) {
-        double ratingScore = evaluateByRating(curAttraction);
-        double reviewsScore = evaluateByReviewsNumber(curAttraction);
+    public double evaluateAttraction(Attraction attraction, double distance) {
+        double ratingScore;
+        double reviewsScore;
         double distanceScore = evaluateByDistance(distance);
+
+        if(isTopAttraction(attraction)){
+            ratingScore = TOP_ATTRACTION_SCORE;
+            reviewsScore = TOP_ATTRACTION_SCORE;
+        }
+        else{
+            ratingScore = evaluateByRating(attraction);
+            reviewsScore = evaluateByReviewsNumber(attraction);
+        }
 
         return 0.35 * ratingScore + 0.35 * reviewsScore + 0.3 * distanceScore;
     }
 
     private double evaluateByDistance(double distance) {
-        if(distance < 1.5){
+        if(distance < 1.8){
             return 100;
         }
         else{
             // to calculate grade
-            if(distance > 10){
+            if(distance > 8){
                 distance = 10;
             }
 
-            return (1 - distance/10.0) * 100;
+            return (1 - distance/9) * 100;
         }
     }
 
