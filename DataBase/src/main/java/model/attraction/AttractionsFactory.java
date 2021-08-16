@@ -90,17 +90,21 @@ public class AttractionsFactory {
 
             case SPA:
                 res = new Spa(searchResultObject, placeType, priceRange, city);
+                break;
 
             case GROCERY_OR_SUPERMARKET:
                 res = new Market(searchResultObject, placeType, priceRange, city);
+                break;
 
             // DOCTOR == BEACH (beach doesn't exist on google type & time is short)
             case DOCTOR:
                 res = new Beach(searchResultObject, placeType, priceRange, city);
+                break;
 
             // ATM == TOP SIGHT
             case ATM:
                 res = new TopSight(searchResultObject, placeType, priceRange, city);
+                break;
         }
 
         return res;
