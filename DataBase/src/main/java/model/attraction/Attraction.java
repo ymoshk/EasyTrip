@@ -15,7 +15,6 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Attraction extends Model {
 
-    @Column(nullable = false)
     private String formattedAddress;
     @Column(length = 1024)
     private Geometry geometry;
