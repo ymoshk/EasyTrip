@@ -28,11 +28,11 @@ public class NumbeoApi {
         Response response = client.newCall(request).execute();
         String citiesID = response.body().string();
         CitiesWrap citiesLocations = gson.fromJson(citiesID, CitiesWrap.class);
-        AtomicInteger i = new AtomicInteger(1);
-        citiesLocations.getCities().forEach(cityLocation -> {
-            System.out.println( i + cityLocation.getCity());
-            i.getAndIncrement();
-        });
+//        AtomicInteger i = new AtomicInteger(1);
+//        citiesLocations.getCities().forEach(cityLocation -> {
+//            System.out.println( i + cityLocation.getCity());
+//            i.getAndIncrement();
+//        });
         return citiesLocations.getCities();
     }
 
