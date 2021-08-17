@@ -26,6 +26,7 @@ public class ItineraryCache implements Closeable {
 
         recentItinerary.forEach(itinerary -> {
             memory.put(itinerary.getItineraryId(), itinerary);
+            queue.add(new AbstractMap.SimpleImmutableEntry<>(itinerary.getItineraryId(), LocalTime.now()));
         });
 
         updateHandler();

@@ -15,20 +15,28 @@ public abstract class User extends Model {
     @Column(nullable = false)
     private String password;
     private boolean isAdmin;
-    private boolean isActive;
+    private String sessionId;
 
     public User() {
     }
 
-    public User(String userName, String password, boolean isAdmin) {
+    public User(String sessionId, String userName, String password, boolean isAdmin) {
         this.userName = userName;
         this.password = password;
         this.isAdmin = isAdmin;
-        this.isActive = true;
+        this.sessionId = sessionId;
     }
 
-    public User(String userName, String password) {
-        this(userName, password, false);
+    public User(String sessionId, String userName, String password) {
+        this(sessionId, userName, password, false);
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     public String getUserName() {
@@ -53,14 +61,6 @@ public abstract class User extends Model {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        this.isActive = active;
     }
 }
 

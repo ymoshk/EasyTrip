@@ -15,7 +15,6 @@ public class GuestUser extends User {
         setUserName(guestNameGenerator());
         setPassword(Hash.md5Hash(GUID.generate()));
         setAdmin(false);
-        setActive(false);
     }
 
     public static String guestNameGenerator() {
