@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet("/api/completeQuestions")
-public class QuestionsCompleted extends HttpServlet {
+@WebServlet("/api/completeQuestionsAuto")
+public class QuestionsCompletedAuto extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req));

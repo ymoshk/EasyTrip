@@ -21,7 +21,7 @@ public class QuestionsData {
     private final List<TripTag> tripVibes;
 
     public QuestionsData(String countryName, String cityName, int adultsCount, int childrenCount, int budget, LocalDateTime startDate,
-                         LocalDateTime endDate, List<TripTag> favoriteAttractions, List<TripTag> tripVibes) throws Exception {
+                         LocalDateTime endDate, List<TripTag> favoriteAttractions, List<TripTag> tripVibes) {
         this.adultsCount = adultsCount;
         this.childrenCount = childrenCount;
         this.city = cityName;

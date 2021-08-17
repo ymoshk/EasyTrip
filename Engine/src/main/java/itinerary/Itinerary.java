@@ -25,7 +25,11 @@ public class Itinerary {
         setDays();
     }
 
-    ItineraryDay getItineraryDay(LocalDate date){
+    public int getCurrentDayIndex() {
+        return currentDayIndex;
+    }
+
+    ItineraryDay getItineraryDay(LocalDate date) {
         return itineraryDays.stream().
                 filter(itineraryDay ->
                         itineraryDay.getDate().isEqual(date)).findFirst().orElse(null);
@@ -65,10 +69,10 @@ public class Itinerary {
         itineraryDays.add(newItineraryDay);
     }
 
-    public void addAttraction(Attraction attraction, LocalDateTime startTime, LocalDateTime endTime){
+    public void addAttraction(Attraction attraction, LocalDateTime startTime, LocalDateTime endTime) {
         ItineraryDay dayToUpdate = getItineraryDay(startTime.toLocalDate());
 
-        if(dayToUpdate == null){
+        if (dayToUpdate == null) {
             itineraryDays.add(new ItineraryDay(startTime.toLocalDate()));
             dayToUpdate = getItineraryDay(startTime.toLocalDate());
         }
