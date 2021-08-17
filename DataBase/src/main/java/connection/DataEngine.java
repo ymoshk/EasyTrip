@@ -212,7 +212,8 @@ public class DataEngine implements Closeable {
             int i = 0;
             context = new GeoApiContext.Builder().apiKey(Keys.getKey()).build();
             PlacesSearchResponse resp = GoogleMapsApiUtils
-                    .getTextSearchRequest(context, attractionName, city.getCityName(), priceRange, type)
+                    .getTextSearchRequest(context, attractionName, city.getCityName(),
+                            city.getCityCenter(), priceRange, type)
                     .await();
             do {
                 GeoApiContext finalContext = context;
