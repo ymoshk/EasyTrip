@@ -2,27 +2,28 @@ package util.google;
 
 import com.google.maps.*;
 import com.google.maps.model.LatLng;
-import com.google.maps.model.PlaceDetails;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.TravelMode;
 import container.PriceRange;
 
 public class GoogleMapsApiUtils {
+    public static int RADIUS = 50 * 1000;
 
-    public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName, String cityName, PriceRange priceRange, PlaceType type) {
+    public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName, String cityName,
+                                                         LatLng cityCenter, PriceRange priceRange, PlaceType type) {
         if(type.equals(PlaceType.GROCERY_OR_SUPERMARKET)) {
-            return PlacesApi.textSearchQuery(context, "market" + "+" + cityName);
+            return PlacesApi.textSearchQuery(context, "market" + "+" + cityName).location(cityCenter).radius(RADIUS);
         }
         // DOCTOR == BEACH
         else if(type.equals(PlaceType.DOCTOR)) {
-            return PlacesApi.textSearchQuery(context, "beach" + "+" + cityName);
+            return PlacesApi.textSearchQuery(context, "beach" + "+" + cityName).location(cityCenter).radius(RADIUS);
         }
         // ATM == TOP SIGHT
         else if(type.equals(PlaceType.ATM)) {
-            return PlacesApi.textSearchQuery(context, "top sights" + "+" + cityName);
+            return PlacesApi.textSearchQuery(context, "top sights" + "+" + cityName).location(cityCenter).radius(RADIUS);
         }
 
-        return PlacesApi.textSearchQuery(context, attractionName + "+" + cityName).type(type);
+        return PlacesApi.textSearchQuery(context, attractionName).type(type).location(cityCenter).radius(RADIUS);
     }
 
     public static TextSearchRequest getNextPageTextSearchRequest(GeoApiContext context, String pageToken) {

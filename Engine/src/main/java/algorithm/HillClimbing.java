@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 public class HillClimbing {
     //TODO: fetch 10 cities & check them + Tel Aviv + Jerusalem
     //TODO: add breaks depending on traveler type - depends on transportation time
-    //TODO: consider user preferences: children --> times + nightlife
     //TODO: budget --> filter?
     //TODO: attraction tags --> relative weights
     //TODO: vibe tags: early bird / night owl, luxury / street food, fast-paced / chill
@@ -32,9 +31,11 @@ public class HillClimbing {
     //TODO: save attraction name as constants
     //TODO: remove beaches from cities without beach
     static private class ScheduleRestrictions {
-        private final LocalTime LUNCH_TIME;
+        private LocalTime START_TIME;
+        private LocalTime END_TIME;
+        private LocalTime LUNCH_TIME;
         private boolean scheduledLunch;
-        private final LocalTime DINNER_TIME;
+        private LocalTime DINNER_TIME;
         private boolean scheduledDinner;
         private final LocalTime BAR_TIME;
         private final LocalTime NIGHT_CLUB_TIME;
@@ -43,10 +44,10 @@ public class HillClimbing {
         private final LocalTime PARK_TIME;
         private boolean scheduledCasino;
         private boolean scheduledSpa;
+        private final boolean isFamilyTrip;
 
         public ScheduleRestrictions(QuestionsData preferences) {
-            this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
-            this.DINNER_TIME = LocalTime.of(18,59, 0, 0);
+            initTimeConstraints(preferences);
             this.scheduledLunch = false;
             this.scheduledDinner = false;
             this.BAR_TIME = LocalTime.of(16, 59,0,0);
@@ -56,6 +57,7 @@ public class HillClimbing {
             this.PARK_TIME = LocalTime.of(19, 1, 0, 0);
             this.scheduledCasino = false;
             this.scheduledSpa = false;
+            this.isFamilyTrip = preferences.getChildrenCount() > 0;
         }
 
         public void setScheduledCasino(boolean scheduledCasino) {
@@ -76,6 +78,41 @@ public class HillClimbing {
 
         public void setScheduledDinner(boolean scheduledDinner) {
             this.scheduledDinner = scheduledDinner;
+        }
+
+        public LocalTime getSTART_TIME() {
+            return START_TIME;
+        }
+
+        public LocalTime getEND_TIME() {
+            return END_TIME;
+        }
+
+        public LocalTime getLUNCH_TIME() {
+            return LUNCH_TIME;
+        }
+
+        public LocalTime getDINNER_TIME() {
+            return DINNER_TIME;
+        }
+
+        public boolean isFamilyTrip() {
+            return isFamilyTrip;
+        }
+
+        public void initTimeConstraints(QuestionsData questionsData){
+            this.START_TIME = LocalTime.of(8, 0, 0, 0);
+
+            if(questionsData.getChildrenCount() > 0){
+                this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
+                this.DINNER_TIME = LocalTime.of(17, 59, 0, 0);
+                this.END_TIME = LocalTime.of(21, 59, 0, 0);
+            }
+            else{
+                this.LUNCH_TIME = LocalTime.of(12,59, 0, 0);
+                this.DINNER_TIME = LocalTime.of(19,29, 0, 0);
+                this.END_TIME = LocalTime.of(23, 59, 0, 0);
+            }
         }
 
         private boolean isRestaurantSchedule(LocalDateTime currentTime){
@@ -288,13 +325,13 @@ public class HillClimbing {
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList) {
         this.preferences = preferences;
+        this.scheduleRestrictions = new ScheduleRestrictions(preferences);
         this.placeTypeToAttraction = attractionListToAttractionHashMap(attractionList);
         this.attractionEvaluator = new AttractionEvaluator(placeTypeToAttraction);
         this.attractionToBooleanMap = new HashMap<>();
         currentTime = getStartTimeByTravelerType();
         this.rand = new Random();
         this.lastAttraction = null;
-        this.scheduleRestrictions = new ScheduleRestrictions(preferences);
         removeAttractionDuplicationFromTouristAttraction();
         initTopSights(TOP_SIGHTS_NUM);
     }
@@ -350,12 +387,17 @@ public class HillClimbing {
         HashMap<String, List<Attraction>> res = new HashMap<>();
 
         attractionList.forEach(attraction -> {
-            // don't add hotels to itinerary
-            if(!attraction.getClass().getSimpleName().equalsIgnoreCase("Hotel")){
-                if(!res.containsKey(attraction.getClass().getSimpleName()))
-                    res.put(attraction.getClass().getSimpleName(), new ArrayList<>());
+            String attractionType = attraction.getClass().getSimpleName();
 
-                res.get(attraction.getClass().getSimpleName()).add(attraction);
+            // don't add hotels to itinerary
+            if(!attractionType.equalsIgnoreCase("Hotel")){
+                if(scheduleRestrictions.isFamilyTrip() && !attractionType.equalsIgnoreCase("Bar") &&
+                    !attractionType.equalsIgnoreCase("NightClub")){
+                    if(!res.containsKey(attraction.getClass().getSimpleName()))
+                        res.put(attraction.getClass().getSimpleName(), new ArrayList<>());
+
+                    res.get(attraction.getClass().getSimpleName()).add(attraction);
+                }
             }
         });
 
@@ -448,14 +490,27 @@ public class HillClimbing {
         return attractionToAdd;
     }
 
+    private boolean moveToNextDay(LocalDateTime prevTime){
+        if(!prevTime.toLocalDate().isEqual(currentTime.toLocalDate())){
+            return true;
+        }
+        else if(scheduleRestrictions.isFamilyTrip && currentTime.toLocalTime().isAfter(scheduleRestrictions.getEND_TIME())){
+            currentTime = currentTime.plusDays(1);
+            return true;
+        }
+
+        return false;
+    }
 
     private void advanceCurrentTime(int attractionDurationMinutes){
         LocalDateTime prevTime = currentTime;
+        LocalTime startTime = scheduleRestrictions.getSTART_TIME();
 
         currentTime = currentTime.plusMinutes(attractionDurationMinutes);
+
         // check if moved to the next day
-        if(!prevTime.toLocalDate().isEqual(currentTime.toLocalDate())){
-            currentTime = currentTime.withHour(8).withMinute(0).withSecond(0).withNano(0);
+        if(moveToNextDay(prevTime)){
+            currentTime = currentTime.with(startTime);
             scheduleRestrictions.setScheduledLunch(false);
             scheduleRestrictions.setScheduledDinner(false);
             scheduleRestrictions.setScheduledBeach(false);
