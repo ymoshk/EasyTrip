@@ -9,12 +9,12 @@ import javax.persistence.Table;
 @Table(name = "RegisteredUser")
 public class RegisteredUser extends User {
 
-    public RegisteredUser(String userName, String password, boolean isAdmin) {
-        super(userName, Hash.md5Hash(password), isAdmin);
+    public RegisteredUser(String sessionId, String userName, String password, boolean isAdmin) {
+        super(sessionId, userName, Hash.md5Hash(password), isAdmin);
     }
 
-    public RegisteredUser(String userName, String password) {
-        super(userName, Hash.md5Hash(password));
+    public RegisteredUser(String sessionId, String userName, String password) {
+        super(sessionId, userName, Hash.md5Hash(password));
     }
 
     public RegisteredUser() {

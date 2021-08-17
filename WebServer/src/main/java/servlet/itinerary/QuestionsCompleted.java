@@ -53,6 +53,7 @@ public class QuestionsCompleted extends HttpServlet {
             // TODO the attraction mapping algorithm should create the new itinerary.
 
             HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
+
             List<model.attraction.Attraction> attractionList = data.getCity().getAttractionList();
             List<template.Attraction> attractionsTemplatesList = attractionList.stream()
                     .map(attraction -> new template.Attraction(attraction, true))

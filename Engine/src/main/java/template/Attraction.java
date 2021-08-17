@@ -57,7 +57,6 @@ public class Attraction {
         this.website = attraction.getWebsite();
         this.reviews = gson.toJson(attraction.getReviews());
         this.priceLevel = attraction.getPriceLevel() != null ? attraction.getPriceLevel().ordinal() : 0;
-        this.minDurationAsSeconds = TypesDefaultDuration.getMinDurationAsSeconds(this.type);
     }
 
     private HashMap<OpeningHours.Period.OpenClose.DayOfWeek, LocalTime[]>
