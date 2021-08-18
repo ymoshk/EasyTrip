@@ -44,11 +44,15 @@ public class Attraction {
         this.isTemporarilyClose = attraction.getBusinessStatus().equals("CLOSED_TEMPORARILY");
         this.priceRangeMin = attraction.getPriceRange().getMin().ordinal();
         this.priceRangeMax = attraction.getPriceRange().getMin().ordinal();
+
         Gson gson = new Gson();
         if (attraction.getOpeningHours() != null) {
             this.openingHoursText = gson.toJson(new OpeningHoursTextContainer(attraction));
             //this.openingHoursData = gson.toJson(parseOpeningHours(attraction.getOpeningHours().periods));
+        } else {
+            this.openingHoursText = "";
         }
+
         this.lat = attraction.getLat();
         this.lng = attraction.getLng();
         this.address = attraction.getFormattedAddress();
@@ -89,11 +93,10 @@ public class Attraction {
                 count++;
             }
 
-            if(count == 2 && !spaceAdded){
+            if (count == 2 && !spaceAdded) {
                 res.append(" " + character);
                 spaceAdded = true;
-            }
-            else {
+            } else {
                 res.append(character);
             }
         }
