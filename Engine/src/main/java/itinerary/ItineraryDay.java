@@ -48,6 +48,13 @@ public class ItineraryDay {
                 new template.Attraction(attraction, true)));
     }
 
+    public void addTransportationTime(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type){
+        activities.add(new ActivityNode(startTime.toLocalTime(),
+                endTime.toLocalTime(),
+                type,
+                null));
+    }
+
     public void clean() {
         this.activities.clear();
 

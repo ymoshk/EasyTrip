@@ -3,6 +3,7 @@ package algorithm;
 import com.google.maps.model.OpeningHours;
 import constant.DefaultDurations;
 import evaluators.AttractionEvaluator;
+import itinerary.ActivityNode;
 import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import model.attraction.Attraction;
@@ -449,6 +450,7 @@ public class HillClimbing {
     private Attraction addAttraction(State currentState) {
         List<Attraction> attractionList;
         Attraction attractionToAdd;
+        int transportationTime = 30;
 
         attractionList = scheduleRestrictions.getNeighbourAttractions(currentTime, placeTypeToAttraction,
                 attractionToBooleanMap, lastAttraction);
@@ -469,9 +471,18 @@ public class HillClimbing {
 
             debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
 
+            // exclude first & last attractions transportation times
+            if(lastAttraction != null){
+                // calculate transportation
+                currentState.getItinerary().addTransportation(currentTime, currentTime.plusMinutes(transportationTime),
+                        ActivityNode.Types.CAR);
+                advanceCurrentTime(transportationTime);
+            }
+
             currentState.getItinerary().addAttraction(attractionToAdd,
-                    attractionStartTime,
-                    attractionEndTime);
+                    currentTime,
+                    currentTime.plusMinutes(attractionDurationMinutes));
+
 
             // reset restrictions
             if(attractionToAdd.getClass().getSimpleName().equalsIgnoreCase("Spa")){
@@ -640,7 +651,7 @@ public class HillClimbing {
             budget = Integer.parseInt(scanner.nextLine());
 
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
-                    childrenCount, budget, LocalDateTime.now(), LocalDateTime.now().plusDays(5), new ArrayList<>(),
+                    childrenCount, budget, LocalDateTime.now(), LocalDateTime.now().plusDays(3), new ArrayList<>(),
                     new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 

@@ -79,4 +79,8 @@ public class Itinerary {
 
         dayToUpdate.addAttractionToEnd(attraction, startTime, endTime);
     }
+
+    public void addTransportation(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type){
+        getItineraryDay(startTime.toLocalDate()).addTransportationTime(startTime, endTime, type);
+    }
 }
