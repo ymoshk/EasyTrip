@@ -25,6 +25,7 @@ public class HillClimbing {
     //TODO: fetch 10 cities & check them + Tel Aviv + Jerusalem
     //TODO: add breaks depending on traveler type - depends on transportation time
     //TODO: budget --> filter?
+    //TODO: decide if we want the top sight in the pull or not
     //TODO: attraction tags --> relative weights
     //TODO: vibe tags: early bird / night owl, luxury / street food, fast-paced / chill
     //TODO: change attraction durations, lunch & dinner
@@ -390,8 +391,9 @@ public class HillClimbing {
             String attractionType = attraction.getClass().getSimpleName();
 
             // don't add hotels to itinerary
-            if(!attractionType.equalsIgnoreCase("Hotel")){
-                if(scheduleRestrictions.isFamilyTrip() && !attractionType.equalsIgnoreCase("Bar") &&
+             if(!attractionType.equalsIgnoreCase("Hotel")){
+                // don't add bars & clubs to family trip
+                if(!scheduleRestrictions.isFamilyTrip() || !attractionType.equalsIgnoreCase("Bar") &&
                     !attractionType.equalsIgnoreCase("NightClub")){
                     if(!res.containsKey(attraction.getClass().getSimpleName()))
                         res.put(attraction.getClass().getSimpleName(), new ArrayList<>());
@@ -460,12 +462,12 @@ public class HillClimbing {
             LocalDateTime attractionStartTime = currentTime;
             LocalDateTime attractionEndTime = currentTime.plusMinutes(attractionDurationMinutes);
 
-            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
-
-            //cutting the end time to 00:00, although the attractions filter checks the whole durations
+            //cutting the end time to 23:59, although the attractions filter checks the whole durations
             if(attractionStartTime.toLocalDate().isBefore(attractionEndTime.toLocalDate())){
-                attractionEndTime = attractionEndTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                attractionEndTime = attractionEndTime.withHour(23).withMinute(59).withSecond(0).withNano(0);
             }
+
+            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
 
             currentState.getItinerary().addAttraction(attractionToAdd,
                     attractionStartTime,
@@ -638,7 +640,7 @@ public class HillClimbing {
             budget = Integer.parseInt(scanner.nextLine());
 
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
-                    childrenCount, budget, LocalDateTime.now(), LocalDateTime.now().plusDays(3), new ArrayList<>(),
+                    childrenCount, budget, LocalDateTime.now(), LocalDateTime.now().plusDays(5), new ArrayList<>(),
                     new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 
