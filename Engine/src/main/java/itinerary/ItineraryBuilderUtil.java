@@ -20,6 +20,10 @@ public class ItineraryBuilderUtil {
         this.attractions = generateAttractionsDictionary();
     }
 
+    public QuestionsData getQuestionsData() {
+        return questionsData;
+    }
+
     private QuestionsData parseQuestionsData(HashMap<String, String> questionnaireData) {
         Gson gson = new Gson();
 
