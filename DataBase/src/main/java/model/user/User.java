@@ -1,21 +1,23 @@
 package model.user;
 
 import model.Model;
+import model.itinerary.ItineraryModel;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity()
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class User extends Model {
     @Column(nullable = false)
-    private String userName;
+    String password;
+    boolean isAdmin;
+    String sessionId;
+    @JoinColumn(name = "user_id")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ItineraryModel> itineraryList;
     @Column(nullable = false)
-    private String password;
-    private boolean isAdmin;
-    private String sessionId;
+    private String userName;
 
     public User() {
     }
@@ -29,6 +31,14 @@ public abstract class User extends Model {
 
     public User(String sessionId, String userName, String password) {
         this(sessionId, userName, password, false);
+    }
+
+    public List<ItineraryModel> getItineraryList() {
+        return itineraryList;
+    }
+
+    public void setItineraryList(List<ItineraryModel> itineraryList) {
+        this.itineraryList = itineraryList;
     }
 
     public String getSessionId() {

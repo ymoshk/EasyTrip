@@ -1,25 +1,51 @@
 package model.itinerary;
 
 import model.Model;
+import model.user.User;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class ItineraryModel extends Model {
     @Column(unique = true, nullable = false)
-    private String itineraryId;
+    String itineraryId;
     @Type(type = "text")
     @Column(nullable = false)
-    private String jsonData;
+    String jsonData;
+    @ManyToOne
+    @JoinColumn(name = "user_id", updatable = false)
+    User user;
+    ItineraryStatus status;
 
     public ItineraryModel() {
+        this.status = ItineraryStatus.EDIT;
     }
 
-    public ItineraryModel(String itineraryId, String jsonData) {
+    public ItineraryModel(String itineraryId, String jsonData, User user) {
         this.itineraryId = itineraryId;
         this.jsonData = jsonData;
+        this.status = ItineraryStatus.EDIT;
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public ItineraryStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ItineraryStatus status) {
+        this.status = status;
     }
 
     public String getItineraryId() {

@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import connection.DataEngine;
 import itinerary.Itinerary;
 import model.itinerary.ItineraryModel;
+import model.user.GuestUser;
+import model.user.User;
 
 import java.io.Closeable;
 import java.time.LocalTime;
@@ -103,8 +105,13 @@ public class ItineraryCache implements Closeable {
     private void saveItinerary(Itinerary itinerary, boolean isUpdate) {
         try {
             Gson gson = new Gson();
+
+            // TODO - delete the user creation
+            User user = new GuestUser();
+            DataEngine.getInstance().addUser(user);
+
             ItineraryModel model = new ItineraryModel(itinerary.getItineraryId(),
-                    gson.toJson(itinerary));
+                    gson.toJson(itinerary), user);
 
             if (isUpdate) {
                 DataEngine.getInstance().updateItinerary(model);

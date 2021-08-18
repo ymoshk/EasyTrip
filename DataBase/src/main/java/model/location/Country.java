@@ -25,7 +25,7 @@ public class Country extends Model implements Serializable {
     private String capital;
     private double averagePricePerDay;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "country_id", insertable = true, updatable = true)
+    @JoinColumn(name = "country_id")
     private List<City> cityList;
 
     public Country() {
