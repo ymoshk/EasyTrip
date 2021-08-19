@@ -10,12 +10,12 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class User extends Model {
     @Column(nullable = false)
-    String password;
-    boolean isAdmin;
-    String sessionId;
+    private String password;
+    private boolean isAdmin;
+    private String sessionId;
     @JoinColumn(name = "user_id")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    List<ItineraryModel> itineraryList;
+    private List<ItineraryModel> itineraryList;
     @Column(nullable = false)
     private String userName;
 

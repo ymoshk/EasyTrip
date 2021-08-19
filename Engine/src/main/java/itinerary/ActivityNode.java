@@ -5,6 +5,8 @@ import template.Attraction;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ActivityNode {
 
@@ -13,6 +15,7 @@ public class ActivityNode {
     private String endTime;
     private Attraction attraction;
     private String uniqueKey;
+    private Map<Types, Integer> transDuration;
 
     public ActivityNode(LocalTime startTime, LocalTime endTime, Types type, Attraction attraction) {
         this.startTime = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -20,6 +23,18 @@ public class ActivityNode {
         this.type = type;
         this.attraction = attraction;
         this.uniqueKey = GUID.generate();
+
+        if (type != Types.ATTRACTION && type != Types.FREE_TIME) {
+            this.transDuration = new HashMap<>();
+        }
+    }
+
+    public Map<Types, Integer> getTransDuration() {
+        return transDuration;
+    }
+
+    public void setTransDuration(Map<Types, Integer> transDuration) {
+        this.transDuration = transDuration;
     }
 
     public String getUniqueKey() {

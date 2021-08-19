@@ -11,10 +11,12 @@ import javax.persistence.Table;
 public class GuestUser extends User {
     private static int counter = 0;
 
+    public GuestUser(String sessionId) {
+        super(sessionId, guestNameGenerator(), Hash.md5Hash(GUID.generate()), false);
+    }
+
     public GuestUser() {
-        setUserName(guestNameGenerator());
-        setPassword(Hash.md5Hash(GUID.generate()));
-        setAdmin(false);
+
     }
 
     public static String guestNameGenerator() {
