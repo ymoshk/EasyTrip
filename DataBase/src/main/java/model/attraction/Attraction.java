@@ -23,7 +23,7 @@ public abstract class Attraction extends Model {
     @Column(nullable = false)
     private String name;
     private URL icon;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String placeId;
     private float rating;
     @ElementCollection

@@ -3,6 +3,7 @@ package algorithm;
 import com.google.maps.model.OpeningHours;
 import constant.DefaultDurations;
 import evaluators.AttractionEvaluator;
+import itinerary.ActivityNode;
 import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import model.attraction.Attraction;
@@ -25,6 +26,7 @@ public class HillClimbing {
     //TODO: fetch 10 cities & check them + Tel Aviv + Jerusalem
     //TODO: add breaks depending on traveler type - depends on transportation time
     //TODO: budget --> filter?
+    //TODO: decide if we want the top sight in the pull or not
     //TODO: attraction tags --> relative weights
     //TODO: vibe tags: early bird / night owl, luxury / street food, fast-paced / chill
     //TODO: change attraction durations, lunch & dinner
@@ -390,8 +392,9 @@ public class HillClimbing {
             String attractionType = attraction.getClass().getSimpleName();
 
             // don't add hotels to itinerary
-            if(!attractionType.equalsIgnoreCase("Hotel")){
-                if(scheduleRestrictions.isFamilyTrip() && !attractionType.equalsIgnoreCase("Bar") &&
+             if(!attractionType.equalsIgnoreCase("Hotel")){
+                // don't add bars & clubs to family trip
+                if(!scheduleRestrictions.isFamilyTrip() || !attractionType.equalsIgnoreCase("Bar") &&
                     !attractionType.equalsIgnoreCase("NightClub")){
                     if(!res.containsKey(attraction.getClass().getSimpleName()))
                         res.put(attraction.getClass().getSimpleName(), new ArrayList<>());
@@ -447,6 +450,7 @@ public class HillClimbing {
     private Attraction addAttraction(State currentState) {
         List<Attraction> attractionList;
         Attraction attractionToAdd;
+        int transportationTime = 30;
 
         attractionList = scheduleRestrictions.getNeighbourAttractions(currentTime, placeTypeToAttraction,
                 attractionToBooleanMap, lastAttraction);
@@ -460,16 +464,25 @@ public class HillClimbing {
             LocalDateTime attractionStartTime = currentTime;
             LocalDateTime attractionEndTime = currentTime.plusMinutes(attractionDurationMinutes);
 
+            //cutting the end time to 23:59, although the attractions filter checks the whole durations
+            if(attractionStartTime.toLocalDate().isBefore(attractionEndTime.toLocalDate())){
+                attractionEndTime = attractionEndTime.withHour(23).withMinute(59).withSecond(0).withNano(0);
+            }
+
             debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
 
-            //cutting the end time to 00:00, although the attractions filter checks the whole durations
-            if(attractionStartTime.toLocalDate().isBefore(attractionEndTime.toLocalDate())){
-                attractionEndTime = attractionEndTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
+            // exclude first & last attractions transportation times
+            if(lastAttraction != null){
+                // calculate transportation
+                currentState.getItinerary().addTransportation(currentTime, currentTime.plusMinutes(transportationTime),
+                        ActivityNode.Types.CAR);
+                advanceCurrentTime(transportationTime);
             }
 
             currentState.getItinerary().addAttraction(attractionToAdd,
-                    attractionStartTime,
-                    attractionEndTime);
+                    currentTime,
+                    currentTime.plusMinutes(attractionDurationMinutes));
+
 
             // reset restrictions
             if(attractionToAdd.getClass().getSimpleName().equalsIgnoreCase("Spa")){
