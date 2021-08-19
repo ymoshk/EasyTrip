@@ -46,6 +46,11 @@ public class ItineraryDay {
                 endTime.toLocalTime(),
                 ActivityNode.Types.ATTRACTION,
                 new template.Attraction(attraction, true)));
+        System.out.println("Attraction: " + attraction.getName());
+        System.out.println("Type: " + attraction.getClass().getSimpleName());
+        System.out.println("Start time: " +  startTime);
+        System.out.println("End time: " +  endTime);
+        System.out.println("\n\n");
     }
 
     public void addTransportationTime(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type){
@@ -53,6 +58,10 @@ public class ItineraryDay {
                 endTime.toLocalTime(),
                 type,
                 null));
+        System.out.println("Transportation time");
+        System.out.println("Start time: " +  startTime);
+        System.out.println("End time: " +  endTime);
+        System.out.println("\n\n");
     }
 
     public void clean() {
