@@ -1,6 +1,9 @@
 package algorithm;
 
+import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.OpeningHours;
+import com.google.maps.model.TravelMode;
+import connection.DataEngine;
 import constant.DefaultDurations;
 import evaluators.AttractionEvaluator;
 import itinerary.ActivityNode;
@@ -8,6 +11,7 @@ import itinerary.Itinerary;
 import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.location.City;
+import model.travel.Travel;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -107,12 +111,12 @@ public class HillClimbing {
 
             if(questionsData.getChildrenCount() > 0){
                 this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
-                this.DINNER_TIME = LocalTime.of(17, 59, 0, 0);
-                this.END_TIME = LocalTime.of(21, 59, 0, 0);
+                this.DINNER_TIME = LocalTime.of(17, 29, 0, 0);
+                this.END_TIME = LocalTime.of(22, 29, 0, 0);
             }
             else{
                 this.LUNCH_TIME = LocalTime.of(12,59, 0, 0);
-                this.DINNER_TIME = LocalTime.of(19,29, 0, 0);
+                this.DINNER_TIME = LocalTime.of(18,59, 0, 0);
                 this.END_TIME = LocalTime.of(23, 59, 0, 0);
             }
         }
@@ -311,6 +315,14 @@ public class HillClimbing {
 
             return attractionList;
         }
+
+        public void resetRestrictions(){
+            setScheduledLunch(false);
+            setScheduledDinner(false);
+            setScheduledBeach(false);
+            setScheduledCasino(false);
+            setScheduledSpa(false);
+        }
     }
 
     private final QuestionsData preferences;
@@ -318,11 +330,13 @@ public class HillClimbing {
     private final HashMap<String, List<Attraction>> placeTypeToAttraction;
     private final HashMap<String, Boolean> attractionToBooleanMap;
     private final Random rand;
+    DataEngine dataEngine;
     private LocalDateTime currentTime;
     private Attraction lastAttraction;
     private final ScheduleRestrictions scheduleRestrictions;
     private final int EARTH_RADIUS = 6371; // Radius of the earth in km
     private final int TOP_SIGHTS_NUM = 7;
+    private final int WALK_TIME = 15;
 
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList) {
@@ -333,6 +347,7 @@ public class HillClimbing {
         this.attractionToBooleanMap = new HashMap<>();
         currentTime = getStartTimeByTravelerType();
         this.rand = new Random();
+        this.dataEngine = DataEngine.getInstance();
         this.lastAttraction = null;
         removeAttractionDuplicationFromTouristAttraction();
         initTopSights(TOP_SIGHTS_NUM);
@@ -413,9 +428,10 @@ public class HillClimbing {
         // schedule attraction until vacation is over
         while(currentTime.isBefore(preferences.getEndDate())){
             // no available attractions to add
-            if(addAttraction(currentState) == null){
-                break;
-            }
+            addAttraction(currentState);
+//            if(addAttraction(currentState) == null){
+//                break;
+//            }
         }
 
         return currentState.getItinerary();
@@ -447,44 +463,62 @@ public class HillClimbing {
         return maxAttraction;
     }
 
+    int getTransportationTime(Attraction attractionDestination){
+        Travel travel = dataEngine.getTravel(
+                lastAttraction.getGeometry().location,
+                attractionDestination.getGeometry().location, TravelMode.DRIVING);
+
+        System.out.println(travel.getDistanceMatrixElement());
+        return 30;
+    }
+
     private Attraction addAttraction(State currentState) {
         List<Attraction> attractionList;
         Attraction attractionToAdd;
         int transportationTime = 30;
+        int attractionDurationMinutes;
+        LocalDateTime attractionStartTime;
+        LocalDateTime attractionEndTime;
+        LocalDateTime transportationStartTime = null;    // because initialized inside if statement
+        LocalDateTime transportationEndTime = null;      // because initialized inside if statement
 
         attractionList = scheduleRestrictions.getNeighbourAttractions(currentTime, placeTypeToAttraction,
                 attractionToBooleanMap, lastAttraction);
         attractionToAdd = findBestAttraction(attractionList);
 
         if(attractionToAdd != null){
-            attractionToBooleanMap.put(attractionToAdd.getPlaceId(), true);
-
-            int attractionDurationMinutes = DefaultDurations.getESTOfAttraction(attractionToAdd);
-
-            LocalDateTime attractionStartTime = currentTime;
-            LocalDateTime attractionEndTime = currentTime.plusMinutes(attractionDurationMinutes);
-
-            //cutting the end time to 23:59, although the attractions filter checks the whole durations
-            if(attractionStartTime.toLocalDate().isBefore(attractionEndTime.toLocalDate())){
-                attractionEndTime = attractionEndTime.withHour(23).withMinute(59).withSecond(0).withNano(0);
-            }
-
-            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
-
-            // exclude first & last attractions transportation times
+            // exclude first attraction transportation time
             if(lastAttraction != null){
-                // calculate transportation
-                currentState.getItinerary().addTransportation(currentTime, currentTime.plusMinutes(transportationTime),
-                        ActivityNode.Types.CAR);
-                advanceCurrentTime(transportationTime);
+                transportationStartTime = currentTime;
+                transportationTime = getTransportationTime(attractionToAdd);
+                currentTime = currentTime.plusMinutes(transportationTime);
+                transportationEndTime = currentTime;
             }
+
+            attractionDurationMinutes = DefaultDurations.getESTOfAttraction(attractionToAdd);
+
+            attractionStartTime = currentTime;
+            currentTime = currentTime.plusMinutes(attractionDurationMinutes);
+            attractionEndTime = currentTime;
+
+            if(lastAttraction != null && moveToNextDay(transportationStartTime)){
+                resetNextDay();
+                return lastAttraction;
+            }
+
+            if(lastAttraction != null) {
+                currentState.getItinerary().addTransportation(transportationStartTime, transportationEndTime,
+                        ActivityNode.Types.CAR);
+            }
+
+//            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
 
             currentState.getItinerary().addAttraction(attractionToAdd,
-                    currentTime,
-                    currentTime.plusMinutes(attractionDurationMinutes));
+                    attractionStartTime,
+                    attractionEndTime);
 
 
-            // reset restrictions
+            // update restrictions
             if(attractionToAdd.getClass().getSimpleName().equalsIgnoreCase("Spa")){
                 scheduleRestrictions.setScheduledSpa(true);
             }
@@ -496,8 +530,8 @@ public class HillClimbing {
             }
 
             //after adding the attraction, it's now the last attraction we added.
+            attractionToBooleanMap.put(attractionToAdd.getPlaceId(), true);
             lastAttraction = attractionToAdd;
-            advanceCurrentTime(attractionDurationMinutes);
         }
 
         return attractionToAdd;
@@ -515,23 +549,27 @@ public class HillClimbing {
         return false;
     }
 
-    private void advanceCurrentTime(int attractionDurationMinutes){
-        LocalDateTime prevTime = currentTime;
+    private void resetNextDay(){
         LocalTime startTime = scheduleRestrictions.getSTART_TIME();
 
-        currentTime = currentTime.plusMinutes(attractionDurationMinutes);
-
-        // check if moved to the next day
-        if(moveToNextDay(prevTime)){
-            currentTime = currentTime.with(startTime);
-            scheduleRestrictions.setScheduledLunch(false);
-            scheduleRestrictions.setScheduledDinner(false);
-            scheduleRestrictions.setScheduledBeach(false);
-            scheduleRestrictions.setScheduledCasino(false);
-            scheduleRestrictions.setScheduledSpa(false);
-            lastAttraction = null;
-        }
+        currentTime = currentTime.with(startTime);
+        scheduleRestrictions.resetRestrictions();
+        lastAttraction = null;
     }
+
+//    private void advanceCurrentTime(int attractionDurationMinutes){
+//        LocalDateTime prevTime = currentTime;
+//        LocalTime startTime = scheduleRestrictions.getSTART_TIME();
+//
+//        currentTime = currentTime.plusMinutes(attractionDurationMinutes);
+//
+//        // check if moved to the next day
+//        if(moveToNextDay(prevTime)){
+//            currentTime = currentTime.with(startTime);
+//            scheduleRestrictions.resetRestrictions();
+//            lastAttraction = null;
+//        }
+//    }
 
 //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
     private double calculateDistance(Attraction source, Attraction destination){

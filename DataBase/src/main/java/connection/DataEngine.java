@@ -347,14 +347,14 @@ public class DataEngine implements Closeable {
         List<Travel> travels = (List<Travel>) dbContext.selectQuery(
                 "FROM Travel WHERE " +
                         "destLat = " + dest.lat + " AND destLng = " + dest.lng +
-                        " AND sourceLat = " + source.lat + " AND sourceLng = " + source.lng);
+                        " AND sourceLat = " + source.lat + " AND sourceLng = " + source.lng + " AND mode = " + mode.ordinal());
 
         Travel res = travels.stream().filter(travel -> travel.getMode() == mode).findFirst().orElse(null);
 
         return res;
     }
 
-    private DistanceMatrixElement getDistanceMatrixElementFromGoogleApi(LatLng source, LatLng dest, TravelMode mode) {
+    public static DistanceMatrixElement getDistanceMatrixElementFromGoogleApi(LatLng source, LatLng dest, TravelMode mode) {
         GeoApiContext context = null;
         DistanceMatrixElement res = null;
 
