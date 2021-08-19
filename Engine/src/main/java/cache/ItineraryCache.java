@@ -2,6 +2,7 @@ package cache;
 
 import com.google.gson.Gson;
 import connection.DataEngine;
+import generator.GUID;
 import itinerary.Itinerary;
 import model.itinerary.ItineraryModel;
 import model.user.GuestUser;
@@ -107,7 +108,7 @@ public class ItineraryCache implements Closeable {
             Gson gson = new Gson();
 
             // TODO - delete the user creation
-            User user = new GuestUser();
+            User user = new GuestUser(GUID.generate());
             DataEngine.getInstance().addUser(user);
 
             ItineraryModel model = new ItineraryModel(itinerary.getItineraryId(),
