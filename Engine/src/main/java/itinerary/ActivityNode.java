@@ -1,5 +1,6 @@
 package itinerary;
 
+import com.google.maps.model.TravelMode;
 import generator.GUID;
 import template.Attraction;
 
@@ -77,7 +78,22 @@ public class ActivityNode {
         this.endTime = endTime;
     }
 
+    public static Types googleTravelToActivityType(TravelMode travelMode){
+        if(travelMode.equals(TravelMode.WALKING)){
+            return Types.WALK;
+        }
+        else if(travelMode.equals(TravelMode.DRIVING)){
+            return Types.CAR;
+        }
+        else if(travelMode.equals(TravelMode.TRANSIT)){
+            return Types.TRANSIT;
+        }
+        else{
+            return Types.BICYCLE;
+        }
+    }
+
     public enum Types {
-        FREE_TIME, CAR, BICYCLE, WALK, ATTRACTION
+        FREE_TIME, CAR, BICYCLE, WALK, TRANSIT, ATTRACTION
     }
 }

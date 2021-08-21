@@ -155,16 +155,11 @@ public class AttractionEvaluator {
     }
 
     private double evaluateByDistance(double distance) {
-        if(distance < 1.8){
+        if(distance < 1.6){
             return 100;
         }
         else{
-            // to calculate grade
-            if(distance > 8){
-                distance = 10;
-            }
-
-            return (1 - distance/9) * 100;
+            return (1 - distance/6) * 100;
         }
     }
 

@@ -1,6 +1,5 @@
 package algorithm;
 
-import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.OpeningHours;
 import com.google.maps.model.TravelMode;
 import connection.DataEngine;
@@ -16,6 +15,7 @@ import model.travel.Travel;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -112,11 +112,11 @@ public class HillClimbing {
             if(questionsData.getChildrenCount() > 0){
                 this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
                 this.DINNER_TIME = LocalTime.of(17, 29, 0, 0);
-                this.END_TIME = LocalTime.of(22, 29, 0, 0);
+                this.END_TIME = LocalTime.of(23, 0, 0, 0);
             }
             else{
-                this.LUNCH_TIME = LocalTime.of(12,59, 0, 0);
-                this.DINNER_TIME = LocalTime.of(18,59, 0, 0);
+                this.LUNCH_TIME = LocalTime.of(12,29, 0, 0);
+                this.DINNER_TIME = LocalTime.of(18,29, 0, 0);
                 this.END_TIME = LocalTime.of(23, 59, 0, 0);
             }
         }
@@ -336,7 +336,9 @@ public class HillClimbing {
     private final ScheduleRestrictions scheduleRestrictions;
     private final int EARTH_RADIUS = 6371; // Radius of the earth in km
     private final int TOP_SIGHTS_NUM = 7;
-    private final int WALK_TIME = 15;
+    private final long WALKABLE_TIME = 15 * 60;   // seconds
+    private long BREAK_TIME_FACTOR = 15 * 60;
+    private boolean hasCar;
 
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList) {
@@ -351,6 +353,8 @@ public class HillClimbing {
         this.lastAttraction = null;
         removeAttractionDuplicationFromTouristAttraction();
         initTopSights(TOP_SIGHTS_NUM);
+        this.hasCar = false;
+        this.BREAK_TIME_FACTOR = 10 * 60;
     }
 
     void initTopSights(int numOfAttractions){
@@ -444,10 +448,11 @@ public class HillClimbing {
         }
 
         Attraction maxAttraction = attractionList.get(0);
-        double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction);
+        double distance = calculateDistance(lastAttraction, maxAttraction);
+        double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction, distance);
+
         Attraction curAttraction;
         double curValue;
-        double distance;
 
         for (Attraction attraction : attractionList) {
             curAttraction = attraction;
@@ -463,19 +468,54 @@ public class HillClimbing {
         return maxAttraction;
     }
 
-    int getTransportationTime(Attraction attractionDestination){
+    Travel getTransportationTime(Attraction attractionDestination){
+        // let assume the distance is walkable
         Travel travel = dataEngine.getTravel(
                 lastAttraction.getGeometry().location,
-                attractionDestination.getGeometry().location, TravelMode.DRIVING);
+                attractionDestination.getGeometry().location, TravelMode.WALKING);
+
+        if(travel.getDistanceMatrixElement().duration.inSeconds > WALKABLE_TIME){
+            if(hasCar){
+                travel = dataEngine.getTravel(
+                        lastAttraction.getGeometry().location,
+                        attractionDestination.getGeometry().location, TravelMode.DRIVING);
+            }
+            else{
+                travel = dataEngine.getTravel(
+                        lastAttraction.getGeometry().location,
+                        attractionDestination.getGeometry().location, TravelMode.TRANSIT);
+            }
+        }
 
         System.out.println(travel.getDistanceMatrixElement());
-        return 30;
+        System.out.println(travel.getMode());
+        return travel;
+    }
+
+    private void addBreakTime(Travel travel){
+        int minutes;
+        int minutesUnits;
+        int minutesToAdd;
+
+        // in case travel time is long, don't add break time
+        if(travel.getDistanceMatrixElement().duration.inSeconds < 30 * 60){
+            currentTime = currentTime.plusSeconds(BREAK_TIME_FACTOR);
+        }
+
+        // round minutes units to 10
+        minutes = currentTime.toLocalTime().getMinute();
+        if(minutes % 10 != 0){
+            minutesUnits = minutes % 10;
+            minutesToAdd = 10 - minutesUnits;
+
+            currentTime = currentTime.plusMinutes(minutesToAdd);
+        }
     }
 
     private Attraction addAttraction(State currentState) {
         List<Attraction> attractionList;
         Attraction attractionToAdd;
-        int transportationTime = 30;
+        Travel travelTime = null;   // because initialized inside if statement
         int attractionDurationMinutes;
         LocalDateTime attractionStartTime;
         LocalDateTime attractionEndTime;
@@ -490,9 +530,12 @@ public class HillClimbing {
             // exclude first attraction transportation time
             if(lastAttraction != null){
                 transportationStartTime = currentTime;
-                transportationTime = getTransportationTime(attractionToAdd);
-                currentTime = currentTime.plusMinutes(transportationTime);
+                travelTime = getTransportationTime(attractionToAdd);
+                currentTime = currentTime.plusSeconds(travelTime.getDistanceMatrixElement().duration.inSeconds);
+                currentTime = currentTime.truncatedTo(ChronoUnit.MINUTES);
                 transportationEndTime = currentTime;
+
+                addBreakTime(travelTime);
             }
 
             attractionDurationMinutes = DefaultDurations.getESTOfAttraction(attractionToAdd);
@@ -507,8 +550,9 @@ public class HillClimbing {
             }
 
             if(lastAttraction != null) {
+                System.out.println(calculateDistance(lastAttraction, attractionToAdd));
                 currentState.getItinerary().addTransportation(transportationStartTime, transportationEndTime,
-                        ActivityNode.Types.CAR);
+                        ActivityNode.googleTravelToActivityType(travelTime.getMode()));
             }
 
 //            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);

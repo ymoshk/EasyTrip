@@ -31,6 +31,7 @@ public class Attraction {
     public int priceLevel;
     public int minDurationAsSeconds;
 
+    // TODO: check if null before using .get(), exception on line 43
     public Attraction(model.attraction.Attraction attraction, boolean isRecommended) {
         this.id = attraction.getPlaceId();
         this.name = attraction.getName();
