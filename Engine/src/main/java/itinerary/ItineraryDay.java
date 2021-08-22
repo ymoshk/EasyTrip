@@ -64,6 +64,14 @@ public class ItineraryDay {
         System.out.println("\n\n");
     }
 
+    public void addFreeTime(LocalDateTime startTime, LocalDateTime endTime){
+        activities.add(new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FREE_TIME, null));
+        System.out.println("Free time");
+        System.out.println("Start time: " +  startTime);
+        System.out.println("End time: " +  endTime);
+        System.out.println("\n\n");
+    }
+
     public void clean() {
         this.activities.clear();
 

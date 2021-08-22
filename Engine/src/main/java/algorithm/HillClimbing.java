@@ -30,10 +30,8 @@ public class HillClimbing {
     //TODO: fetch 10 cities & check them + Tel Aviv + Jerusalem
     //TODO: add breaks depending on traveler type - depends on transportation time
     //TODO: budget --> filter?
-    //TODO: decide if we want the top sight in the pull or not
     //TODO: attraction tags --> relative weights
     //TODO: vibe tags: early bird / night owl, luxury / street food, fast-paced / chill
-    //TODO: change attraction durations, lunch & dinner
     //TODO: save attraction name as constants
     //TODO: remove beaches from cities without beach
     static private class ScheduleRestrictions {
@@ -546,6 +544,8 @@ public class HillClimbing {
 
             if(lastAttraction != null && moveToNextDay(transportationStartTime)){
                 resetNextDay();
+                // add padding to the end of the day
+                currentState.getItinerary().addFreeTime(transportationStartTime, transportationStartTime);
                 return lastAttraction;
             }
 
@@ -553,6 +553,9 @@ public class HillClimbing {
                 System.out.println(calculateDistance(lastAttraction, attractionToAdd));
                 currentState.getItinerary().addTransportation(transportationStartTime, transportationEndTime,
                         ActivityNode.googleTravelToActivityType(travelTime.getMode()));
+
+                // add padding between transportation time and next attraction
+                currentState.getItinerary().addFreeTime(transportationEndTime, attractionStartTime);
             }
 
 //            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
@@ -572,6 +575,9 @@ public class HillClimbing {
             if(attractionToAdd.getClass().getSimpleName().equalsIgnoreCase("Casino")){
                 scheduleRestrictions.setScheduledCasino(true);
             }
+
+            // add padding after attraction
+            currentState.getItinerary().addFreeTime(currentTime, currentTime);
 
             //after adding the attraction, it's now the last attraction we added.
             attractionToBooleanMap.put(attractionToAdd.getPlaceId(), true);
@@ -733,7 +739,7 @@ public class HillClimbing {
             budget = Integer.parseInt(scanner.nextLine());
 
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
-                    childrenCount, budget, LocalDateTime.now(), LocalDateTime.now().plusDays(3), new ArrayList<>(),
+                    childrenCount, budget, LocalDateTime.now(), LocalDateTime.now().plusDays(1), new ArrayList<>(),
                     new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 

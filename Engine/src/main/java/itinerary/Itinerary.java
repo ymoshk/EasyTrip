@@ -83,4 +83,8 @@ public class Itinerary {
     public void addTransportation(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type){
         getItineraryDay(startTime.toLocalDate()).addTransportationTime(startTime, endTime, type);
     }
+
+    public void addFreeTime(LocalDateTime startTime, LocalDateTime endTime){
+        getItineraryDay(startTime.toLocalDate()).addFreeTime(startTime, endTime);
+    }
 }
