@@ -16,7 +16,7 @@ public class ActivityNode {
     private String endTime;
     private Attraction attraction;
     private String uniqueKey;
-    private Map<Types, Integer> transDuration;
+    private Map<Types, Long> transDuration;
 
     public ActivityNode(LocalTime startTime, LocalTime endTime, Types type, Attraction attraction) {
         this.startTime = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -30,11 +30,11 @@ public class ActivityNode {
         }
     }
 
-    public Map<Types, Integer> getTransDuration() {
+    public Map<Types, Long> getTransDuration() {
         return transDuration;
     }
 
-    public void setTransDuration(Map<Types, Integer> transDuration) {
+    public void setTransDuration(Map<Types, Long> transDuration) {
         this.transDuration = transDuration;
     }
 
