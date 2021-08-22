@@ -41,8 +41,10 @@ public class Attraction {
         this.rating = attraction.getRating();
         this.userTotalRating = attraction.getUserRatingsTotal();
         this.image = attraction.getPhotoReference();
-        this.isPermanentlyClosed = attraction.getBusinessStatus().equals("CLOSED_PERMANENTLY");
-        this.isTemporarilyClose = attraction.getBusinessStatus().equals("CLOSED_TEMPORARILY");
+        if(attraction.getBusinessStatus() != null){
+            this.isPermanentlyClosed = attraction.getBusinessStatus().equals("CLOSED_PERMANENTLY");
+            this.isTemporarilyClose = attraction.getBusinessStatus().equals("CLOSED_TEMPORARILY");
+        }
         this.priceRangeMin = attraction.getPriceRange().getMin().ordinal();
         this.priceRangeMax = attraction.getPriceRange().getMin().ordinal();
 

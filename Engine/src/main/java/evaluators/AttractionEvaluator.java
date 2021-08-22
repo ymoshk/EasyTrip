@@ -35,6 +35,7 @@ public class AttractionEvaluator {
     private HashMap<String, ReviewsData> reviewsDataMap;
     private HashMap<String, Integer> attractionToIndexMap;
     private List<String> topAttractionIdList;
+    private Attraction topAmusementPark;
     private final double TOP_ATTRACTION_SCORE = 100;
     private final double AVG_ATTRACTION_SCORE = 80;
     private final double MEDIAN_ATTRACTION_SCORE = 50;
@@ -47,6 +48,10 @@ public class AttractionEvaluator {
             // sort attractions by number of reviews
             List <Attraction> sortedAttractionList = attractionList.stream().sorted(Comparator.
                     comparingInt(Attraction::getUserRatingsTotal)).collect(Collectors.toList());
+
+            if(placeType.equalsIgnoreCase("AmusementPark")){
+                this.topAmusementPark = sortedAttractionList.get(sortedAttractionList.size() - 1);
+            }
 
             ReviewsData reviewsDataOfType = calculateReviewsData(sortedAttractionList);
             reviewsDataMap.put(placeType, reviewsDataOfType);
@@ -172,6 +177,9 @@ public class AttractionEvaluator {
         return Math.log(logNumber) / Math.log(base);
     }
 
+    public Attraction getTopAmusementPark() {
+        return topAmusementPark;
+    }
 
     public static void main(String[] args) {
 
