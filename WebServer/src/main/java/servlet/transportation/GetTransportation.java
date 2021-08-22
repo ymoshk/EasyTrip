@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.maps.model.LatLng;
 import com.google.maps.model.TravelMode;
 import connection.DataEngine;
-import itinerary.ActivityNode;
 import model.travel.Travel;
 import util.Utils;
 
@@ -22,7 +21,7 @@ import java.util.Map;
 public class GetTransportation extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HashMap<String, String> data = Utils.parsePostData(req);
         double srcLat = Double.parseDouble(data.get("srcLat"));
         double srcLng = Double.parseDouble(data.get("srcLng"));
@@ -35,9 +34,9 @@ public class GetTransportation extends HttpServlet {
 
         try (PrintWriter out = resp.getWriter()) {
             Map<String, Long> res = new HashMap<>();
-            res.put("driving", driving.getDistanceMatrixElement().duration.inSeconds / 60);
-            res.put("walking", walking.getDistanceMatrixElement().duration.inSeconds / 60);
-            res.put("transit", transit.getDistanceMatrixElement().duration.inSeconds / 60);
+            res.put("driving", Math.floorDiv(driving.getDistanceMatrixElement().duration.inSeconds, 60L));
+            res.put("walking", Math.floorDiv(walking.getDistanceMatrixElement().duration.inSeconds, 60L));
+            res.put("transit", Math.floorDiv(transit.getDistanceMatrixElement().duration.inSeconds, 60L));
 
             out.println(new Gson().toJson(res));
         } catch (Exception e) {
