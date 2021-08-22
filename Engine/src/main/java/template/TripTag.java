@@ -12,4 +12,8 @@ public class TripTag {
         this.tagName = map.get("name").toString();
         this.imgSource = map.get("src").toString();
     }
+
+    public String getTagName() {
+        return tagName;
+    }
 }
