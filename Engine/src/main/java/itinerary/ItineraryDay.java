@@ -19,7 +19,7 @@ public class ItineraryDay {
         this.activities = new ArrayList<>();
 
         ActivityNode padding = new ActivityNode(LocalTime.of(8, 0),
-                LocalTime.of(8, 0), ActivityNode.Types.FREE_TIME, null);
+                LocalTime.of(9, 0), ActivityNode.Types.FREE_TIME, null);
 
         this.activities.add(padding);
     }

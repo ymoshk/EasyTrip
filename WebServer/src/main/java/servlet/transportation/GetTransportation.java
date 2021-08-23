@@ -34,9 +34,9 @@ public class GetTransportation extends HttpServlet {
 
         try (PrintWriter out = resp.getWriter()) {
             Map<String, Long> res = new HashMap<>();
-            res.put("driving", Math.floorDiv(driving.getDistanceMatrixElement().duration.inSeconds, 60L));
-            res.put("walking", Math.floorDiv(walking.getDistanceMatrixElement().duration.inSeconds, 60L));
-            res.put("transit", Math.floorDiv(transit.getDistanceMatrixElement().duration.inSeconds, 60L));
+            res.put("CAR", Math.floorDiv(driving.getDistanceMatrixElement().duration.inSeconds, 60L));
+            res.put("WALK", Math.floorDiv(walking.getDistanceMatrixElement().duration.inSeconds, 60L));
+            res.put("TRANSIT", Math.floorDiv(transit.getDistanceMatrixElement().duration.inSeconds, 60L));
 
             out.println(new Gson().toJson(res));
         } catch (Exception e) {
