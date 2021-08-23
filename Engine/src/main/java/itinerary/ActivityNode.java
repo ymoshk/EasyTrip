@@ -78,17 +78,14 @@ public class ActivityNode {
         this.endTime = endTime;
     }
 
-    public static Types googleTravelToActivityType(TravelMode travelMode){
-        if(travelMode.equals(TravelMode.WALKING)){
+    public static Types googleTravelToActivityType(TravelMode travelMode) {
+        if (travelMode.equals(TravelMode.WALKING)) {
             return Types.WALK;
-        }
-        else if(travelMode.equals(TravelMode.DRIVING)){
+        } else if (travelMode.equals(TravelMode.DRIVING)) {
             return Types.CAR;
-        }
-        else if(travelMode.equals(TravelMode.TRANSIT)){
+        } else if (travelMode.equals(TravelMode.TRANSIT)) {
             return Types.TRANSIT;
-        }
-        else{
+        } else {
             return Types.BICYCLE;
         }
     }
