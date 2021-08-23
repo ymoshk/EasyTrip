@@ -3,6 +3,7 @@ package util.google;
 import com.google.maps.*;
 import com.google.maps.model.LatLng;
 import com.google.maps.model.PlaceType;
+import com.google.maps.model.PriceLevel;
 import com.google.maps.model.TravelMode;
 import container.PriceRange;
 
@@ -22,6 +23,16 @@ public class GoogleMapsApiUtils {
         else if(type.equals(PlaceType.ATM)) {
             return PlacesApi.textSearchQuery(context, "top sights" + "+" + cityName).location(cityCenter).radius(RADIUS);
         }
+        //fetch amusement parks without a radius limit
+        else if(type.equals(PlaceType.AMUSEMENT_PARK)){
+            return PlacesApi.textSearchQuery(context, "amusement park" + "+" + cityName).type(type);
+        }
+
+        // TODO: fetch more restaurants
+//        else if(type.equals(PlaceType.RESTAURANT)){
+//            return PlacesApi.textSearchQuery(context, attractionName).type(type).location(cityCenter).radius(RADIUS).
+//                    maxPrice(PriceLevel.MODERATE);
+//        }
 
         return PlacesApi.textSearchQuery(context, attractionName).type(type).location(cityCenter).radius(RADIUS);
     }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Itinerary {
     private final String itineraryId;
-    private final HashMap<String, List<template.Attraction>> attractions;
+    private HashMap<String, List<template.Attraction>> attractions;
     private final List<ItineraryDay> itineraryDays;
     private final QuestionsData questionsData;
     private final int currentDayIndex;
@@ -86,5 +86,9 @@ public class Itinerary {
 
     public void addFreeTime(LocalDateTime startTime, LocalDateTime endTime){
         getItineraryDay(startTime.toLocalDate()).addFreeTime(startTime, endTime);
+    }
+
+    public void setAttractions(HashMap<String, List<template.Attraction>> attractions) {
+        this.attractions = attractions;
     }
 }

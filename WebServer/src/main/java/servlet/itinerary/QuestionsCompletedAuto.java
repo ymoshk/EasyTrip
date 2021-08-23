@@ -31,6 +31,7 @@ public class QuestionsCompletedAuto extends HttpServlet {
         HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
         State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
         Itinerary itinerary = hillClimbing.getItineraryWithHillClimbingAlgorithm(state);
+        itinerary.setAttractions(itineraryBuilder.getAttractions());
 
         Gson gson = new Gson();
 
