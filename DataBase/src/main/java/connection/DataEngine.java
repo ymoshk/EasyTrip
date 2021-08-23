@@ -198,7 +198,7 @@ public class DataEngine implements Closeable {
         int pageCountToGet = 3;
 
         // get number of results depends on type relevant
-        switch (type){
+        switch (type) {
             case SPA:
             case CASINO:
                 pageCountToGet = 2;
@@ -232,20 +232,19 @@ public class DataEngine implements Closeable {
                             //this is the method to updates the attraction with reviews, phones, website, ...
                             AttractionsFactory.setAttractionDetails(attractionToAdd, placeDetails);
                             //TODO: bar changes
-                            if(attractionToAdd.getWebsite() != null){
-                                if(attractionToAdd.getWebsite().length() > 250){
+                            if (attractionToAdd.getWebsite() != null) {
+                                if (attractionToAdd.getWebsite().length() > 250) {
                                     attractionToAdd.setWebsite(attractionToAdd.getWebsite().substring(0, 249));
                                 }
                             }
                             //we wish to add attraction only if it has at least 5 review
-                            if(attractionToAdd.getUserRatingsTotal() > 10 && attractionToAdd.getRating() > 3.0){
-                                if(calculateDistance(city, attractionToAdd) < 100.0){
+                            if (attractionToAdd.getUserRatingsTotal() > 10 && attractionToAdd.getRating() > 3.0) {
+                                if (calculateDistance(city, attractionToAdd) < 100.0) {
                                     result.add(attractionToAdd);
-                                }
-                                else {
+                                } else {
                                     System.out.println("Attraction above 100 km " + attractionToAdd.getName());
                                 }
-                            }else {
+                            } else {
                                 System.out.println("Below 3.0 and 10 reviews " + attractionToAdd.getName());
                             }
                         });
@@ -269,20 +268,20 @@ public class DataEngine implements Closeable {
 
 
     //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
-    private double calculateDistance(City source, Attraction destination){
+    private double calculateDistance(City source, Attraction destination) {
         //case we initial an empty route, and there's no last attraction
-        if(source == null){
+        if (source == null) {
             return 0;
         }
 
         double latDelta = deg2rad(destination.getLat() - source.getCityCenter().lat);
         double longDelta = deg2rad(destination.getLng() - source.getCityCenter().lng);
 
-        double a = Math.sin(latDelta/2) * Math.sin(latDelta/2) +
+        double a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) +
                 Math.cos(deg2rad(destination.getLat())) * Math.cos(deg2rad(source.getCityCenter().lat)) *
-                        Math.sin(longDelta/2) * Math.sin(longDelta/2);
+                        Math.sin(longDelta / 2) * Math.sin(longDelta / 2);
 
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         double result = EARTH_RADIUS * c;
 //        System.out.println("source: " + source.getName());
@@ -293,7 +292,7 @@ public class DataEngine implements Closeable {
     }
 
     private double deg2rad(double degree) {
-        return degree * (Math.PI/180);
+        return degree * (Math.PI / 180);
     }
 
     private boolean isAttractionExist(String tableName, String placeId) {
@@ -462,6 +461,13 @@ public class DataEngine implements Closeable {
     public void close() {
         // TODO - make sure to call this method as the server shut down.
         DBContext.getInstance().close();
+    }
+
+    public List<ItineraryModel> getUserItineraries(String userID) {
+        List<ItineraryModel> res = (List<ItineraryModel>) DBContext.getInstance().
+                selectQuery("FROM ItineraryModel WHERE " +"user_id = " + userID);
+
+        return res;
     }
 
 }
