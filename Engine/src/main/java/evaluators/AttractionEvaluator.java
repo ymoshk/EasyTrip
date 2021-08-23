@@ -37,9 +37,7 @@ public class AttractionEvaluator {
     private List<String> topAttractionIdList;
     private Attraction topAmusementPark;
     private final double TOP_ATTRACTION_SCORE = 100;
-    private final double AVG_ATTRACTION_SCORE = 80;
-    private final double MEDIAN_ATTRACTION_SCORE = 50;
-    private final double BOTTOM_ATTRACTION_SCORE = 25;
+
 
     public AttractionEvaluator(HashMap<String, List<Attraction>> placeTypeToAttractionMap) {
         reviewsDataMap = new HashMap<>();
@@ -128,6 +126,38 @@ public class AttractionEvaluator {
             }
 
             return placeTypeStep * attractionIndex;
+    }
+
+    public double evaluateByUserPreferences(Attraction attraction, List<String> attractionTags){
+        // TouristAttraction is added on HillClimbing constructor
+        if(attractionTags.size() == 1 || attractionTags.isEmpty()){
+            return 100.0;
+        }
+
+        if(attractionTags.contains(attraction.getClass().getSimpleName())){
+            return 100.0 / attractionTags.size();
+        }
+        else{
+            return 0;
+        }
+    }
+
+    public double evaluateAttraction(Attraction attraction, double distance, List<String> attractionTags){
+        double ratingScore;
+        double reviewsScore;
+        double distanceScore = evaluateByDistance(distance);
+        double preferencesScore = evaluateByUserPreferences(attraction, attractionTags);
+
+        if(isTopAttraction(attraction)){
+            ratingScore = TOP_ATTRACTION_SCORE;
+            reviewsScore = TOP_ATTRACTION_SCORE;
+        }
+        else{
+            ratingScore = evaluateByRating(attraction);
+            reviewsScore = evaluateByReviewsNumber(attraction);
+        }
+
+        return 0.3 * ratingScore + 0.3 * reviewsScore + 0.3 * distanceScore + 0.1 * preferencesScore;
     }
 
     public double evaluateAttraction(Attraction attraction){

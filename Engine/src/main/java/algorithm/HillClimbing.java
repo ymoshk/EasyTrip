@@ -53,11 +53,13 @@ public class HillClimbing {
         private final boolean isFamilyTrip;
         private final boolean amusementParkIncluded;
         private boolean scheduledAmusementPark;
+        private final City city;
         private List<String> attractionTags;
         private List<String> vibeTags;
 
         public ScheduleRestrictions(QuestionsData preferences, List<String> attractionTags, List<String> vibeTags) {
             initTimeConstraints(preferences);
+            this.city = preferences.getCity();
             this.scheduledLunch = false;
             this.scheduledDinner = false;
             this.BAR_TIME = LocalTime.of(16, 59,0,0);
@@ -359,11 +361,19 @@ public class HillClimbing {
                                 isPartyTime(attraction, currentTime) &&
                                 isCasinoTime(attraction, currentTime) &&
                                 isSpaTime(attraction, currentTime) &&
+                                checkDistanceFromCityCenter(attraction,lastAttraction) &&
                                 isCoffeeTime(lastAttraction, attraction)).
                         collect(Collectors.toList());
             }
 
             return attractionList;
+        }
+
+        private boolean checkDistanceFromCityCenter(Attraction attraction, Attraction lastAttraction) {
+            if(lastAttraction != null){
+                return true;
+            }
+            return DataEngine.calculateDistance(city, attraction) < 15;
         }
 
         public void resetRestrictions(){
@@ -420,9 +430,12 @@ public class HillClimbing {
         preferences.getFavoriteAttractions().stream().forEach(tripTag -> {
             attractionTags.add(tripTag.getTagName().replaceAll(" ", ""));
         });
+        attractionTags.add("TouristAttraction");
+
         preferences.getTripVibes().stream().forEach(tripTag -> {
             vibeTags.add(tripTag.getTagName());
         });
+
         attractionTags.forEach(System.out::println);
         vibeTags.forEach(System.out::println);
     }
@@ -521,7 +534,8 @@ public class HillClimbing {
         Attraction maxAttraction = attractionList.get(0);
         Attraction topAmusementPark;
         double distance = calculateDistance(lastAttraction, maxAttraction);
-        double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction, distance);
+        double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction, distance, attractionTags);
+//        double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction, distance);
 
         // if the user is in the park, bring the user back to the city
         topAmusementPark = attractionEvaluator.getTopAmusementPark();
@@ -538,7 +552,8 @@ public class HillClimbing {
             curAttraction = attraction;
             distance = calculateDistance(lastAttraction, curAttraction);
             if(evaluateByDistance){
-                curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance);
+                curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance, attractionTags);
+//                curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance);
             }
             else{
                 curValue = attractionEvaluator.evaluateAttraction(curAttraction);
@@ -734,7 +749,7 @@ public class HillClimbing {
 //    }
 
 //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
-    private double calculateDistance(Attraction source, Attraction destination){
+    public double calculateDistance(Attraction source, Attraction destination){
         //case we initial an empty route, and there's no last attraction
         if(source == null){
             return 0;
