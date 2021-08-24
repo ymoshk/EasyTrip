@@ -10,7 +10,6 @@ import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.location.City;
 import model.travel.Travel;
-import template.TripTag;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -54,8 +53,8 @@ public class HillClimbing {
         private final boolean amusementParkIncluded;
         private boolean scheduledAmusementPark;
         private final City city;
-        private List<String> attractionTags;
-        private List<String> vibeTags;
+        private final List<String> attractionTags;
+        private final List<String> vibeTags;
 
         public ScheduleRestrictions(QuestionsData preferences, List<String> attractionTags, List<String> vibeTags) {
             initTimeConstraints(preferences);
@@ -397,10 +396,10 @@ public class HillClimbing {
     private final int EARTH_RADIUS = 6371; // Radius of the earth in km
     private final int TOP_SIGHTS_NUM = 7;
     private final long WALKABLE_TIME = 15 * 60;   // seconds
-    private long BREAK_TIME_FACTOR = 15 * 60;
-    private boolean hasCar;
-    private List<String> attractionTags;
-    private List<String> vibeTags;
+    private long BREAK_TIME_FACTOR;
+    private final boolean hasCar;
+    private final List<String> attractionTags;
+    private final List<String> vibeTags;
 
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList) {
@@ -427,12 +426,13 @@ public class HillClimbing {
     }
 
     private void initTagsList(QuestionsData preferences){
-        preferences.getFavoriteAttractions().stream().forEach(tripTag -> {
-            attractionTags.add(tripTag.getTagName().replaceAll(" ", ""));
+        preferences.getFavoriteAttractions().forEach(tripTag -> {
+            attractionTags.add(tripTag.getTagName().replaceAll(" ", "").toUpperCase());
         });
-        attractionTags.add("TouristAttraction");
+        String touristAttractionTag = "TouristAttraction";
+        attractionTags.add(touristAttractionTag.toUpperCase());
 
-        preferences.getTripVibes().stream().forEach(tripTag -> {
+        preferences.getTripVibes().forEach(tripTag -> {
             vibeTags.add(tripTag.getTagName());
         });
 
@@ -443,8 +443,7 @@ public class HillClimbing {
     void initTopSights(int numOfAttractions){
         List<Attraction> attractionList = placeTypeToAttraction.get("TopSight");
 
-        // TODO: temporary bandaid -
-        //  remove duplicates
+        // TODO: temporary band aid - remove duplicates
         List<Attraction> filteredAttraction = new ArrayList<>();
         HashMap<String, Boolean> attractionIdToBoolean = new HashMap<>();
 
@@ -514,11 +513,7 @@ public class HillClimbing {
 
         // schedule attraction until vacation is over
         while(currentTime.isBefore(preferences.getEndDate())){
-            // no available attractions to add
             addAttraction(currentState);
-//            if(addAttraction(currentState) == null){
-//                break;
-//            }
         }
 
         return currentState.getItinerary();
@@ -535,7 +530,6 @@ public class HillClimbing {
         Attraction topAmusementPark;
         double distance = calculateDistance(lastAttraction, maxAttraction);
         double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction, distance, attractionTags);
-//        double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction, distance);
 
         // if the user is in the park, bring the user back to the city
         topAmusementPark = attractionEvaluator.getTopAmusementPark();
@@ -550,10 +544,10 @@ public class HillClimbing {
 
         for (Attraction attraction : attractionList) {
             curAttraction = attraction;
+
             distance = calculateDistance(lastAttraction, curAttraction);
             if(evaluateByDistance){
                 curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance, attractionTags);
-//                curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance);
             }
             else{
                 curValue = attractionEvaluator.evaluateAttraction(curAttraction);
@@ -734,20 +728,6 @@ public class HillClimbing {
         lastAttraction = null;
     }
 
-//    private void advanceCurrentTime(int attractionDurationMinutes){
-//        LocalDateTime prevTime = currentTime;
-//        LocalTime startTime = scheduleRestrictions.getSTART_TIME();
-//
-//        currentTime = currentTime.plusMinutes(attractionDurationMinutes);
-//
-//        // check if moved to the next day
-//        if(moveToNextDay(prevTime)){
-//            currentTime = currentTime.with(startTime);
-//            scheduleRestrictions.resetRestrictions();
-//            lastAttraction = null;
-//        }
-//    }
-
 //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
     public double calculateDistance(Attraction source, Attraction destination){
         //case we initial an empty route, and there's no last attraction
@@ -764,22 +744,12 @@ public class HillClimbing {
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-        double result = EARTH_RADIUS * c;
-//        System.out.println("source: " + source.getName());
-//        System.out.println("destination: " + destination.getName());
-//        System.out.println("distance: " + result + "KM");
-
-        return result;
+        return EARTH_RADIUS * c;
     }
 
     private double deg2rad(double degree) {
         return degree * (Math.PI/180);
     }
-
-    private int evaluate(State currentState){
-        return rand.nextInt(10);
-    }
-
 
     public static HashMap<String, List<template.Attraction>> classifyAttractions(QuestionsData questionsData) {
         City city = questionsData.getCity();
@@ -866,7 +836,7 @@ public class HillClimbing {
             budget = Integer.parseInt(scanner.nextLine());
 
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
-                    childrenCount, budget, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(6), new ArrayList<>(),
+                    childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(4), new ArrayList<>(),
                     new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 

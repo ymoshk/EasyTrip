@@ -130,12 +130,23 @@ public class AttractionEvaluator {
 
     public double evaluateByUserPreferences(Attraction attraction, List<String> attractionTags){
         // TouristAttraction is added on HillClimbing constructor
-        if(attractionTags.size() == 1 || attractionTags.isEmpty()){
+       int numberOfTags = attractionTags.size();
+        if( numberOfTags == 1 || attractionTags.isEmpty()){
             return 100.0;
         }
+        // user chose many tags - normalize scores
+       if( numberOfTags > 5){
+           numberOfTags = 5;
+       }
 
-        if(attractionTags.contains(attraction.getClass().getSimpleName())){
-            return 100.0 / attractionTags.size();
+        if (attraction.getClass().getSimpleName().equalsIgnoreCase("Museum")){
+            if (attractionTags.contains("ART")){
+                return 100.0 / numberOfTags;
+            }
+        }
+
+        if(attractionTags.contains(attraction.getClass().getSimpleName().toUpperCase())){
+            return 100.0 / numberOfTags;
         }
         else{
             return 0;
@@ -157,7 +168,7 @@ public class AttractionEvaluator {
             reviewsScore = evaluateByReviewsNumber(attraction);
         }
 
-        return 0.3 * ratingScore + 0.3 * reviewsScore + 0.3 * distanceScore + 0.1 * preferencesScore;
+        return 0.3 * ratingScore + 0.3 * reviewsScore + 0.2 * distanceScore + 0.2 * preferencesScore;
     }
 
     public double evaluateAttraction(Attraction attraction){
@@ -190,12 +201,7 @@ public class AttractionEvaluator {
     }
 
     private double evaluateByDistance(double distance) {
-        if(distance < 1.6){
-            return 100;
-        }
-        else{
-            return (1 - distance/6) * 100;
-        }
+        return (1 - distance/6) * 100;
     }
 
     public int getIndex(Attraction attractionToAdd) {
