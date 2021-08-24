@@ -5,6 +5,7 @@ import model.attraction.Attraction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,6 +79,12 @@ public class Itinerary {
         }
 
         dayToUpdate.addAttractionToEnd(attraction, startTime, endTime);
+    }
+
+    public void addStartDayPadding(LocalDateTime startTime, LocalDateTime endTime){
+        ItineraryDay itineraryDay = getItineraryDay(startTime.toLocalDate());
+
+        itineraryDay.getActivities().get(0).setEndTime(endTime.format(DateTimeFormatter.ofPattern("HH:mm")));
     }
 
     public void addTransportation(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type){

@@ -57,7 +57,7 @@ public class HillClimbing {
         private final List<String> vibeTags;
 
         public ScheduleRestrictions(QuestionsData preferences, List<String> attractionTags, List<String> vibeTags) {
-            initTimeConstraints(preferences);
+            initTimeConstraints(preferences, vibeTags);
             this.city = preferences.getCity();
             this.scheduledLunch = false;
             this.scheduledDinner = false;
@@ -112,8 +112,9 @@ public class HillClimbing {
             return isFamilyTrip;
         }
 
-        public void initTimeConstraints(QuestionsData questionsData){
-            this.START_TIME = LocalTime.of(9, 0, 0, 0);
+        public void initTimeConstraints(QuestionsData questionsData, List<String> vibeTags){
+
+            this.START_TIME = initStartTimeByTraveler(vibeTags);
 
             if(questionsData.getChildrenCount() > 0){
                 this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
@@ -122,9 +123,24 @@ public class HillClimbing {
             }
             else{
                 this.LUNCH_TIME = LocalTime.of(12,29, 0, 0);
-                this.DINNER_TIME = LocalTime.of(18,29, 0, 0);
+                this.DINNER_TIME = LocalTime.of(17,59, 0, 0);
                 this.END_TIME = LocalTime.of(23, 59, 0, 0);
             }
+        }
+
+        private LocalTime initStartTimeByTraveler(List<String> vibeTags) {
+            if(vibeTags.contains("NightOwl")){
+                return LocalTime.of(10,0,0,0);
+            }
+            else if(vibeTags.contains("EarlyBird")){
+                return LocalTime.of(8,0,0,0);
+
+            }
+            else{
+                //default start time
+                return LocalTime.of(9,0,0,0);
+            }
+
         }
 
         private boolean isRestaurantSchedule(LocalDateTime currentTime){
@@ -418,6 +434,7 @@ public class HillClimbing {
         removeAttractionDuplicationFromTouristAttraction();
         initTopSights(TOP_SIGHTS_NUM);
         this.hasCar = false;
+        //in seconds
         this.BREAK_TIME_FACTOR = 10 * 60;
     }
 
@@ -435,6 +452,7 @@ public class HillClimbing {
         preferences.getTripVibes().forEach(tripTag -> {
             vibeTags.add(tripTag.getTagName());
         });
+
 
         attractionTags.forEach(System.out::println);
         vibeTags.forEach(System.out::println);
@@ -631,6 +649,12 @@ public class HillClimbing {
                 attractionToBooleanMap, lastAttraction, preferences.getStartDate(), attractionEvaluator);
         attractionToAdd = findBestAttraction(attractionList);
 
+        // configure start time of the day
+        if(lastAttraction == null){
+            currentState.getItinerary().addStartDayPadding(currentTime, currentTime.with(scheduleRestrictions.getSTART_TIME()));
+            currentTime = currentTime.with(scheduleRestrictions.getSTART_TIME());
+        }
+
         if(attractionToAdd != null){
             // exclude first attraction transportation time
             if(lastAttraction != null){
@@ -674,11 +698,10 @@ public class HillClimbing {
                 currentState.getItinerary().addFreeTime(transportationEndTime, attractionStartTime);
             }
 
-//            debugPrintAttraction(attractionToAdd, attractionStartTime, attractionEndTime);
-
             //case of adding night club, we want to end the day with a night club
             if(attractionToAdd.getClass().getSimpleName().equalsIgnoreCase("NightClub")){
                 attractionEndTime = attractionEndTime.withHour(23).withMinute(59);
+                currentTime = attractionEndTime;
             }
 
             currentState.getItinerary().addAttraction(attractionToAdd,
@@ -836,7 +859,7 @@ public class HillClimbing {
             budget = Integer.parseInt(scanner.nextLine());
 
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
-                    childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(4), new ArrayList<>(),
+                    childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(2), new ArrayList<>(),
                     new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 
