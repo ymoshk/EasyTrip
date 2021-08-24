@@ -2,6 +2,7 @@ package itinerary;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import template.Attraction;
 import template.TripTag;
 
 import java.time.LocalDateTime;
@@ -74,5 +75,9 @@ public class ItineraryBuilderUtil {
 
     public Itinerary getItinerary() {
         return new Itinerary(this.attractions, this.questionsData);
+    }
+
+    public HashMap<String, List<Attraction>> getAttractions() {
+        return attractions;
     }
 }
