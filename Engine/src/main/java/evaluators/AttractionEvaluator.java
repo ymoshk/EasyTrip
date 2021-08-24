@@ -37,9 +37,7 @@ public class AttractionEvaluator {
     private List<String> topAttractionIdList;
     private Attraction topAmusementPark;
     private final double TOP_ATTRACTION_SCORE = 100;
-    private final double AVG_ATTRACTION_SCORE = 80;
-    private final double MEDIAN_ATTRACTION_SCORE = 50;
-    private final double BOTTOM_ATTRACTION_SCORE = 25;
+
 
     public AttractionEvaluator(HashMap<String, List<Attraction>> placeTypeToAttractionMap) {
         reviewsDataMap = new HashMap<>();
@@ -130,6 +128,49 @@ public class AttractionEvaluator {
             return placeTypeStep * attractionIndex;
     }
 
+    public double evaluateByUserPreferences(Attraction attraction, List<String> attractionTags){
+        // TouristAttraction is added on HillClimbing constructor
+       int numberOfTags = attractionTags.size();
+        if( numberOfTags == 1 || attractionTags.isEmpty()){
+            return 100.0;
+        }
+        // user chose many tags - normalize scores
+       if( numberOfTags > 5){
+           numberOfTags = 5;
+       }
+
+        if (attraction.getClass().getSimpleName().equalsIgnoreCase("Museum")){
+            if (attractionTags.contains("ART")){
+                return 100.0 / numberOfTags;
+            }
+        }
+
+        if(attractionTags.contains(attraction.getClass().getSimpleName().toUpperCase())){
+            return 100.0 / numberOfTags;
+        }
+        else{
+            return 0;
+        }
+    }
+
+    public double evaluateAttraction(Attraction attraction, double distance, List<String> attractionTags){
+        double ratingScore;
+        double reviewsScore;
+        double distanceScore = evaluateByDistance(distance);
+        double preferencesScore = evaluateByUserPreferences(attraction, attractionTags);
+
+        if(isTopAttraction(attraction)){
+            ratingScore = TOP_ATTRACTION_SCORE;
+            reviewsScore = TOP_ATTRACTION_SCORE;
+        }
+        else{
+            ratingScore = evaluateByRating(attraction);
+            reviewsScore = evaluateByReviewsNumber(attraction);
+        }
+
+        return 0.3 * ratingScore + 0.3 * reviewsScore + 0.2 * distanceScore + 0.2 * preferencesScore;
+    }
+
     public double evaluateAttraction(Attraction attraction){
         if(topAttractionIdList != null &&
                 isTopAttraction(attraction)){
@@ -160,12 +201,7 @@ public class AttractionEvaluator {
     }
 
     private double evaluateByDistance(double distance) {
-        if(distance < 1.6){
-            return 100;
-        }
-        else{
-            return (1 - distance/6) * 100;
-        }
+        return (1 - distance/6) * 100;
     }
 
     public int getIndex(Attraction attractionToAdd) {

@@ -32,7 +32,7 @@ public class DataEngine implements Closeable {
     private static final int MIN_SIZE_COLLECTION = 3;
     private static DataEngine instance = null;
     private final Set<City> loadingCities;
-    private final int EARTH_RADIUS = 6371; // Radius of the earth in km
+    private static final int EARTH_RADIUS = 6371; // Radius of the earth in km
 
     //empty constructor just to make sure the class is a singleton
     private DataEngine() {
@@ -268,7 +268,7 @@ public class DataEngine implements Closeable {
 
 
     //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
-    private double calculateDistance(City source, Attraction destination) {
+    public static double calculateDistance(City source, Attraction destination) {
         //case we initial an empty route, and there's no last attraction
         if (source == null) {
             return 0;
@@ -291,7 +291,7 @@ public class DataEngine implements Closeable {
         return result;
     }
 
-    private double deg2rad(double degree) {
+    public static double deg2rad(double degree) {
         return degree * (Math.PI / 180);
     }
 

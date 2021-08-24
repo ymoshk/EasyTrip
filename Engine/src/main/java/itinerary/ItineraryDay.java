@@ -15,11 +15,15 @@ public class ItineraryDay {
     private List<ActivityNode> activities;
 
     public ItineraryDay(LocalDate date) {
+        this(date, 8);
+    }
+
+    public ItineraryDay(LocalDate date, int startHour) {
         this.date = date;
         this.activities = new ArrayList<>();
 
         ActivityNode padding = new ActivityNode(LocalTime.of(8, 0),
-                LocalTime.of(9, 0), ActivityNode.Types.FREE_TIME, null);
+                LocalTime.of(startHour, 0), ActivityNode.Types.FREE_TIME, null);
 
         this.activities.add(padding);
     }
