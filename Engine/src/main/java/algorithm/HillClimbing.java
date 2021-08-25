@@ -434,6 +434,7 @@ public class HillClimbing {
         this.lastAttraction = null;
         removeAttractionDuplicationFromTouristAttraction();
         initTopSights(TOP_SIGHTS_NUM);
+        removeDuplicateRestaurant();
         this.hasCar = false;
         //in seconds
         this.BREAK_TIME_FACTOR = calculateBreakTimeByTravelerType(vibeTags);
@@ -465,9 +466,27 @@ public class HillClimbing {
         preferences.getTripVibes().forEach(tripTag -> {
             vibeTags.add(tripTag.getTagName().replaceAll(" ", ""));
         });
+//        vibeTags.add("Foody");
+        vibeTags.add("StreetFood");
 
         attractionTags.forEach(System.out::println);
         vibeTags.forEach(System.out::println);
+    }
+
+    void removeDuplicateRestaurant(){
+        List<Attraction> attractionList = placeTypeToAttraction.get("Restaurant");
+
+        List<Attraction> filteredRestaurant = new ArrayList<>();
+        HashMap<String, Boolean> attractionIdToBoolean = new HashMap<>();
+
+        for (Attraction attraction : attractionList){
+            if(!attractionIdToBoolean.containsKey(attraction.getPlaceId())){
+                filteredRestaurant.add(attraction);
+                attractionIdToBoolean.put(attraction.getPlaceId(), true);
+            }
+        }
+
+        placeTypeToAttraction.put("Restaurant", filteredRestaurant);
     }
 
     void initTopSights(int numOfAttractions){
@@ -574,7 +593,7 @@ public class HillClimbing {
         Attraction maxAttraction = attractionList.get(0);
         Attraction topAmusementPark;
         double distance = calculateDistance(lastAttraction, maxAttraction);
-        double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction, distance, attractionTags);
+        double maxValue = attractionEvaluator.evaluateAttraction(maxAttraction, distance, attractionTags, vibeTags);
 
         // if the user is in the park, bring the user back to the city
         topAmusementPark = attractionEvaluator.getTopAmusementPark();
@@ -592,7 +611,7 @@ public class HillClimbing {
 
             distance = calculateDistance(lastAttraction, curAttraction);
             if(evaluateByDistance){
-                curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance, attractionTags);
+                curValue = attractionEvaluator.evaluateAttraction(curAttraction, distance, attractionTags, vibeTags);
             }
             else{
                 curValue = attractionEvaluator.evaluateAttraction(curAttraction);
@@ -898,7 +917,7 @@ public class HillClimbing {
             budget = Integer.parseInt(scanner.nextLine());
 
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
-                    childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(2), new ArrayList<>(),
+                    childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(4), new ArrayList<>(),
                     new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 
