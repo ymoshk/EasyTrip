@@ -52,6 +52,7 @@ public class HillClimbing {
         private final boolean isFamilyTrip;
         private final boolean amusementParkIncluded;
         private boolean scheduledAmusementPark;
+        private boolean nightClubIncluded;
         private final City city;
         private final List<String> attractionTags;
         private final List<String> vibeTags;
@@ -71,9 +72,10 @@ public class HillClimbing {
             this.isFamilyTrip = preferences.getChildrenCount() > 0;
             this.attractionTags = attractionTags;
             this.vibeTags = vibeTags;
-            this.amusementParkIncluded = attractionTags.contains("AmusementPark");
-            this.spaIncluded = attractionTags.contains("Spa");
-            this.casinoIncluded = attractionTags.contains("Casino");
+            this.amusementParkIncluded = attractionTags.contains("AMUSEMENTPARK");
+            this.spaIncluded = attractionTags.contains("SPA");
+            this.casinoIncluded = attractionTags.contains("CASINO");
+            this.nightClubIncluded = attractionTags.contains("NIGHTCLUB");
         }
 
         public void setScheduledCasino(boolean scheduledCasino) {
@@ -140,7 +142,6 @@ public class HillClimbing {
                 //default start time
                 return LocalTime.of(9,0,0,0);
             }
-
         }
 
         private boolean isRestaurantSchedule(LocalDateTime currentTime){
@@ -254,7 +255,7 @@ public class HillClimbing {
                 return true;
             }
             if(attraction.getClass().getSimpleName().equalsIgnoreCase("NightClub") &&
-                    startTime.toLocalTime().isAfter(NIGHT_CLUB_TIME)){
+                    startTime.toLocalTime().isAfter(NIGHT_CLUB_TIME) && nightClubIncluded){
                 return true;
             }
 
@@ -435,7 +436,19 @@ public class HillClimbing {
         initTopSights(TOP_SIGHTS_NUM);
         this.hasCar = false;
         //in seconds
-        this.BREAK_TIME_FACTOR = 10 * 60;
+        this.BREAK_TIME_FACTOR = calculateBreakTimeByTravelerType(vibeTags);
+    }
+
+    private long calculateBreakTimeByTravelerType(List<String> vibeTags){
+        if(vibeTags.contains("Chill")){
+            return 25 * 60;
+        }
+        else if(vibeTags.contains("FastPaced")){
+            return 5 * 60;
+        }
+        else{
+            return 15 * 60;
+        }
     }
 
     public  List<String> getAttractionTags() {
@@ -450,9 +463,8 @@ public class HillClimbing {
         attractionTags.add(touristAttractionTag.toUpperCase());
 
         preferences.getTripVibes().forEach(tripTag -> {
-            vibeTags.add(tripTag.getTagName());
+            vibeTags.add(tripTag.getTagName().replaceAll(" ", ""));
         });
-
 
         attractionTags.forEach(System.out::println);
         vibeTags.forEach(System.out::println);
@@ -504,23 +516,38 @@ public class HillClimbing {
         return preferences.getStartDate().with(scheduleRestrictions.getSTART_TIME());
     }
 
+    private boolean addAttractionToHashMap(String attractionType){
+        // Don't add hotels to itinerary
+        if(attractionType.equalsIgnoreCase("Hotel")){
+            return false;
+        }
+        else if(!scheduleRestrictions.isFamilyTrip()){
+            return true;
+        }
+        // restrict family trip
+        else{
+            if(attractionType.equalsIgnoreCase("NightClub")){
+                return false;
+            }
+            // add bar only if user asked for
+            else if(attractionType.equalsIgnoreCase("Bar")){
+                return attractionTags.contains("BAR");
+            }
+            else{
+                return true;
+            }
+        }
+    }
+
     private HashMap<String, List<Attraction>> attractionListToAttractionHashMap(List<Attraction> attractionList){
         HashMap<String, List<Attraction>> res = new HashMap<>();
 
-        attractionList.forEach(attraction -> {
-            String attractionType = attraction.getClass().getSimpleName();
-
-            // don't add hotels to itinerary
-             if(!attractionType.equalsIgnoreCase("Hotel")){
-                // don't add bars & clubs to family trip
-                if(!scheduleRestrictions.isFamilyTrip() || !attractionType.equalsIgnoreCase("Bar") &&
-                    !attractionType.equalsIgnoreCase("NightClub")){
+        attractionList.stream().filter(attraction -> addAttractionToHashMap(attraction.getClass().getSimpleName())).
+                forEach(attraction -> {
                     if(!res.containsKey(attraction.getClass().getSimpleName()))
                         res.put(attraction.getClass().getSimpleName(), new ArrayList<>());
 
                     res.get(attraction.getClass().getSimpleName()).add(attraction);
-                }
-            }
         });
 
         return res;
@@ -608,11 +635,21 @@ public class HillClimbing {
         int minutes;
         int minutesUnits;
         int minutesToAdd;
+        long travelTimeSeconds;
 
-        // in case travel time is long, don't add break time
-        if(travel.getDistanceMatrixElement().status.equals(DistanceMatrixElementStatus.OK) &&
-                travel.getDistanceMatrixElement().duration.inSeconds < 30 * 60){
-            currentTime = currentTime.plusSeconds(BREAK_TIME_FACTOR);
+        // add break time depends on travel time
+        if(travel.getDistanceMatrixElement().status.equals(DistanceMatrixElementStatus.OK)){
+            travelTimeSeconds = travel.getDistanceMatrixElement().duration.inSeconds;
+
+            if(travelTimeSeconds < 15 * 60) {
+                currentTime = currentTime.plusSeconds(BREAK_TIME_FACTOR);
+            }
+            else if(travelTimeSeconds < 25 * 60){   // for longer transportation times
+                currentTime = currentTime.plusSeconds(BREAK_TIME_FACTOR / 2);
+            }
+            else{
+                currentTime = currentTime.plusMinutes(5);
+            }
         }
 
         // round minutes units to 10
@@ -623,6 +660,8 @@ public class HillClimbing {
 
             currentTime = currentTime.plusMinutes(minutesToAdd);
         }
+
+        currentTime = currentTime.withSecond(0).withNano(0);
     }
 
     private boolean addAmusementParkExtraTime(Attraction attraction){
