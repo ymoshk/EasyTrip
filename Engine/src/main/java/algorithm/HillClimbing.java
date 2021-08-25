@@ -455,7 +455,6 @@ public class HillClimbing {
         });
         String touristAttractionTag = "TouristAttraction";
         attractionTags.add(touristAttractionTag.toUpperCase());
-        attractionTags.add("NIGHTCLUB");
 
         preferences.getTripVibes().forEach(tripTag -> {
             vibeTags.add(tripTag.getTagName().replaceAll(" ", ""));
