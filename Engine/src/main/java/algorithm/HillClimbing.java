@@ -27,12 +27,6 @@ import java.util.stream.Collectors;
 
 public class HillClimbing {
     //TODO: fetch 10 cities & check them + Tel Aviv + Jerusalem
-    //TODO: add breaks depending on traveler type - depends on transportation time
-    //TODO: budget --> filter?
-    //TODO: attraction tags --> relative weights
-    //TODO: vibe tags: early bird / night owl, luxury / street food, fast-paced / chill
-    //TODO: save attraction name as constants
-    //TODO: remove beaches from cities without beach
     static private class ScheduleRestrictions {
         private LocalTime START_TIME;
         private LocalTime END_TIME;
@@ -340,7 +334,6 @@ public class HillClimbing {
             return null;
         }
 
-        // TODO: limit attraction list to X attractions?
         public List<Attraction> getNeighbourAttractions(LocalDateTime currentTime,
                                                         HashMap<String, List<Attraction>> placeTypeToAttraction,
                                                         HashMap<String, Boolean> attractionToBooleanMap,
@@ -462,12 +455,11 @@ public class HillClimbing {
         });
         String touristAttractionTag = "TouristAttraction";
         attractionTags.add(touristAttractionTag.toUpperCase());
+        attractionTags.add("NIGHTCLUB");
 
         preferences.getTripVibes().forEach(tripTag -> {
             vibeTags.add(tripTag.getTagName().replaceAll(" ", ""));
         });
-//        vibeTags.add("Foody");
-        vibeTags.add("StreetFood");
 
         attractionTags.forEach(System.out::println);
         vibeTags.forEach(System.out::println);
