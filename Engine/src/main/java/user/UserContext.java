@@ -127,6 +127,7 @@ public class UserContext implements Closeable {
 
         if (maybeUser.isPresent()) {
             this.userData.addUser(sessionId, maybeUser.get());
+            DataEngine.getInstance().removeGuestUsersBySession(sessionId);
             return true;
         } else {
             return false;

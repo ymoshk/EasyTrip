@@ -2,6 +2,7 @@ package servlet.user;
 
 import com.google.gson.Gson;
 import constant.Constants;
+import model.user.User;
 import user.UserContext;
 import util.Utils;
 
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Optional;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -30,8 +32,11 @@ public class LoginServlet extends HttpServlet {
 
         if (userContext.login(sessionId, userName, password)) {
             try (PrintWriter out = resp.getWriter()) {
-                out.println(new Gson().toJson(userContext.getLoggedInUser(sessionId)));
-                resp.setStatus(200);
+                Optional<User> loggedInUser = userContext.getLoggedInUser(sessionId);
+                if (loggedInUser.isPresent()) {
+                    out.println(new Gson().toJson(new UserTypeTemplate(loggedInUser.get())));
+                    resp.setStatus(200);
+                }
             }
         }
     }

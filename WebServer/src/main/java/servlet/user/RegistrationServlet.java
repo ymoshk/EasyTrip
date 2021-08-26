@@ -34,7 +34,7 @@ public class RegistrationServlet extends HttpServlet {
         RegisteredUser user = userContext.createUser(sessionId, userName, password, name);
 
         try (PrintWriter out = resp.getWriter()) {
-            out.println(new Gson().toJson(user));
+            out.println(new Gson().toJson(new UserTypeTemplate(user)));
             resp.setStatus(200);
         }
     }

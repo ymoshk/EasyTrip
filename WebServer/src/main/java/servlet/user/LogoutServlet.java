@@ -21,12 +21,11 @@ public class LogoutServlet extends HttpServlet {
         UserContext userContext = (UserContext) context.getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
 
-        req.getSession().invalidate();
         String sessionId = req.getSession(false).getId();
         userContext.logout(sessionId);
 
         try (PrintWriter out = resp.getWriter()) {
-            out.println(new Gson().toJson(userContext.getLoggedInUser(sessionId)));
+            out.println(new Gson().toJson(new UserTypeTemplate(userContext.getLoggedInUser(sessionId).get())));
             resp.setStatus(200);
         }
     }

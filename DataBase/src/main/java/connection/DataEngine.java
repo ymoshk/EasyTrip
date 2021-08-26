@@ -483,6 +483,16 @@ public class DataEngine implements Closeable {
         DBContext.getInstance().delete(user);
     }
 
+    public void removeGuestUsersBySession(String sessionId) {
+        DBContext context = DBContext.getInstance();
+        List<GuestUser> lst = (List<GuestUser>) context.getToList(GuestUser.class);
+        System.out.println(lst.size());
+
+        lst.stream()
+                .filter(user -> sessionId.equals(sessionId))
+                .forEach(context::delete);
+    }
+
     @Override
     public void close() {
         DBContext.getInstance().close();
@@ -496,5 +506,4 @@ public class DataEngine implements Closeable {
                 .filter(model -> model.getUser().getUserName().equals(userName))
                 .collect(Collectors.toList());
     }
-
 }
