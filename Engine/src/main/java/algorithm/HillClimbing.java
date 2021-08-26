@@ -410,12 +410,14 @@ public class HillClimbing {
     private final boolean hasCar;
     private final List<String> attractionTags;
     private final List<String> vibeTags;
+    private final List<String> transportationTags;
 
 
     public HillClimbing(QuestionsData preferences, List<Attraction> attractionList) {
         this.preferences = preferences;
         this.attractionTags = new ArrayList<>();
         this.vibeTags = new ArrayList<>();
+        this.transportationTags = new ArrayList<>();
         initTagsList(preferences);
         this.scheduleRestrictions = new ScheduleRestrictions(preferences, attractionTags, vibeTags);
         this.placeTypeToAttraction = attractionListToAttractionHashMap(attractionList);
@@ -428,7 +430,7 @@ public class HillClimbing {
         removeAttractionDuplicationFromTouristAttraction();
         initTopSights(TOP_SIGHTS_NUM);
         removeDuplicateRestaurant();
-        this.hasCar = false;
+        this.hasCar = transportationTags.contains("Car");
         //in seconds
         this.BREAK_TIME_FACTOR = calculateBreakTimeByTravelerType(vibeTags);
     }
@@ -460,8 +462,13 @@ public class HillClimbing {
             vibeTags.add(tripTag.getTagName().replaceAll(" ", ""));
         });
 
+        preferences.getTransportation().forEach(tripTag -> {
+            transportationTags.add(tripTag.getTagName().replaceAll(" ", ""));
+        });
+
         attractionTags.forEach(System.out::println);
         vibeTags.forEach(System.out::println);
+        transportationTags.forEach(System.out::println);
     }
 
     void removeDuplicateRestaurant(){
@@ -909,7 +916,7 @@ public class HillClimbing {
 
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
                     childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(4), new ArrayList<>(),
-                    new ArrayList<>());
+                    new ArrayList<>(), new ArrayList<>());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 
             HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);

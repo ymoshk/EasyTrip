@@ -19,9 +19,10 @@ public class QuestionsData {
     private final LocalDateTime endDate;
     private final List<TripTag> favoriteAttractions;
     private final List<TripTag> tripVibes;
+    private final List<TripTag> transportation;
 
     public QuestionsData(String countryName, String cityName, int adultsCount, int childrenCount, int budget, LocalDateTime startDate,
-                         LocalDateTime endDate, List<TripTag> favoriteAttractions, List<TripTag> tripVibes) {
+                         LocalDateTime endDate, List<TripTag> favoriteAttractions, List<TripTag> tripVibes, List<TripTag> transportation) {
         this.adultsCount = adultsCount;
         this.childrenCount = childrenCount;
         this.city = cityName;
@@ -31,6 +32,7 @@ public class QuestionsData {
         this.favoriteAttractions = favoriteAttractions;
         this.tripVibes = tripVibes;
         this.priceRange = new PriceRange(budget);
+        this.transportation = transportation;
     }
 
     public String getCountry() {
@@ -67,5 +69,9 @@ public class QuestionsData {
 
     public List<TripTag> getTripVibes() {
         return Collections.unmodifiableList(tripVibes);
+    }
+
+    public List<TripTag> getTransportation() {
+        return transportation;
     }
 }
