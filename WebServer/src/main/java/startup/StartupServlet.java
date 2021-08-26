@@ -3,6 +3,7 @@ package startup;
 import cache.ItineraryCache;
 import connection.DataEngine;
 import constant.Constants;
+import user.UserContext;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -17,6 +18,7 @@ public class StartupServlet implements ServletContextListener {
 
         context.setAttribute(Constants.DATA_ENGINE, DataEngine.getInstance());
         context.setAttribute(Constants.ITINERARY_CACHE, new ItineraryCache());
+        context.setAttribute(Constants.USERS_CONTEXT, new UserContext());
     }
 
     @Override
@@ -28,5 +30,6 @@ public class StartupServlet implements ServletContextListener {
 
         ((ItineraryCache) context.getAttribute(Constants.ITINERARY_CACHE)).close();
         dataEngine.close();
+        ((UserContext) context.getAttribute(Constants.USERS_CONTEXT)).close();
     }
 }

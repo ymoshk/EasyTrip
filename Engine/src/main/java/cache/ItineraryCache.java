@@ -2,10 +2,8 @@ package cache;
 
 import com.google.gson.Gson;
 import connection.DataEngine;
-import generator.GUID;
 import itinerary.Itinerary;
 import model.itinerary.ItineraryModel;
-import model.user.GuestUser;
 import model.user.User;
 
 import java.io.Closeable;
@@ -46,7 +44,7 @@ public class ItineraryCache implements Closeable {
         }
     }
 
-    public void addNewItinerary(Itinerary itinerary) {
+    public void addNewItinerary(Itinerary itinerary, User user) {
         try {
             if (this.memory.size() >= CACHE_CAPACITY) {
                 removeOldestItinerary();
@@ -57,7 +55,7 @@ public class ItineraryCache implements Closeable {
                     itinerary.getItineraryId(),
                     LocalTime.now()));
 
-            saveItinerary(itinerary, false);
+            saveItinerary(itinerary, user);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -74,7 +72,7 @@ public class ItineraryCache implements Closeable {
                 itinerary = gson.fromJson(itineraryModel.getJsonData(), Itinerary.class);
 
                 if (itinerary != null) {
-                    this.addNewItinerary(itinerary);
+                    this.addNewItinerary(itinerary, itineraryModel.getUser());
                 }
             }
 
@@ -102,24 +100,20 @@ public class ItineraryCache implements Closeable {
         }
     }
 
+    private void updateItinerary(Itinerary itinerary) {
+        Gson gson = new Gson();
+        ItineraryModel model = DataEngine.getInstance().getItinerary(itinerary.getItineraryId());
+        model.setJsonData(gson.toJson(itinerary));
+        DataEngine.getInstance().updateItinerary(model);
+    }
 
-    private void saveItinerary(Itinerary itinerary, boolean isUpdate) {
+    private void saveItinerary(Itinerary itinerary, User user) {
         try {
             Gson gson = new Gson();
-
-            // TODO - delete the user creation
-            User user = new GuestUser(GUID.generate());
-            DataEngine.getInstance().addUser(user);
-
             ItineraryModel model = new ItineraryModel(itinerary.getItineraryId(),
                     gson.toJson(itinerary), user);
 
-            if (isUpdate) {
-                DataEngine.getInstance().updateItinerary(model);
-
-            } else {
-                DataEngine.getInstance().saveItinerary(model);
-            }
+            DataEngine.getInstance().saveItinerary(model);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -131,7 +125,7 @@ public class ItineraryCache implements Closeable {
 
             this.queue.forEach(pair -> {
                 if (forceUpdate || pair.getValue().plusMinutes(UPDATE_INTERVAL).isAfter(LocalTime.now())) {
-                    saveItinerary(this.memory.get(pair.getKey()), true);
+                    updateItinerary(this.memory.get(pair.getKey()));
                     newQueue.offer(new AbstractMap.SimpleImmutableEntry<>(pair.getKey(), LocalTime.now()));
                 } else {
                     newQueue.offer(pair);

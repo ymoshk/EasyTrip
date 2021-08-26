@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import constant.Constants;
 import itinerary.Itinerary;
 import itinerary.ItineraryBuilderUtil;
+import model.user.User;
+import user.UserContext;
 import util.Utils;
 
 import javax.servlet.annotation.WebServlet;
@@ -13,28 +15,33 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 @WebServlet("/api/completeQuestions")
 public class QuestionsCompleted extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req));
-        Itinerary itinerary = itineraryBuilder.getItinerary();
-        Gson gson = new Gson();
+        UserContext userContext = (UserContext) req.getServletContext().getAttribute(Constants.USERS_CONTEXT);
+        Optional<User> maybeUser = userContext.getLoggedInUser(req.getSession(false).getId());
+        resp.setStatus(500);
 
-        if (itinerary != null) {
-            ItineraryCache cache = (ItineraryCache) req.getServletContext()
-                    .getAttribute(Constants.ITINERARY_CACHE);
-
-            Thread savingThread = new Thread(() -> cache.addNewItinerary(itinerary));
-            savingThread.start();
-
+        maybeUser.ifPresent(user -> {
             try (PrintWriter out = resp.getWriter()) {
-                out.println(gson.toJson(itinerary.getItineraryId()));
+                ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req));
+                Itinerary itinerary = itineraryBuilder.getItinerary();
+                Gson gson = new Gson();
+
+                if (itinerary != null) {
+                    ItineraryCache cache = (ItineraryCache) req.getServletContext()
+                            .getAttribute(Constants.ITINERARY_CACHE);
+
+                    cache.addNewItinerary(itinerary, user);
+                    out.println(gson.toJson(itinerary.getItineraryId()));
+                }
+                resp.setStatus(200);
+            } catch (IOException ignore) {
             }
-        } else {
-            resp.setStatus(500);
-        }
+        });
     }
 }
 

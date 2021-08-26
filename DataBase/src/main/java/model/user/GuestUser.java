@@ -12,7 +12,7 @@ public class GuestUser extends User {
     private static int counter = 0;
 
     public GuestUser(String sessionId) {
-        super(sessionId, guestNameGenerator(), Hash.md5Hash(GUID.generate()), false);
+        super(sessionId, guestNameGenerator(), Hash.md5Hash(GUID.generate()), "Guest", false);
     }
 
     public GuestUser() {

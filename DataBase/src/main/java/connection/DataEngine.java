@@ -14,6 +14,8 @@ import model.itinerary.ItineraryModel;
 import model.location.City;
 import model.location.Country;
 import model.travel.Travel;
+import model.user.GuestUser;
+import model.user.RegisteredUser;
 import model.user.User;
 import util.google.GoogleMapsApiUtils;
 import util.google.Keys;
@@ -30,9 +32,9 @@ public class DataEngine implements Closeable {
     private static final int PAGE_COUNT_TO_GET = 3; // total of 60 results
     private static final int NEXT_PAGE_DELAY = 2000; // milli sec
     private static final int MIN_SIZE_COLLECTION = 3;
+    private static final int EARTH_RADIUS = 6371; // Radius of the earth in km
     private static DataEngine instance = null;
     private final Set<City> loadingCities;
-    private static final int EARTH_RADIUS = 6371; // Radius of the earth in km
 
     //empty constructor just to make sure the class is a singleton
     private DataEngine() {
@@ -47,13 +49,64 @@ public class DataEngine implements Closeable {
         return instance;
     }
 
+    //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
+    public static double calculateDistance(City source, Attraction destination) {
+        //case we initial an empty route, and there's no last attraction
+        if (source == null) {
+            return 0;
+        }
+
+        double latDelta = deg2rad(destination.getLat() - source.getCityCenter().lat);
+        double longDelta = deg2rad(destination.getLng() - source.getCityCenter().lng);
+
+        double a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) +
+                Math.cos(deg2rad(destination.getLat())) * Math.cos(deg2rad(source.getCityCenter().lat)) *
+                        Math.sin(longDelta / 2) * Math.sin(longDelta / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        double result = EARTH_RADIUS * c;
+        //        System.out.println("source: " + source.getName());
+        //        System.out.println("destination: " + destination.getName());
+        //        System.out.println("distance: " + result + "KM");
+
+        return result;
+    }
+
+    public static double deg2rad(double degree) {
+        return degree * (Math.PI / 180);
+    }
+
+    public static DistanceMatrixElement getDistanceMatrixElementFromGoogleApi(LatLng source, LatLng dest, TravelMode mode) {
+        GeoApiContext context = null;
+        DistanceMatrixElement res = null;
+
+        context = new GeoApiContext.Builder()
+                .apiKey(Keys.getKey())
+                .build();
+
+        try {
+            DistanceMatrix response = GoogleMapsApiUtils.getDistanceMatrixApiRequest(context, source, dest, mode).await();
+
+            if (response.rows.length != 0 && response.rows[0].elements.length != 0) {
+                res = response.rows[0].elements[0];
+            }
+        } catch (Exception e) {
+            LogsManager.logException(e);
+        } finally {
+            context.shutdown();
+
+            return res;
+        }
+    }
+
     /**
      * @param cityPrefix The name or a part of the name of the requested city.
      * @return List of cities that match the search result.
      */
     public List<City> getCities(String cityPrefix) {
-//        return (List<City>) DBContext.getInstance().selectQuery(
-//                "FROM City WHERE cityName LIKE '" + cityPrefix + "%'");
+        //        return (List<City>) DBContext.getInstance().selectQuery(
+        //                "FROM City WHERE cityName LIKE '" + cityPrefix + "%'");
         return (List<City>) DBContext.getInstance().selectQuery(
                 "FROM City WHERE cityName = '" + cityPrefix + "'");
     }
@@ -266,35 +319,6 @@ public class DataEngine implements Closeable {
         return result;
     }
 
-
-    //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
-    public static double calculateDistance(City source, Attraction destination) {
-        //case we initial an empty route, and there's no last attraction
-        if (source == null) {
-            return 0;
-        }
-
-        double latDelta = deg2rad(destination.getLat() - source.getCityCenter().lat);
-        double longDelta = deg2rad(destination.getLng() - source.getCityCenter().lng);
-
-        double a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) +
-                Math.cos(deg2rad(destination.getLat())) * Math.cos(deg2rad(source.getCityCenter().lat)) *
-                        Math.sin(longDelta / 2) * Math.sin(longDelta / 2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        double result = EARTH_RADIUS * c;
-//        System.out.println("source: " + source.getName());
-//        System.out.println("destination: " + destination.getName());
-//        System.out.println("distance: " + result + "KM");
-
-        return result;
-    }
-
-    public static double deg2rad(double degree) {
-        return degree * (Math.PI / 180);
-    }
-
     private boolean isAttractionExist(String tableName, String placeId) {
         return !DBContext.getInstance().selectQuery(
                 "FROM " + tableName +
@@ -353,29 +377,6 @@ public class DataEngine implements Closeable {
         return res;
     }
 
-    public static DistanceMatrixElement getDistanceMatrixElementFromGoogleApi(LatLng source, LatLng dest, TravelMode mode) {
-        GeoApiContext context = null;
-        DistanceMatrixElement res = null;
-
-        context = new GeoApiContext.Builder()
-                .apiKey(Keys.getKey())
-                .build();
-
-        try {
-            DistanceMatrix response = GoogleMapsApiUtils.getDistanceMatrixApiRequest(context, source, dest, mode).await();
-
-            if (response.rows.length != 0 && response.rows[0].elements.length != 0) {
-                res = response.rows[0].elements[0];
-            }
-        } catch (Exception e) {
-            LogsManager.logException(e);
-        } finally {
-            context.shutdown();
-
-            return res;
-        }
-    }
-
     public Optional<Attraction> getAttractionById(String id) {
 
         List<? extends Attraction> lst = (List<Attraction>) DBContext.getInstance()
@@ -407,16 +408,33 @@ public class DataEngine implements Closeable {
         return (List<User>) dbContext.getToList(User.class);
     }
 
-    public User getUser(String userName, String password) {
+    public Optional<RegisteredUser> getUser(String userName, String password) {
         DBContext dbContext = DBContext.getInstance();
 
-        List<User> users = (List<User>) dbContext.selectQuery("FROM User WHERE userName = " + "'" + userName + "'");
+        List<RegisteredUser> users = (List<RegisteredUser>) dbContext.getToList(RegisteredUser.class);
         return users.stream()
-                .filter(user -> user.getPassword().equals(Hash.md5Hash(password))).findFirst().orElse(null);
+                .filter(user -> user.getUserName().equals(userName))
+                .filter(user -> user.getPassword().equals(Hash.md5Hash(password)))
+                .findFirst();
+    }
+
+    public Optional<GuestUser> getGuestUser(String sessionId) {
+        DBContext dbContext = DBContext.getInstance();
+
+        List<GuestUser> users = (List<GuestUser>) dbContext.getToList(GuestUser.class);
+        return users.stream()
+                .filter(user -> user.getSessionId().equals(sessionId))
+                .findFirst();
+    }
+
+    public void updateUserSessionId(User user, String sessionId) {
+        DBContext dbContext = DBContext.getInstance();
+        user.setSessionId(sessionId);
+        dbContext.update(user);
     }
 
     public boolean isUserExist(String userName, String password) {
-        return getUser(userName, password) != null;
+        return getUser(userName, password).isPresent();
     }
 
     public void addUser(User userToAdd) {
@@ -457,17 +475,26 @@ public class DataEngine implements Closeable {
         dbContext.update(model);
     }
 
+    public void updateUser(User user) {
+        DBContext.getInstance().update(user);
+    }
+
+    public void deleteUser(User user) {
+        DBContext.getInstance().delete(user);
+    }
+
     @Override
     public void close() {
-        // TODO - make sure to call this method as the server shut down.
         DBContext.getInstance().close();
     }
 
-    public List<ItineraryModel> getUserItineraries(String userID) {
-        List<ItineraryModel> res = (List<ItineraryModel>) DBContext.getInstance().
-                selectQuery("FROM ItineraryModel WHERE " +"user_id = " + userID);
+    public List<ItineraryModel> getUserItineraries(String userName) {
+        List<ItineraryModel> allModels =
+                (List<ItineraryModel>) DBContext.getInstance().getToList(ItineraryModel.class);
 
-        return res;
+        return allModels.stream()
+                .filter(model -> model.getUser().getUserName().equals(userName))
+                .collect(Collectors.toList());
     }
 
 }
