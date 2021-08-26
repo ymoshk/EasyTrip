@@ -1,7 +1,9 @@
 package itinerary;
 
+import algorithm.HillClimbing;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import evaluators.AttractionEvaluator;
 import template.Attraction;
 import template.TripTag;
 
@@ -55,10 +57,15 @@ public class ItineraryBuilderUtil {
 
         if (this.questionsData != null) {
             HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
-
-            List<model.attraction.Attraction> attractionList = this.questionsData.getCity().getAttractionList();
+            List<model.attraction.Attraction> attractionList = questionsData.getCity().getAttractionList();
+            HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
+            AttractionEvaluator attractionEvaluator = hillClimbing.getAttractionEvaluator();
+            List<String> attractionTags = hillClimbing.getAttractionTags();
+            List<String> vibeTags = hillClimbing.getVibeTags();
             List<template.Attraction> attractionsTemplatesList = attractionList.stream()
-                    .map(attraction -> new template.Attraction(attraction, true))
+                    .map(attraction ->
+                        new template.Attraction(attraction,
+                                attractionEvaluator.isRecommended(attraction, attractionTags, vibeTags)))
                     .collect(Collectors.toList());
 
             for (template.Attraction attraction : attractionsTemplatesList) {

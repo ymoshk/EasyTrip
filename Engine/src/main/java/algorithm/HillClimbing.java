@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 //https://bigseventravel.com/most-visited-cities-in-europe/
 
 public class HillClimbing {
+
+
     //TODO: fetch 10 cities & check them + Tel Aviv + Jerusalem
     static private class ScheduleRestrictions {
         private LocalTime START_TIME;
@@ -435,6 +437,8 @@ public class HillClimbing {
         this.BREAK_TIME_FACTOR = calculateBreakTimeByTravelerType(vibeTags);
     }
 
+
+
     private long calculateBreakTimeByTravelerType(List<String> vibeTags){
         if(vibeTags.contains("Chill")){
             return 25 * 60;
@@ -449,6 +453,14 @@ public class HillClimbing {
 
     public  List<String> getAttractionTags() {
         return attractionTags;
+    }
+
+    public List<String> getVibeTags(){
+        return vibeTags;
+    }
+
+    public AttractionEvaluator getAttractionEvaluator() {
+        return attractionEvaluator;
     }
 
     private void initTagsList(QuestionsData preferences){
