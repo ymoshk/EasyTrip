@@ -153,6 +153,53 @@ public class AttractionEvaluator {
         }
     }
 
+    public double evaluateRestaurantByPreferences(Attraction attraction, List<String> vibeTags){
+        // no information about price level
+        if(attraction.getPriceLevel() == null){
+            return 50;
+        }
+
+        if(vibeTags.contains("Foody")){
+            switch(attraction.getPriceLevel()){
+                case INEXPENSIVE: return 20;
+                case MODERATE: return 60;
+                case EXPENSIVE: return 95;
+                case VERY_EXPENSIVE: return 100;
+                default: return 0;
+            }
+        }
+        else if(vibeTags.contains("StreetFood")){
+            switch(attraction.getPriceLevel()){
+                case INEXPENSIVE: return 100;
+                case MODERATE: return 55;
+                case EXPENSIVE: return 25;
+                case VERY_EXPENSIVE: return 0;
+                default: return 0;
+            }
+        }
+        else{
+            switch(attraction.getPriceLevel()){
+                case INEXPENSIVE:
+                case MODERATE:
+                    return 100;
+                case EXPENSIVE:
+                    return 75;
+                case VERY_EXPENSIVE:
+                    return 50;
+                default: return 0;
+            }
+        }
+    }
+
+    public double evaluateAttraction(Attraction attraction, double distance, List<String> attractionTags, List<String> vibeTags){
+        if(attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant")){
+            return evaluateRestaurant(attraction, distance, vibeTags);
+        }
+        else{
+            return evaluateAttraction(attraction, distance, attractionTags);
+        }
+    }
+
     public double evaluateAttraction(Attraction attraction, double distance, List<String> attractionTags){
         double ratingScore;
         double reviewsScore;
@@ -169,6 +216,15 @@ public class AttractionEvaluator {
         }
 
         return 0.3 * ratingScore + 0.3 * reviewsScore + 0.2 * distanceScore + 0.2 * preferencesScore;
+    }
+
+    public double evaluateRestaurant(Attraction attraction, double distance, List<String> vibeTags){
+        double ratingScore = evaluateByRating(attraction);
+        double reviewsScore = evaluateByReviewsNumber(attraction);
+        double distanceScore = evaluateByDistance(distance);
+        double preferencesScore = evaluateRestaurantByPreferences(attraction, vibeTags);
+
+        return 0.25 * ratingScore + 0.3 * reviewsScore + 0.25 * distanceScore + 0.2 * preferencesScore;
     }
 
     public double evaluateAttraction(Attraction attraction){
