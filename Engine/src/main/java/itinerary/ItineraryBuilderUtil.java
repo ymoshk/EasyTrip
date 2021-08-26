@@ -1,7 +1,9 @@
 package itinerary;
 
+import algorithm.HillClimbing;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import evaluators.AttractionEvaluator;
 import template.Attraction;
 import template.TripTag;
 
@@ -32,11 +34,13 @@ public class ItineraryBuilderUtil {
         String city = questionnaireData.get("city");
         int adultsCount = Integer.parseInt(questionnaireData.get("adultsCount"));
         int childrenCount = Integer.parseInt(questionnaireData.get("childrenCount"));
-        int budget = Integer.parseInt(questionnaireData.get("budget"));
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         LocalDateTime startDate = LocalDateTime.parse(questionnaireData.get("startDate"), formatter);
         LocalDateTime endDate = LocalDateTime.parse(questionnaireData.get("endDate"), formatter);
+
+        List<TripTag> transportation = (List<TripTag>) gson.fromJson(questionnaireData.get("transportation"), List.class)
+                .stream().map(data -> new TripTag((LinkedTreeMap<String, Object>) data)).collect(Collectors.toList());
 
         List<TripTag> favoriteAttraction = (List<TripTag>) gson.fromJson(questionnaireData.get("favoriteAttraction"), List.class)
                 .stream().map(data -> new TripTag((LinkedTreeMap<String, Object>) data)).collect(Collectors.toList());
@@ -44,8 +48,8 @@ public class ItineraryBuilderUtil {
         List<TripTag> tripVibes = (List<TripTag>) gson.fromJson(questionnaireData.get("tripVibes"), List.class)
                 .stream().map(data -> new TripTag((LinkedTreeMap<String, Object>) data)).collect(Collectors.toList());
 
-        return new QuestionsData(country, city, adultsCount, childrenCount, budget,
-                startDate, endDate, favoriteAttraction, tripVibes);
+        return new QuestionsData(country, city, adultsCount, childrenCount, 0,
+                startDate, endDate, favoriteAttraction, tripVibes, transportation);
     }
 
     private HashMap<String, List<template.Attraction>> generateAttractionsDictionary() {
@@ -53,10 +57,15 @@ public class ItineraryBuilderUtil {
 
         if (this.questionsData != null) {
             HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
-
-            List<model.attraction.Attraction> attractionList = this.questionsData.getCity().getAttractionList();
+            List<model.attraction.Attraction> attractionList = questionsData.getCity().getAttractionList();
+            HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
+            AttractionEvaluator attractionEvaluator = hillClimbing.getAttractionEvaluator();
+            List<String> attractionTags = hillClimbing.getAttractionTags();
+            List<String> vibeTags = hillClimbing.getVibeTags();
             List<template.Attraction> attractionsTemplatesList = attractionList.stream()
-                    .map(attraction -> new template.Attraction(attraction, true))
+                    .map(attraction ->
+                        new template.Attraction(attraction,
+                                attractionEvaluator.isRecommended(attraction, attractionTags, vibeTags)))
                     .collect(Collectors.toList());
 
             for (template.Attraction attraction : attractionsTemplatesList) {

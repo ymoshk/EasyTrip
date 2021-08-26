@@ -264,6 +264,27 @@ public class AttractionEvaluator {
         return attractionToIndexMap.get(generateAttractionKey(attractionToAdd));
     }
 
+    public boolean isRecommended(Attraction attraction, List<String> attractionTags, List<String> vibeTags) {
+        double ratingScore = evaluateByRating(attraction);
+        double reviewsScore = evaluateByReviewsNumber(attraction);
+        double preferencesScore;
+        double finalScore;
+        if(attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant")){
+            preferencesScore = evaluateRestaurantByPreferences(attraction, vibeTags);
+            finalScore =  0.5 * reviewsScore + 0.3 * ratingScore + 0.2 * preferencesScore;
+
+            return finalScore > 80;
+        }
+        else{
+            preferencesScore = evaluateByUserPreferences(attraction, attractionTags);
+            finalScore =  0.5 * reviewsScore + 0.35 * ratingScore + 0.15 * preferencesScore;
+
+            return finalScore > 75;
+        }
+
+
+    }
+
 
     private static double customLog(double base, double logNumber) {
         return Math.log(logNumber) / Math.log(base);
