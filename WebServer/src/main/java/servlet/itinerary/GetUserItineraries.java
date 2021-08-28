@@ -29,9 +29,8 @@ public class GetUserItineraries extends HttpServlet {
         UserContext userContext = (UserContext) Utils.getContext(req).getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
         Optional<User> loggedInUser = userContext.getLoggedInUser(req.getSession(false).getId());
-//TODO - Replace line 30 with the note
+
         loggedInUser.ifPresent(user -> {
-//        userContext.getLoggedInUser("48b5b6d6-f733-4abd-9a33-63e0688e9c62").ifPresent(user -> {
             String userName = user.getUserName();
             try (PrintWriter out = resp.getWriter()) {
                 List<ItineraryModel> itineraries = DataEngine.getInstance().getUserItineraries(userName);
