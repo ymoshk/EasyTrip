@@ -277,4 +277,12 @@ public class FlightOffer extends Model {
             return at;
         }
     }
+
+    public String getOriginLocationCode() {
+        return originLocationCode;
+    }
+
+    public String getDestinationLocationCode() {
+        return destinationLocationCode;
+    }
 }
