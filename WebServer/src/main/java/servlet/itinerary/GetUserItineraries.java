@@ -8,6 +8,7 @@ import itinerary.QuestionsData;
 import log.LogsManager;
 import model.itinerary.ItineraryModel;
 import model.itinerary.ItineraryStatus;
+import model.user.User;
 import user.UserContext;
 import util.Utils;
 
@@ -17,26 +18,29 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @WebServlet(urlPatterns = "/api/getUserItineraries")
 public class GetUserItineraries extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         UserContext userContext = (UserContext) Utils.getContext(req).getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
+        Optional<User> loggedInUser = userContext.getLoggedInUser(req.getSession(false).getId());
 
-        userContext.getLoggedInUser(req.getSession(false).getId()).ifPresent(user -> {
+        loggedInUser.ifPresent(user -> {
             String userName = user.getUserName();
             try (PrintWriter out = resp.getWriter()) {
                 List<ItineraryModel> itineraries = DataEngine.getInstance().getUserItineraries(userName);
 
                 List<ItineraryAndStatus> res =
-                        (List<ItineraryAndStatus>) itineraries.stream().
+                        itineraries.stream().
                                 map(itineraryModel -> {
                                     Itinerary itinerary = new Gson().fromJson(itineraryModel.getJsonData(), Itinerary.class);
                                     return new ItineraryAndStatus(itinerary.getQuestionsData(), itineraryModel.getStatus(), itinerary.getItineraryId());
-                                });
+                                }).collect(Collectors.toList());
 
                 out.println(new Gson().toJson(res));
                 resp.setStatus(200);
