@@ -278,11 +278,21 @@ public class FlightOffer extends Model {
         }
     }
 
-    public String getOriginLocationCode() {
-        return originLocationCode;
+    public String getOriginLocationCode(int direction) {
+        if(direction == TO_DESTINATION){
+            return originLocationCode;
+        }
+        else{
+            return destinationLocationCode;
+        }
     }
 
-    public String getDestinationLocationCode() {
-        return destinationLocationCode;
+    public String getDestinationLocationCode(int direction) {
+        if(direction == TO_DESTINATION){
+            return destinationLocationCode;
+        }
+        else{
+            return originLocationCode;
+        }
     }
 }

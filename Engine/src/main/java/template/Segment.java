@@ -19,8 +19,8 @@ public class Segment {
         LocalDateTime departureDateTime = flightOffer.getDepartureDateTime(direction);
         LocalDateTime arrivalDateTime = flightOffer.getArrivalDateTime(direction);
 
-        this.departureAirport = flightOffer.getOriginLocationCode();
-        this.arrivalAirport = flightOffer.getDestinationLocationCode();
+        this.departureAirport = flightOffer.getOriginLocationCode(direction);
+        this.arrivalAirport = flightOffer.getDestinationLocationCode(direction);
         this.departureTime = departureDateTime.toLocalTime().toString();
         this.arrivalTime = arrivalDateTime.toLocalTime().toString();
 
