@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class AmadeusApi {
     // Initialize using parameters (Must define keys in global environment in order to use this API)
     Amadeus amadeus = Amadeus
-            .builder(System.getenv().get("AMADEUS_CLIENT_ID"), System.getenv().get("AMADEUS_CLIENT_SECRET"))
+            .builder("QGTezduNRqkNWfFXkJuQ9hLGw6gkMH7j", "xH6NK70tdHkOMiSw")
             .build();
 
     /**

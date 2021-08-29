@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,13 +26,14 @@ public class GetFlights extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         FlightEngine flightEngine = (FlightEngine) request.getServletContext().getAttribute(Constants.FLIGHT_ENGINE);
         HashMap<String, String> requestData = Utils.parsePostData(request);
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
         List<FlightOffer> flightOfferList = flightEngine.findFlights(requestData.get("originCountry"),
                 requestData.get("originCity"),
                 requestData.get("destinationCountry"),
                 requestData.get("destinationCity"),
-                LocalDate.parse(requestData.get("departureDate")),
-                LocalDate.parse(requestData.get("arrivalDate")),
+                LocalDateTime.parse(requestData.get("departureDate"), formatter).toLocalDate(),
+                LocalDateTime.parse(requestData.get("returnDate"), formatter).toLocalDate(),
                 Boolean.parseBoolean(requestData.get("oneWay")),
                 Integer.parseInt(requestData.get("numberOfPassengers")));
 
