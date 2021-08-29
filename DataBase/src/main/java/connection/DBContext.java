@@ -148,9 +148,11 @@ class DBContext implements Closeable {
      * @param objectToAdd A model to insert into the DB. The model will be mapped automatically to the relevant table.
      */
     boolean insert(Model objectToAdd) {
+        flushManager();
         EntityTransaction transaction = this.entityManager.getTransaction();
         objectToAdd.setCreateTime(LocalDateTime.now());
         objectToAdd.setUpdateTime(LocalDateTime.now());
+
         try {
             transaction.begin();
             this.entityManager.persist(objectToAdd);
@@ -162,12 +164,21 @@ class DBContext implements Closeable {
         }
     }
 
+    void flushManager() {
+        try {
+            this.entityManager.flush();
+        } catch (Exception ignore) {
+        }
+    }
+
     /**
      * @param modelCollection A collection of models to insert into the DB.
      *                        The models will be mapped automatically to the relevant table.
      */
     void insertAll(Collection<? extends Model> modelCollection) {
+        flushManager();
         EntityTransaction transaction = this.entityManager.getTransaction();
+
         try {
             transaction.begin();
             for (Model model : modelCollection) {
@@ -186,6 +197,8 @@ class DBContext implements Closeable {
      *                      If the model couldn't be found in the DB, the method will end without an error.
      */
     void delete(Model modelToRemove) {
+        flushManager();
+
         if (modelToRemove != null) {
             EntityTransaction transaction = this.entityManager.getTransaction();
             try {
@@ -203,6 +216,8 @@ class DBContext implements Closeable {
      *                        If any of the models couldn't be found in the DB it will be ignored.
      */
     void deleteAll(Collection<? extends Model> modelCollection) {
+        flushManager();
+
         if (modelCollection != null) {
             EntityTransaction transaction = this.entityManager.getTransaction();
             try {
@@ -221,6 +236,8 @@ class DBContext implements Closeable {
      *                     Use this method once to save these changes.
      */
     void update(Model updatedModel) {
+        flushManager();
+
         if (updatedModel != null) {
             EntityTransaction transaction = this.entityManager.getTransaction();
             updatedModel.setUpdateTime(LocalDateTime.now());
