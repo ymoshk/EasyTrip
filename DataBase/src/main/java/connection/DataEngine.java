@@ -158,7 +158,7 @@ public class DataEngine implements Closeable {
      * @param priceRange A price range object to limit the price range of the requested attractions.
      * @return A list of attraction that match the search args.
      */
-    public List<Attraction> getAttractions(PlaceType type, String cityName, PriceRange priceRange) {
+    public List<Attraction> getAttractions(PlaceType type, String cityName, PriceRange priceRange, PriceLevel priceLevel) {
         DBContext dbContext = DBContext.getInstance();
         City theCity = getCity(cityName).orElse(null);
         List<Attraction> res = new ArrayList<>();
@@ -171,11 +171,11 @@ public class DataEngine implements Closeable {
             try {
                 //TODO: make sure there're enough attractions
                 if (res.isEmpty() || res.size() < 5) {
-                    res = getAttractionsAndSaveToDB(priceRange, type, theCity);
+                    res = getAttractionsAndSaveToDB(priceRange, type, theCity, priceLevel);
                 } else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
                     res.forEach(theCity::removeAttraction);
                     dbContext.update(theCity);
-                    res = getAttractionsAndSaveToDB(priceRange, type, theCity);
+                    res = getAttractionsAndSaveToDB(priceRange, type, theCity, priceLevel);
                 }
             } catch (Exception e) {
                 LogsManager.logException(e);
@@ -192,7 +192,6 @@ public class DataEngine implements Closeable {
                 PlaceType.AMUSEMENT_PARK,
                 PlaceType.AQUARIUM,
                 PlaceType.ART_GALLERY,
-                PlaceType.CAFE,
                 PlaceType.CASINO,
                 PlaceType.MUSEUM,
                 PlaceType.NIGHT_CLUB,
@@ -200,6 +199,7 @@ public class DataEngine implements Closeable {
                 PlaceType.TOURIST_ATTRACTION,
                 PlaceType.PARK,
                 PlaceType.RESTAURANT,
+                PlaceType.CAFE,
                 PlaceType.SHOPPING_MALL,
                 PlaceType.SPA,
                 PlaceType.ZOO,
@@ -207,7 +207,17 @@ public class DataEngine implements Closeable {
                 PlaceType.DOCTOR    // DOCTOR == BEACH
         ));
 
-        types.forEach(type -> res.addAll(getAttractions(type, cityName, priceRange)));
+        types.forEach(type -> {
+            if(type.equals(PlaceType.RESTAURANT)) {
+                res.addAll(getAttractions(type, cityName, priceRange, PriceLevel.INEXPENSIVE));
+                res.addAll(getAttractions(type, cityName, priceRange, PriceLevel.MODERATE));
+                res.addAll(getAttractions(type, cityName, priceRange, PriceLevel.EXPENSIVE));
+                res.addAll(getAttractions(type, cityName, priceRange, PriceLevel.VERY_EXPENSIVE));
+            }
+            else{
+                res.addAll(getAttractions(type, cityName, priceRange, null));
+            }
+        });
 
         return res;
     }
@@ -220,9 +230,9 @@ public class DataEngine implements Closeable {
      * @param type       The PlaceType of the requested attractions.
      * @return a list of attractions that match the search args.
      */
-    private List<Attraction> getAttractionsAndSaveToDB(PriceRange priceRange, PlaceType type, City city) {
+    private List<Attraction> getAttractionsAndSaveToDB(PriceRange priceRange, PlaceType type, City city, PriceLevel priceLevel) {
         List<Attraction> attractionsToAdd =
-                getAttractionInStandardTextSearch(type.name().replace("_", " "), priceRange, type, city);
+                getAttractionInStandardTextSearch(type.name().replace("_", " "), priceRange, type, city, priceLevel);
 
         DBContext.getInstance().insertAll(attractionsToAdd);
         return attractionsToAdd;

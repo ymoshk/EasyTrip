@@ -7,4 +7,6 @@ public class Constants {
     public static final String USERS_CONTEXT = "usersContext";
 
 
+    public static final String SESSION_ATT = "sessionID";
+    public static final String FLIGHT_ENGINE = "flightEngineObject";
 }

@@ -2,6 +2,7 @@ package startup;
 
 import cache.ItineraryCache;
 import connection.DataEngine;
+import connection.FlightEngine;
 import constant.Constants;
 import user.UserContext;
 
@@ -19,6 +20,7 @@ public class StartupServlet implements ServletContextListener {
         context.setAttribute(Constants.DATA_ENGINE, DataEngine.getInstance());
         context.setAttribute(Constants.ITINERARY_CACHE, new ItineraryCache());
         context.setAttribute(Constants.USERS_CONTEXT, new UserContext());
+        context.setAttribute(Constants.FLIGHT_ENGINE, new FlightEngine());
     }
 
     @Override

@@ -9,6 +9,7 @@ import model.IATACode.IATACode;
 import model.flightOffer.FlightOffer;
 
 import javax.persistence.Query;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -172,16 +173,57 @@ public class FlightEngine {
         return IATACodeList.stream().map(IATACode::getCode).collect(Collectors.toList());
     }
 
+    static private void saveToDBCityIATATable() throws IOException {
+        DBContext context = DBContext.getInstance();
+        File file = new File("C:\\2021\\airport_list_final.txt");
+        int counter = 1;
+        String city = "";
+        String country = "";
+        String code = "";
+        IATACode iataCode;
+
+        BufferedReader br = new BufferedReader(new FileReader(file));
+
+        String st;
+        while ((st = br.readLine()) != null)
+        {
+            //System.out.println(st);
+
+            if(counter == 2){
+                city = new String(st);
+            }
+            else if(counter == 3){
+                country = new String(st);
+            }
+            else if(counter == 4){
+                code = new String(st);
+            }
+            if(counter == 4){
+                counter = 0;
+                iataCode = new IATACode(city, country, code);
+                context.insert(iataCode);
+                //System.out.println(iataCode);
+            }
+
+            counter++;
+        }
+    }
 
     // TODO: remove this method
     public static void main(String[] args) {
+//        try{
+//            saveToDBCityIATATable();
+//        }
+//        catch (Exception exception){
+//            System.out.println(exception.getMessage());
+//        }
         FlightEngine flightEngine = new FlightEngine();
         List<FlightOffer> flightOfferList = flightEngine.findFlights("Israel",
                 "Tel Aviv",
                 "Germany",
                 "Berlin",
-                LocalDate.parse("2021-07-17"),
-                LocalDate.parse("2021-07-23"),
+                LocalDate.parse("2021-08-30"),
+                LocalDate.parse("2021-09-05"),
                 false,
                 1);
 

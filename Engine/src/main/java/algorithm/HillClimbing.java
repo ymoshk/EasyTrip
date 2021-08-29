@@ -6,6 +6,7 @@ import constant.DefaultDurations;
 import evaluators.AttractionEvaluator;
 import itinerary.ActivityNode;
 import itinerary.Itinerary;
+import itinerary.ItineraryDay;
 import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.location.City;
@@ -590,7 +591,91 @@ public class HillClimbing {
             addAttraction(currentState);
         }
 
-        return currentState.getItinerary();
+        Itinerary itinerary = currentState.getItinerary();
+        Itinerary optimizedItinerary = optimize(itinerary);
+
+        return itinerary;
+    }
+
+    private Itinerary optimize(Itinerary itinerary) {
+        List<ItineraryDay> itineraryDays = itinerary.getItineraryDays();
+        List <ActivityNode> activityNodes;
+        List<String> visitedAttraction = new ArrayList<>();
+        template.Attraction previous = null, current = null,  next = null;
+        for (ItineraryDay itineraryDay:itineraryDays) {
+            activityNodes = itineraryDay.getActivities();
+            int sizeOfDay = activityNodes.size();
+            for (ActivityNode activityNode:activityNodes) {
+                if(activityNode.getType().equals(ActivityNode.Types.ATTRACTION)){
+                    current = activityNode.getAttraction();
+                    int currentIndex = activityNodes.indexOf(activityNode);
+                    if(currentIndex < sizeOfDay - 4){
+                        next = activityNodes.get(currentIndex + 4).getAttraction();
+                        if(previous != null){
+                            check(previous, current, next, visitedAttraction,
+                                    itineraryDay.getDate().atTime(LocalTime.parse(activityNode.getStartTime())));
+                        }
+                    }
+                    previous = current;
+                    visitedAttraction.add(previous.id);
+                }
+            }
+            previous = null;
+        }
+
+        return  itinerary;
+    }
+
+    private void check(template.Attraction previous, template.Attraction current,
+                       template.Attraction next, List<String> visitedAttraction, LocalDateTime startTime) {
+
+        List<Attraction> attractions = placeTypeToAttraction.values()
+                .stream().flatMap(Collection::stream).collect(Collectors.toList());
+
+        Attraction previousAttraction = attractions.stream().filter(attraction ->
+                attraction.getPlaceId().equalsIgnoreCase(previous.id)).findFirst().orElse(null);
+        Attraction currentAttraction = attractions.stream().filter(attraction ->
+                attraction.getPlaceId().equalsIgnoreCase(current.id)).findFirst().orElse(null);
+        Attraction nextAttraction = attractions.stream().filter(attraction ->
+                attraction.getPlaceId().equalsIgnoreCase(next.id)).findFirst().orElse(null);
+
+        List<Attraction> filteredAttractions = attractions.stream().filter(attraction ->
+                scheduleRestrictions.checkOpeningHours(attraction, startTime) &&
+                !visitedAttraction.contains(attraction.getPlaceId())).collect(Collectors.toList());
+
+
+        filteredAttractions.forEach(attraction -> {
+            double possibleReplaceDistance = calculateDistance(previousAttraction, attraction) +
+                    calculateDistance(attraction, nextAttraction);
+            double originDistance = calculateDistance(previousAttraction, currentAttraction) +
+                    calculateDistance(currentAttraction, nextAttraction);
+            if(possibleReplaceDistance < originDistance){
+                double possibleReplaceScore = attractionEvaluator.evaluateAttraction(attraction);
+                double originScore = attractionEvaluator.evaluateAttraction(currentAttraction);
+                if(possibleReplaceScore + 5 >= originScore){
+                    if(DefaultDurations.getESTOfAttraction(attraction) ==
+                    DefaultDurations.getESTOfAttraction(currentAttraction)){
+                        if(currentAttraction.getClass().getSimpleName().
+                                equalsIgnoreCase("Restaurant")
+                        && attraction.getClass().getSimpleName().
+                                equalsIgnoreCase("Restaurant")){
+                            System.out.println("Possible Restaurant replace for " + currentAttraction.getName()
+                                    + " is " + attraction.getName() + " with improvement of " +
+                                    (originDistance - possibleReplaceDistance));
+                        }
+                        else if(!currentAttraction.getClass().getSimpleName().
+                                equalsIgnoreCase("Restaurant")
+                                && !attraction.getClass().getSimpleName().
+                                equalsIgnoreCase("Restaurant")){
+                            System.out.println("Possible replace for " + currentAttraction.getName()
+                                    + " is " + attraction.getName() + " with improvement of " +
+                                    (originDistance - possibleReplaceDistance));
+                        }
+                    }
+                }
+            }
+        });
+
     }
 
 
