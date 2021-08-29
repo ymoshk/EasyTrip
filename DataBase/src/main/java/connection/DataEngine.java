@@ -245,7 +245,8 @@ public class DataEngine implements Closeable {
      * @param city           The name of the city where the requested attractions should be located.
      * @return a list of attractions that match the search args.
      */
-    private List<Attraction> getAttractionInStandardTextSearch(String attractionName, PriceRange priceRange, PlaceType type, City city) {
+    private List<Attraction> getAttractionInStandardTextSearch(String attractionName, PriceRange priceRange,
+                                                               PlaceType type, City city, PriceLevel priceLevel) {
         List<Attraction> result = new ArrayList<>();
         GeoApiContext context = null;
         int pageCountToGet = 3;
@@ -266,7 +267,7 @@ public class DataEngine implements Closeable {
             context = new GeoApiContext.Builder().apiKey(Keys.getKey()).build();
             PlacesSearchResponse resp = GoogleMapsApiUtils
                     .getTextSearchRequest(context, attractionName, city.getCityName(),
-                            city.getCityCenter(), priceRange, type)
+                            city.getCityCenter(), priceRange, type, priceLevel)
                     .await();
             do {
                 GeoApiContext finalContext = context;
