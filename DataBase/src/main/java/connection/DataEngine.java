@@ -412,20 +412,20 @@ public class DataEngine implements Closeable {
     public List<User> getUsers() {
         DBContext dbContext = DBContext.getUsersInstance();
 
-        return (List<User>) dbContext.selectQuery("FROM Users");
+        return (List<User>) dbContext.selectQuery("FROM User");
     }
 
     public List<GuestUser> getGuestUsers() {
         DBContext dbContext = DBContext.getUsersInstance();
 
-        return (List<GuestUser>) dbContext.selectQuery("FROM Users WHERE DTYPE = GuestUser");
+        return (List<GuestUser>) dbContext.selectQuery("FROM User WHERE DTYPE = GuestUser");
     }
 
     public Optional<RegisteredUser> getUser(String userName, String password) {
         DBContext dbContext = DBContext.getUsersInstance();
 
         List<RegisteredUser> users = (List<RegisteredUser>) dbContext
-                .selectQuery("FROM Users WHERE DTYPE = RegisteredUser");
+                .selectQuery("FROM User WHERE DTYPE = RegisteredUser");
         return users.stream()
                 .filter(user -> user.getUserName().equals(userName))
                 .filter(user -> user.getPassword().equals(Hash.md5Hash(password)))
@@ -435,7 +435,7 @@ public class DataEngine implements Closeable {
     public Optional<GuestUser> getGuestUser(String sessionId) {
         DBContext dbContext = DBContext.getUsersInstance();
 
-        List<GuestUser> users = (List<GuestUser>) dbContext.selectQuery("FROM Users WHERE DTYPE = GuestUser");
+        List<GuestUser> users = (List<GuestUser>) dbContext.selectQuery("FROM User WHERE DTYPE = GuestUser");
         return users.stream()
                 .filter(user -> user.getSessionId().equals(sessionId))
                 .findFirst();
@@ -511,10 +511,8 @@ public class DataEngine implements Closeable {
     //                .collect(Collectors.toList());
     //    }
 
-    public List<ItineraryModel> getUserItineraries(String userID) {
-        List<ItineraryModel> res = (List<ItineraryModel>) DBContext.getInstance().
-                selectQuery("FROM ItineraryModel WHERE user_id = " + userID);
-
-        return res;
-    }
+    //    public List<ItineraryModel> getUserItineraries(User user) {
+    //
+    //        return user.getItineraryList();
+    //    }
 }

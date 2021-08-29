@@ -76,7 +76,8 @@ public class UserContext {
      */
     private void grabAndRemoveGuest(RegisteredUser registeredUser, GuestUser guest) {
         DataEngine dataEngine = DataEngine.getInstance();
-        List<ItineraryModel> itineraryModelList = dataEngine.getUserItineraries(guest.getUserName());
+        //        List<ItineraryModel> itineraryModelList = dataEngine.getUserItineraries(guest.getUserName());
+        List<ItineraryModel> itineraryModelList = guest.getItineraryList();
 
         if (itineraryModelList != null) {
             for (ItineraryModel itinerary : itineraryModelList) {
@@ -153,8 +154,7 @@ public class UserContext {
     public boolean isItineraryOwner(String sessionId, String itineraryId) {
         User user = getUserBySessionId(sessionId);
 
-        return DataEngine.getInstance()
-                .getUserItineraries(user.getUserName())
+        return user.getItineraryList()
                 .stream()
                 .anyMatch(itineraryModel -> itineraryModel.getItineraryId().equals(itineraryId));
     }

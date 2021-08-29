@@ -1,7 +1,6 @@
 package servlet.itinerary;
 
 import com.google.gson.Gson;
-import connection.DataEngine;
 import constant.Constants;
 import itinerary.Itinerary;
 import itinerary.QuestionsData;
@@ -29,9 +28,10 @@ public class GetUserItineraries extends HttpServlet {
         resp.setStatus(500);
         User user = userContext.getUserBySessionId(req.getSession(false).getId());
 
-        String userName = user.getUserName();
+//        String userName = user.getUserName();
         try (PrintWriter out = resp.getWriter()) {
-            List<ItineraryModel> itineraries = DataEngine.getInstance().getUserItineraries(userName);
+            //            List<ItineraryModel> itineraries = DataEngine.getInstance().getUserItineraries(userName);
+            List<ItineraryModel> itineraries = user.getItineraryList();
 
             List<ItineraryAndStatus> res =
                     itineraries.stream().

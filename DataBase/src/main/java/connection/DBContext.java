@@ -140,10 +140,10 @@ class DBContext implements Closeable {
     }
 
     void flushManager() {
-        //        try {
-        //            this.entityManager.flush();
-        //        } catch (Exception ignore) {
-        //        }
+        try {
+            this.entityManager.flush();
+        } catch (Exception ignore) {
+        }
     }
 
     /**
