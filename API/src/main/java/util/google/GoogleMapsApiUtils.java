@@ -11,7 +11,7 @@ public class GoogleMapsApiUtils {
     public static int RADIUS = 50 * 1000;
 
     public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName, String cityName,
-                                                         LatLng cityCenter, PriceRange priceRange, PlaceType type) {
+                                                         LatLng cityCenter, PriceRange priceRange, PlaceType type, PriceLevel priceLevel) {
         if(type.equals(PlaceType.GROCERY_OR_SUPERMARKET)) {
             return PlacesApi.textSearchQuery(context, "market" + "+" + cityName).location(cityCenter).radius(RADIUS);
         }
@@ -27,12 +27,10 @@ public class GoogleMapsApiUtils {
         else if(type.equals(PlaceType.AMUSEMENT_PARK)){
             return PlacesApi.textSearchQuery(context, "amusement park" + "+" + cityName).type(type);
         }
-
-        // TODO: fetch more restaurants
-//        else if(type.equals(PlaceType.RESTAURANT)){
-//            return PlacesApi.textSearchQuery(context, attractionName).type(type).location(cityCenter).radius(RADIUS).
-//                    maxPrice(PriceLevel.MODERATE);
-//        }
+        else if(type.equals(PlaceType.RESTAURANT)){
+            return PlacesApi.textSearchQuery(context, attractionName).type(type).location(cityCenter).radius(RADIUS).
+                    minPrice(priceLevel).maxPrice(priceLevel);
+        }
 
         return PlacesApi.textSearchQuery(context, attractionName).type(type).location(cityCenter).radius(RADIUS);
     }
