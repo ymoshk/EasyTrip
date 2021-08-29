@@ -23,10 +23,8 @@ import util.google.Keys;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +36,7 @@ public class DataEngine implements Closeable {
     private static final int MIN_SIZE_COLLECTION = 5;
     private static final int EARTH_RADIUS = 6371; // Radius of the earth in km
     private static DataEngine instance = null;
-
+//    private List<Thread> threadsList = new ArrayList<>();
     //empty constructor just to make sure the class is a singleton
     private DataEngine() {
     }
@@ -210,13 +208,61 @@ public class DataEngine implements Closeable {
 
         types.forEach(type -> {
             if(type.equals(PlaceType.RESTAURANT)) {
-                res.addAll(getAttractions(type, cityName, priceRange, PriceLevel.INEXPENSIVE));
-                res.addAll(getAttractions(type, cityName, priceRange, PriceLevel.MODERATE));
-                res.addAll(getAttractions(type, cityName, priceRange, PriceLevel.EXPENSIVE));
-                res.addAll(getAttractions(type, cityName, priceRange, PriceLevel.VERY_EXPENSIVE));
+                Arrays.stream(PriceLevel.values()).filter(priceLevel ->
+                        !priceLevel.equals(PriceLevel.UNKNOWN)).collect(Collectors.toList()).forEach(priceLevel ->
+                {
+                    res.addAll(getAttractions(type, cityName, priceRange, priceLevel));
+                    try {
+                        Thread.sleep(NEXT_PAGE_DELAY);
+                    } catch (InterruptedException e) {
+                        LogsManager.log(e.getMessage());
+                    }
+                });
             }
             else{
                 res.addAll(getAttractions(type, cityName, priceRange, null));
+                try {
+                    Thread.sleep(NEXT_PAGE_DELAY);
+                } catch (InterruptedException e) {
+                    LogsManager.log(e.getMessage());
+                }
+            }
+        });
+
+        List<Attraction> topSightsAttractions = res.stream().filter(attraction ->
+                attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
+                collect(Collectors.toList());
+        res.addAll(fetchRestaurantsByTopSights(topSightsAttractions, cityName, priceRange));
+
+
+
+        return res;
+    }
+
+    private List<Attraction> fetchRestaurantsByTopSights(List<Attraction> topSights, String cityName, PriceRange priceRange) {
+        City theCity = getCity(cityName).orElse(null);
+        List <Attraction> mostVisitedTopSights = topSights.stream().
+                sorted(Comparator.comparingInt(attraction -> attraction.getUserRatingsTotal())).collect(Collectors.toList());
+        mostVisitedTopSights = mostVisitedTopSights.subList(mostVisitedTopSights.size() - 7, mostVisitedTopSights.size());
+        List <Attraction> res = new ArrayList<>();
+        AtomicReference<Attraction> mostFarAttraction = new AtomicReference<>(mostVisitedTopSights.get(0));
+        AtomicReference<Double> currentDistance = new AtomicReference<>(calculateDistance(theCity, mostFarAttraction.get()));
+        AtomicReference<Double> maxDistance = new AtomicReference<>(currentDistance.get());
+        mostVisitedTopSights.forEach(attraction -> {
+            currentDistance.set(calculateDistance(theCity, attraction));
+            if(currentDistance.get() > maxDistance.get()){
+                mostFarAttraction.set(attraction);
+                maxDistance.set(currentDistance.get());
+            }
+        });
+        Arrays.stream(PriceLevel.values()).filter(priceLevel ->
+                !priceLevel.equals(PriceLevel.UNKNOWN)).collect(Collectors.toList()).forEach(priceLevel -> {
+            res.addAll(getAttractionInNearBySearch(mostFarAttraction.get().getGeometry().location,
+                    new PriceRange(2), PlaceType.RESTAURANT, theCity, priceLevel));
+            try {
+                Thread.sleep(NEXT_PAGE_DELAY);
+            } catch (InterruptedException e) {
+                LogsManager.log(e.getMessage());
             }
         });
 
@@ -237,6 +283,16 @@ public class DataEngine implements Closeable {
 
         DBContext.getInstance().insertAll(attractionsToAdd);
         return attractionsToAdd;
+    }
+
+    public List<Attraction> getNearByAttractionsAndSaveToDB(LatLng location, PriceRange priceRange,
+                                                            PlaceType type, City city, PriceLevel priceLevel){
+        List <Attraction> attractionList = getAttractionInNearBySearch(location, priceRange,
+                type, city, priceLevel);
+
+        DBContext.getInstance().insertAll(attractionList);
+
+        return attractionList;
     }
 
     /**
@@ -270,6 +326,66 @@ public class DataEngine implements Closeable {
                     .getTextSearchRequest(context, attractionName, city.getCityName(),
                             city.getCityCenter(), priceRange, type, priceLevel)
                     .await();
+            do {
+                GeoApiContext finalContext = context;
+                Arrays.stream(resp.results)
+                        .forEach(singleRes ->
+                        {
+                            PlaceDetails placeDetails = null;
+                            try {
+                                placeDetails = GoogleMapsApiUtils.getPlaceDetails(finalContext, singleRes.placeId).await();
+
+                            } catch (ApiException | InterruptedException | IOException e) {
+                                LogsManager.logException(e);
+                            }
+
+                            Attraction attractionToAdd = AttractionsFactory.getAttraction(singleRes, type, priceRange, city);
+                            //this is the method to updates the attraction with reviews, phones, website, ...
+                            AttractionsFactory.setAttractionDetails(attractionToAdd, placeDetails);
+                            if (attractionToAdd.getWebsite() != null) {
+                                if (attractionToAdd.getWebsite().length() > 250) {
+                                    attractionToAdd.setWebsite(attractionToAdd.getWebsite().substring(0, 249));
+                                }
+                            }
+                            //we wish to add attraction only if it has at least 5 review
+                            if (attractionToAdd.getUserRatingsTotal() > 10 && attractionToAdd.getRating() > 3.0) {
+                                if (calculateDistance(city, attractionToAdd) < 100.0) {
+                                    result.add(attractionToAdd);
+                                } else {
+                                    System.out.println("Attraction above 100 km " + attractionToAdd.getName());
+                                }
+                            } else {
+                                System.out.println("Below 3.0 and 10 reviews " + attractionToAdd.getName());
+                            }
+                        });
+                Thread.sleep(NEXT_PAGE_DELAY);
+
+                if (resp.nextPageToken == null) {
+                    break;
+                }
+
+                resp = GoogleMapsApiUtils.getNextPageTextSearchRequest(context, resp.nextPageToken).await();
+            } while (++i <= pageCountToGet);
+        } catch (Exception e) {
+            LogsManager.logException(e);
+        } finally {
+            if (context != null) {
+                context.shutdown();
+            }
+        }
+        return result;
+    }
+
+    private List<Attraction> getAttractionInNearBySearch(LatLng location, PriceRange priceRange,
+                                                         PlaceType type, City city, PriceLevel priceLevel) {
+        List<Attraction> result = new ArrayList<>();
+        GeoApiContext context = null;
+        int pageCountToGet = 3;
+
+        try {
+            int i = 0;
+            context = new GeoApiContext.Builder().apiKey(Keys.getKey()).build();
+            PlacesSearchResponse resp = GoogleMapsApiUtils.getNearByPlaces(context, location).await();
             do {
                 GeoApiContext finalContext = context;
                 Arrays.stream(resp.results)
