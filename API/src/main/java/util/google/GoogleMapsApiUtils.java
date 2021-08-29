@@ -9,7 +9,7 @@ import container.PriceRange;
 
 public class GoogleMapsApiUtils {
     public static int RADIUS = 50 * 1000;
-
+    public static int RESTAURANT_RADIUS = 5 * 1000;
     public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName, String cityName,
                                                          LatLng cityCenter, PriceRange priceRange, PlaceType type, PriceLevel priceLevel) {
         if(type.equals(PlaceType.GROCERY_OR_SUPERMARKET)) {
@@ -46,5 +46,9 @@ public class GoogleMapsApiUtils {
 
     public static PlaceDetailsRequest getPlaceDetails(GeoApiContext context, String placeID){
         return PlacesApi.placeDetails(context, placeID);
+    }
+
+    public static NearbySearchRequest getNearByPlaces(GeoApiContext context, LatLng location){
+        return PlacesApi.nearbySearchQuery(context, location).type(PlaceType.RESTAURANT).radius(RESTAURANT_RADIUS);
     }
 }
