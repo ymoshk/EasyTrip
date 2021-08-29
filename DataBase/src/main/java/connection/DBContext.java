@@ -2,6 +2,7 @@ package connection;
 
 import log.LogsManager;
 import model.Model;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.io.Closeable;
@@ -21,7 +22,6 @@ class DBContext implements Closeable {
     private static DBContext usersInstance = null;
     private final EntityManagerFactory entityManagerFactory;
     private final EntityManager entityManager;
-
     private DBContext() {
         entityManagerFactory = Persistence
                 .createEntityManagerFactory("EasyTrip");
@@ -153,18 +153,21 @@ class DBContext implements Closeable {
     synchronized void insertAll(Collection<? extends Model> modelCollection) {
         EntityTransaction transaction = this.entityManager.getTransaction();
 
-        try {
+
             for (Model model : modelCollection) {
+                try {
                 flushManager();
                 transaction.begin();
                 model.setCreateTime(LocalDateTime.now());
                 model.setUpdateTime(LocalDateTime.now());
                 this.entityManager.persist(model);
                 transaction.commit();
+                } catch (Exception ex) {
+                    LogsManager.logException(ex);
+                    System.out.println(ex.getMessage());
+                }
             }
-        } catch (Exception ex) {
-            LogsManager.logException(ex);
-        }
+
     }
 
     /**
