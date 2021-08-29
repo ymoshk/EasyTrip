@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class DataEngine implements Closeable {
     private static final int PAGE_COUNT_TO_GET = 3; // total of 60 results
     private static final int NEXT_PAGE_DELAY = 2000; // milli sec
-    private static final int MIN_SIZE_COLLECTION = 3;
+    private static final int MIN_SIZE_COLLECTION = 5;
     private static final int EARTH_RADIUS = 6371; // Radius of the earth in km
     private static DataEngine instance = null;
 
@@ -170,9 +170,10 @@ public class DataEngine implements Closeable {
 
             try {
                 //TODO: make sure there're enough attractions
-                if (res.isEmpty() || res.size() < 5) {
+                if (res.isEmpty()) {
                     res = getAttractionsAndSaveToDB(priceRange, type, theCity, priceLevel);
-                } else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
+                    //} else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
+                } else if (!Model.isCollectionUpdated(res)) {
                     res.forEach(theCity::removeAttraction);
                     dbContext.update(theCity);
                     res = getAttractionsAndSaveToDB(priceRange, type, theCity, priceLevel);
@@ -411,19 +412,20 @@ public class DataEngine implements Closeable {
     public List<User> getUsers() {
         DBContext dbContext = DBContext.getUsersInstance();
 
-        return (List<User>) dbContext.getToList(User.class);
+        return (List<User>) dbContext.selectQuery("FROM Users");
     }
 
     public List<GuestUser> getGuestUsers() {
         DBContext dbContext = DBContext.getUsersInstance();
 
-        return (List<GuestUser>) dbContext.getToList(GuestUser.class);
+        return (List<GuestUser>) dbContext.selectQuery("FROM Users WHERE DTYPE = GuestUser");
     }
 
     public Optional<RegisteredUser> getUser(String userName, String password) {
         DBContext dbContext = DBContext.getUsersInstance();
 
-        List<RegisteredUser> users = (List<RegisteredUser>) dbContext.getToList(RegisteredUser.class);
+        List<RegisteredUser> users = (List<RegisteredUser>) dbContext
+                .selectQuery("FROM Users WHERE DTYPE = RegisteredUser");
         return users.stream()
                 .filter(user -> user.getUserName().equals(userName))
                 .filter(user -> user.getPassword().equals(Hash.md5Hash(password)))
@@ -433,7 +435,7 @@ public class DataEngine implements Closeable {
     public Optional<GuestUser> getGuestUser(String sessionId) {
         DBContext dbContext = DBContext.getUsersInstance();
 
-        List<GuestUser> users = (List<GuestUser>) dbContext.getToList(GuestUser.class);
+        List<GuestUser> users = (List<GuestUser>) dbContext.selectQuery("FROM Users WHERE DTYPE = GuestUser");
         return users.stream()
                 .filter(user -> user.getSessionId().equals(sessionId))
                 .findFirst();
@@ -500,12 +502,19 @@ public class DataEngine implements Closeable {
         DBContext.getInstance().close();
     }
 
-    public List<ItineraryModel> getUserItineraries(String userName) {
-        List<ItineraryModel> allModels =
-                (List<ItineraryModel>) DBContext.getUsersInstance().getToList(ItineraryModel.class);
+    //    public List<ItineraryModel> getUserItineraries(String userName) {
+    //        List<ItineraryModel> allModels =
+    //                (List<ItineraryModel>) DBContext.getUsersInstance().getToList(ItineraryModel.class);
+    //
+    //        return allModels.stream()
+    //                .filter(model -> model.getUser().getUserName().equals(userName))
+    //                .collect(Collectors.toList());
+    //    }
 
-        return allModels.stream()
-                .filter(model -> model.getUser().getUserName().equals(userName))
-                .collect(Collectors.toList());
+    public List<ItineraryModel> getUserItineraries(String userID) {
+        List<ItineraryModel> res = (List<ItineraryModel>) DBContext.getInstance().
+                selectQuery("FROM ItineraryModel WHERE user_id = " + userID);
+
+        return res;
     }
 }

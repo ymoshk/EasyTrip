@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * A singleton class to connect and process CRUD operations over the DB.
@@ -52,30 +51,6 @@ class DBContext implements Closeable {
         this.entityManagerFactory.close();
         this.entityManager.close();
         instance = null;
-    }
-
-    /**
-     * @param modelClass The class type of the requested object - must be 'Model' or inherit from 'Model'.
-     * @return A list of all the records inside the DB of the requested class
-     * or an empty list if there are no records of the requested class.
-     */
-    List<?> getToList(Class<?> modelClass) {
-        try {
-            Query query = this.entityManager.createQuery("from " + modelClass.getSimpleName());
-            return query.getResultList();
-        } catch (Exception ex) {
-            LogsManager.logException(ex);
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     * @param modelClass The class type of the requested object - must be 'Model' or inherit from 'Model'.
-     * @return A stream of all the records inside the DB of the requested class
-     * or an empty stream if there are no records of the requested class.
-     */
-    Stream<?> getToStream(Class<?> modelClass) {
-        return getToList(modelClass).stream();
     }
 
     /**
@@ -147,7 +122,7 @@ class DBContext implements Closeable {
     /**
      * @param objectToAdd A model to insert into the DB. The model will be mapped automatically to the relevant table.
      */
-    boolean insert(Model objectToAdd) {
+    synchronized boolean insert(Model objectToAdd) {
         flushManager();
         EntityTransaction transaction = this.entityManager.getTransaction();
         objectToAdd.setCreateTime(LocalDateTime.now());
@@ -165,28 +140,28 @@ class DBContext implements Closeable {
     }
 
     void flushManager() {
-        try {
-            this.entityManager.flush();
-        } catch (Exception ignore) {
-        }
+        //        try {
+        //            this.entityManager.flush();
+        //        } catch (Exception ignore) {
+        //        }
     }
 
     /**
      * @param modelCollection A collection of models to insert into the DB.
      *                        The models will be mapped automatically to the relevant table.
      */
-    void insertAll(Collection<? extends Model> modelCollection) {
-        flushManager();
+    synchronized void insertAll(Collection<? extends Model> modelCollection) {
         EntityTransaction transaction = this.entityManager.getTransaction();
 
         try {
-            transaction.begin();
             for (Model model : modelCollection) {
+                flushManager();
+                transaction.begin();
                 model.setCreateTime(LocalDateTime.now());
                 model.setUpdateTime(LocalDateTime.now());
                 this.entityManager.persist(model);
+                transaction.commit();
             }
-            transaction.commit();
         } catch (Exception ex) {
             LogsManager.logException(ex);
         }
@@ -196,7 +171,7 @@ class DBContext implements Closeable {
      * @param modelToRemove the model to remove from the DB.
      *                      If the model couldn't be found in the DB, the method will end without an error.
      */
-    void delete(Model modelToRemove) {
+    synchronized void delete(Model modelToRemove) {
         flushManager();
 
         if (modelToRemove != null) {
@@ -215,7 +190,7 @@ class DBContext implements Closeable {
      * @param modelCollection A collection of models to remove from the DB.
      *                        If any of the models couldn't be found in the DB it will be ignored.
      */
-    void deleteAll(Collection<? extends Model> modelCollection) {
+    synchronized void deleteAll(Collection<? extends Model> modelCollection) {
         flushManager();
 
         if (modelCollection != null) {
@@ -235,7 +210,7 @@ class DBContext implements Closeable {
      *                     Use the model's setters to modify any of it's value.
      *                     Use this method once to save these changes.
      */
-    void update(Model updatedModel) {
+    synchronized void update(Model updatedModel) {
         flushManager();
 
         if (updatedModel != null) {
