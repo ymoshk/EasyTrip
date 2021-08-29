@@ -3,6 +3,8 @@ package itinerary;
 import algorithm.HillClimbing;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import connection.DataEngine;
+import container.PriceRange;
 import evaluators.AttractionEvaluator;
 import template.Attraction;
 import template.TripTag;
@@ -57,7 +59,9 @@ public class ItineraryBuilderUtil {
 
         if (this.questionsData != null) {
             HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
-            List<model.attraction.Attraction> attractionList = questionsData.getCity().getAttractionList();
+            DataEngine dataEngine = DataEngine.getInstance();
+            List<model.attraction.Attraction> attractionList = dataEngine.getAttractions(questionsData.getCity().getCityName(),
+                    new PriceRange(2));
             HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
             AttractionEvaluator attractionEvaluator = hillClimbing.getAttractionEvaluator();
             List<String> attractionTags = hillClimbing.getAttractionTags();
@@ -86,7 +90,7 @@ public class ItineraryBuilderUtil {
         return new Itinerary(this.attractions, this.questionsData);
     }
 
-    public HashMap<String, List<Attraction>> getAttractions() {
+    public HashMap<String, List<Attraction>>getAttractions () {
         return attractions;
     }
 }

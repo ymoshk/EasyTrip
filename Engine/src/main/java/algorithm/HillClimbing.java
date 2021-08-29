@@ -3,6 +3,7 @@ package algorithm;
 import com.google.maps.model.*;
 import connection.DataEngine;
 import constant.DefaultDurations;
+import container.PriceRange;
 import evaluators.AttractionEvaluator;
 import itinerary.ActivityNode;
 import itinerary.Itinerary;
@@ -652,7 +653,7 @@ public class HillClimbing {
             if(possibleReplaceDistance < originDistance){
                 double possibleReplaceScore = attractionEvaluator.evaluateAttraction(attraction);
                 double originScore = attractionEvaluator.evaluateAttraction(currentAttraction);
-                if(possibleReplaceScore + 5 >= originScore){
+//                if(possibleReplaceScore + 5 >= originScore){
                     if(DefaultDurations.getESTOfAttraction(attraction) ==
                     DefaultDurations.getESTOfAttraction(currentAttraction)){
                         if(currentAttraction.getClass().getSimpleName().
@@ -663,16 +664,16 @@ public class HillClimbing {
                                     + " is " + attraction.getName() + " with improvement of " +
                                     (originDistance - possibleReplaceDistance));
                         }
-                        else if(!currentAttraction.getClass().getSimpleName().
-                                equalsIgnoreCase("Restaurant")
-                                && !attraction.getClass().getSimpleName().
-                                equalsIgnoreCase("Restaurant")){
-                            System.out.println("Possible replace for " + currentAttraction.getName()
-                                    + " is " + attraction.getName() + " with improvement of " +
-                                    (originDistance - possibleReplaceDistance));
-                        }
+//                        else if(!currentAttraction.getClass().getSimpleName().
+//                                equalsIgnoreCase("Restaurant")
+//                                && !attraction.getClass().getSimpleName().
+//                                equalsIgnoreCase("Restaurant")){
+//                            System.out.println("Possible replace for " + currentAttraction.getName()
+//                                    + " is " + attraction.getName() + " with improvement of " +
+//                                    (originDistance - possibleReplaceDistance));
+//                        }
                     }
-                }
+//                }
             }
         });
 
@@ -927,29 +928,6 @@ public class HillClimbing {
         return degree * (Math.PI/180);
     }
 
-    public static HashMap<String, List<template.Attraction>> classifyAttractions(QuestionsData questionsData) {
-        City city = questionsData.getCity();
-        HashMap<String, List<template.Attraction>> res = null;
-
-        if (city != null) {
-            // TODO this method returns any attraction marked as recommended - change it
-            res = new HashMap<>();
-            List<Attraction> attractionList = city.getAttractionList();
-            List<template.Attraction> attractionsTemplatesList = attractionList.stream()
-                    .map(attraction -> new template.Attraction(attraction, true))
-                    .collect(Collectors.toList());
-
-            for (template.Attraction attraction : attractionsTemplatesList) {
-                if (!res.containsKey(attraction.getClass().getSimpleName())) {
-                    res.put(attraction.getClass().getSimpleName(), new ArrayList<>());
-                }
-
-                res.get(attraction.getClass().getSimpleName()).add(attraction);
-            }
-        }
-
-        return res;
-    }
 
 
     private void debugPrintAttraction(Attraction attractionToAdd,LocalDateTime attractionStartTime,LocalDateTime attractionEndTime){
@@ -1014,7 +992,9 @@ public class HillClimbing {
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
                     childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(4), new ArrayList<>(),
                     new ArrayList<>(), new ArrayList<>());
-            List<Attraction> attractionList = questionsData.getCity().getAttractionList();
+            DataEngine dataEngine = DataEngine.getInstance();
+            List<Attraction> attractionList = dataEngine.getAttractions(questionsData.getCity().getCityName(),
+                    new PriceRange(2));
 
             HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
             State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);

@@ -3,6 +3,7 @@ package servlet.data.provider;
 import com.google.gson.Gson;
 import connection.DataEngine;
 import constant.Constants;
+import container.PriceRange;
 import model.attraction.Attraction;
 import model.location.City;
 import util.Utils;
@@ -34,7 +35,8 @@ public class CityAttractionsProvider extends HttpServlet {
 
             if (city != null) {
                 // TODO this method returns any attraction marked as recommended - change it
-                List<Attraction> attractionList = city.getAttractionList();
+
+                List<Attraction> attractionList = dataEngine.getAttractions(city.getCityName(), new PriceRange(2));
                 List<template.Attraction> attractionsTemplatesList = attractionList.stream()
                         .map(attraction -> new template.Attraction(attraction, true))
                         .collect(Collectors.toList());
