@@ -13,7 +13,6 @@ public class Segment {
     private String arrivalTime;
     private String duration;
     private String stop;
-    private String stopAirport;
 
     public Segment(FlightOffer flightOffer, int direction){
         LocalDateTime departureDateTime = flightOffer.getDepartureDateTime(direction);
@@ -34,7 +33,6 @@ public class Segment {
         this.duration = flightOffer.getItineraryList().get(direction).getDurationTotal();
         this.duration = this.duration.replace("PT", "").replace("H", "H ").toLowerCase();
         //TODO: check if flight has stops
-        this.stop = "1 stop";
-        this.stopAirport = "TLV";
+        this.stop = String.valueOf(flightOffer.getItineraryList().get(direction).getSegmentList().size() - 1);
     }
 }
