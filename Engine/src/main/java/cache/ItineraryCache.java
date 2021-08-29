@@ -103,8 +103,11 @@ public class ItineraryCache implements Closeable {
     private void updateItinerary(Itinerary itinerary) {
         Gson gson = new Gson();
         ItineraryModel model = DataEngine.getInstance().getItinerary(itinerary.getItineraryId());
-        model.setJsonData(gson.toJson(itinerary));
-        DataEngine.getInstance().updateItinerary(model);
+
+        if (model != null) {
+            model.setJsonData(gson.toJson(itinerary));
+            DataEngine.getInstance().updateItinerary(model);
+        }
     }
 
     private void saveItinerary(Itinerary itinerary, User user) {

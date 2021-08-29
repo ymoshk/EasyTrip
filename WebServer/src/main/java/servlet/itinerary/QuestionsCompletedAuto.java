@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @WebServlet("/api/completeQuestionsAuto")
 public class QuestionsCompletedAuto extends HttpServlet {
@@ -29,27 +28,25 @@ public class QuestionsCompletedAuto extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req));
         UserContext userContext = (UserContext) req.getServletContext().getAttribute(Constants.USERS_CONTEXT);
-        Optional<User> maybeUser = userContext.getLoggedInUser(req.getSession(false).getId());
+        User user = userContext.getUserBySessionId(req.getSession(false).getId());
         resp.setStatus(500);
 
         try (PrintWriter out = resp.getWriter()) {
-            maybeUser.ifPresent(user -> {
-                QuestionsData questionsData = itineraryBuilder.getQuestionsData();
-                List<Attraction> attractionList = questionsData.getCity().getAttractionList();
-                HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
-                State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
-                Itinerary itinerary = hillClimbing.getItineraryWithHillClimbingAlgorithm(state);
-                itinerary.setAttractions(itineraryBuilder.getAttractions());
+            QuestionsData questionsData = itineraryBuilder.getQuestionsData();
+            List<Attraction> attractionList = questionsData.getCity().getAttractionList();
+            HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
+            State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
+            Itinerary itinerary = hillClimbing.getItineraryWithHillClimbingAlgorithm(state);
+            itinerary.setAttractions(itineraryBuilder.getAttractions());
 
-                Gson gson = new Gson();
+            Gson gson = new Gson();
 
-                ItineraryCache cache = (ItineraryCache) req.getServletContext()
-                        .getAttribute(Constants.ITINERARY_CACHE);
+            ItineraryCache cache = (ItineraryCache) req.getServletContext()
+                    .getAttribute(Constants.ITINERARY_CACHE);
 
-                cache.addNewItinerary(itinerary, user);
-                out.println(gson.toJson(itinerary.getItineraryId()));
-                resp.setStatus(200);
-            });
+            cache.addNewItinerary(itinerary, user);
+            out.println(gson.toJson(itinerary.getItineraryId()));
+            resp.setStatus(200);
         } catch (Exception ignore) {
         }
     }

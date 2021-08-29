@@ -7,20 +7,24 @@ import model.user.GuestUser;
 import model.user.RegisteredUser;
 import model.user.User;
 
-import java.io.Closeable;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.stream.Collectors;
 
-public class UserContext implements Closeable {
-    private final UserData userData;
+public class UserContext {
     private final Timer cleanupTimer;
 
+
     public UserContext() {
-        this.userData = new UserData();
+
         this.cleanupTimer = new Timer();
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                userData.removeUnnecessary();
+                removeOldEntries();
             }
         };
 
@@ -28,118 +32,130 @@ public class UserContext implements Closeable {
         this.cleanupTimer.schedule(task, hour, hour);
     }
 
-    public GuestUser createGuestUser(String sessionId) {
+    private void removeOldEntries() {
+        DataEngine dataEngine = DataEngine.getInstance();
+
+        List<GuestUser> guestUsers = dataEngine.getGuestUsers();
+        guestUsers.stream()
+                .filter(guestUser -> guestUser.getUpdateTime().plusMonths(1).isBefore(LocalDateTime.now()))
+                .forEach(dataEngine::removeUser);
+    }
+
+
+    /**
+     * functions related to guest users.
+     */
+    private GuestUser createGuestUser(String sessionId) {
         GuestUser user = new GuestUser(sessionId);
         DataEngine.getInstance().addUser(user);
-        this.userData.addUser(sessionId, user);
         return user;
     }
 
-    public RegisteredUser createUser(String sessionId, String userName, String password, String name) {
-        Optional<User> maybeGuest = this.userData.getUser(sessionId);
-        RegisteredUser user = new RegisteredUser(sessionId, userName, Hash.md5Hash(password), name);
-        DataEngine.getInstance().addUser(user);
-        this.userData.addUser(sessionId, user);
+    public User getUserBySessionId(String sessionId) {
+        DataEngine dataEngine = DataEngine.getInstance();
+        User user;
 
-        // Moving existing itineraries to the new user.
-        if (maybeGuest.isPresent()) {
-            User currentGuest = maybeGuest.get();
-            List<ItineraryModel> itineraryModelList =
-                    DataEngine.getInstance().getUserItineraries(currentGuest.getUserName());
+        List<User> users = dataEngine.getUsers()
+                .stream()
+                .filter(entry -> entry.getSessionId().equals(sessionId))
+                .collect(Collectors.toList());
 
-            itineraryModelList.forEach(itineraryModel -> {
-                itineraryModel.setUser(user);
-                DataEngine.getInstance().updateItinerary(itineraryModel);
-            });
-
-            currentGuest.setItineraryList(new ArrayList<>());
-            DataEngine.getInstance().updateUser(currentGuest); // So the itineraries won't be removed.
-            DataEngine.getInstance().deleteUser(currentGuest);
+        if (users.size() == 1) {
+            user = users.get(0);
+            dataEngine.refreshModelUpdateTime(user);
+            return user;
+        } else {
+            user = createGuestUser(sessionId);
         }
 
         return user;
     }
 
-    public RegisteredUser createAdminUser(String sessionId, String userName, String password, String name) {
-        RegisteredUser user = new RegisteredUser(sessionId, userName, Hash.md5Hash(password), name, true);
-        DataEngine.getInstance().addUser(user);
-        this.userData.addUser(sessionId, user);
-        return user;
-    }
+    /**
+     * Users must be in the DB
+     */
+    private void grabAndRemoveGuest(RegisteredUser registeredUser, GuestUser guest) {
+        DataEngine dataEngine = DataEngine.getInstance();
+        List<ItineraryModel> itineraryModelList = dataEngine.getUserItineraries(guest.getUserName());
 
-    public Optional<User> getLoggedInUser(String sessionId) {
-        return this.userData.getUser(sessionId);
-    }
+        if (itineraryModelList != null) {
+            for (ItineraryModel itinerary : itineraryModelList) {
+                ItineraryModel clone = new
+                        ItineraryModel(itinerary.getItineraryId(), itinerary.getJsonData(), registeredUser);
 
-    public GuestUser getGuestBySession(String sessionId) {
-        Optional<User> user = this.userData.getUser(sessionId);
-
-        if (user.isPresent()) {
-            User theUser = user.get();
-
-            if (theUser.getClass().equals(GuestUser.class)) {
-                return (GuestUser) theUser;
+                clone.setStatus(itinerary.getStatus());
+                dataEngine.saveItinerary(clone);
             }
         }
-
-        return loadGuestUser(sessionId).orElse(createGuestUser(sessionId));
+        dataEngine.removeUser(guest);
     }
 
+    public Optional<RegisteredUser> createRegisteredUser(String sessionId, String userName, String password, String name) {
+        Optional<RegisteredUser> result;
+        DataEngine dataEngine = DataEngine.getInstance();
+        GuestUser currentUser;
 
-    private Optional<RegisteredUser> loadUser(String userName, String password) {
-        return DataEngine.getInstance().getUser(userName, password);
+        RegisteredUser user = new RegisteredUser(sessionId, userName, Hash.md5Hash(password), name); // Password is being hashed
+        if (dataEngine.addUser(user)) {
+
+            Optional<GuestUser> maybeUser = dataEngine.getGuestUser(sessionId);
+
+            if (maybeUser.isPresent()) {
+                currentUser = maybeUser.get();
+                grabAndRemoveGuest(user, currentUser);
+            }
+
+            result = Optional.of(user);
+        } else {
+            result = Optional.empty();
+        }
+        return result;
     }
 
-    private Optional<GuestUser> loadGuestUser(String sessionId) {
-        return DataEngine.getInstance().getGuestUser(sessionId);
-    }
+    public Optional<RegisteredUser> login(String sessionId, String userName, String password) {
+        Optional<RegisteredUser> result;
+        DataEngine dataEngine = DataEngine.getInstance();
 
-    public Optional<RegisteredUser> getRegisteredUser(String sessionId, String userName, String password) {
-        Optional<User> maybeUser = this.userData.getUser(sessionId);
+        Optional<RegisteredUser> maybeUser = dataEngine.getUser(userName, password);
 
         if (maybeUser.isPresent()) {
-            User user = maybeUser.get();
+            RegisteredUser user = maybeUser.get();
+            User currentGuest = getUserBySessionId(sessionId);
 
-            if (user.getUserName().equals(userName) &&
-                    user.getClass().equals(RegisteredUser.class) &&
-                    user.getPassword().equals(Hash.md5Hash(password))) {
-                return Optional.of((RegisteredUser) user);
+            if (currentGuest.getClass().equals(GuestUser.class)) {
+                grabAndRemoveGuest(user, (GuestUser) currentGuest);
             }
+
+            user.setSessionId(sessionId);
+            user.setUpdateTime(LocalDateTime.now());
+            dataEngine.updateUser(user);
+            result = Optional.of(user);
+
+
+        } else {
+            result = Optional.empty();
+        }
+        return result;
+    }
+
+    public GuestUser logout(String sessionId) {
+        User user = getUserBySessionId(sessionId);
+        DataEngine dataEngine = DataEngine.getInstance();
+
+        if (user.getClass().equals(RegisteredUser.class)) {
+            user.setSessionId("");
+            dataEngine.updateUser(user);
         }
 
-        Optional<RegisteredUser> user = loadUser(userName, password);
-        user.ifPresent(registeredUser -> DataEngine.getInstance().updateUserSessionId(registeredUser, sessionId));
-
-        return user;
+        return createGuestUser(sessionId);
     }
 
     public boolean isItineraryOwner(String sessionId, String itineraryId) {
-        Optional<User> user = this.userData.getUser(sessionId);
+        User user = getUserBySessionId(sessionId);
 
-        return user.filter(value -> DataEngine.getInstance().getUserItineraries(value.getUserName())
+        return DataEngine.getInstance()
+                .getUserItineraries(user.getUserName())
                 .stream()
-                .anyMatch(itineraryModel -> itineraryModel.getItineraryId().equals(itineraryId)))
-                .isPresent();
-    }
-
-    public boolean login(String sessionId, String userName, String password) {
-        Optional<RegisteredUser> maybeUser = getRegisteredUser(sessionId, userName, password);
-
-        if (maybeUser.isPresent()) {
-            this.userData.addUser(sessionId, maybeUser.get());
-            DataEngine.getInstance().removeGuestUsersBySession(sessionId);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void logout(String sessionId) {
-        this.userData.addUser(sessionId, createGuestUser(sessionId));
-    }
-
-    @Override
-    public void close() {
-        this.cleanupTimer.cancel();
+                .anyMatch(itineraryModel -> itineraryModel.getItineraryId().equals(itineraryId));
     }
 }

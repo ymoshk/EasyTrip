@@ -29,7 +29,7 @@ public class StartupServlet implements ServletContextListener {
         ServletContext context = servletContextEvent.getServletContext();
 
         ((ItineraryCache) context.getAttribute(Constants.ITINERARY_CACHE)).close();
+
         dataEngine.close();
-        ((UserContext) context.getAttribute(Constants.USERS_CONTEXT)).close();
     }
 }

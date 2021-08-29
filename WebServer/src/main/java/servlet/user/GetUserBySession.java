@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Optional;
 
 @WebServlet("/api/getUser")
 public class GetUserBySession extends HttpServlet {
@@ -22,13 +21,10 @@ public class GetUserBySession extends HttpServlet {
         UserContext userContext = (UserContext) context.getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
 
-        Optional<User> loggedInUser = userContext.getLoggedInUser(req.getSession().getId());
+        User loggedInUser = userContext.getUserBySessionId(req.getSession().getId());
 
         try (PrintWriter out = resp.getWriter()) {
-            User resultUser = loggedInUser.orElseGet(() ->
-                    userContext.getGuestBySession(req.getSession(false).getId()));
-
-            UserTypeTemplate userTypeTemplate = new UserTypeTemplate(resultUser);
+            UserTypeTemplate userTypeTemplate = new UserTypeTemplate(loggedInUser);
             resp.setStatus(200);
             out.println(new Gson().toJson(userTypeTemplate));
         }

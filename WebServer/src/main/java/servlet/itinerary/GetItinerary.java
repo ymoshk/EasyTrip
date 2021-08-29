@@ -26,19 +26,22 @@ public class GetItinerary extends HttpServlet {
         HashMap<String, String> data = Utils.parsePostData(req);
 
         String id = data.get("id");
-        res.setStatus(500);
         String sessionId = req.getSession(false).getId();
+
+        //        if (userContext.isItineraryOwner(sessionId, id)) {
+        res.setStatus(500);
 
         if (!id.isEmpty()) {
             Itinerary itinerary = cache.getItinerary(id).orElse(null);
 
-            if (itinerary != null && userContext.isItineraryOwner(sessionId, id)) {
+            if (itinerary != null) {
                 try (PrintWriter out = res.getWriter()) {
                     res.setStatus(200);
                     out.println(gson.toJson(itinerary));
                 }
             }
         }
+        //        }
     }
 }
 

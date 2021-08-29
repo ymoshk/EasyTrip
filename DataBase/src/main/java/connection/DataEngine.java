@@ -22,7 +22,11 @@ import util.google.Keys;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -34,11 +38,9 @@ public class DataEngine implements Closeable {
     private static final int MIN_SIZE_COLLECTION = 3;
     private static final int EARTH_RADIUS = 6371; // Radius of the earth in km
     private static DataEngine instance = null;
-    private final Set<City> loadingCities;
 
     //empty constructor just to make sure the class is a singleton
     private DataEngine() {
-        this.loadingCities = new HashSet<>();
     }
 
     // only one thread can execute this method at the same time.
@@ -48,6 +50,7 @@ public class DataEngine implements Closeable {
         }
         return instance;
     }
+
 
     //    https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
     public static double calculateDistance(City source, Attraction destination) {
@@ -98,6 +101,11 @@ public class DataEngine implements Closeable {
 
             return res;
         }
+    }
+
+    public void refreshModelUpdateTime(Model model) {
+        model.setUpdateTime(LocalDateTime.now());
+        DBContext.getInstance().update(model);
     }
 
     /**
@@ -216,24 +224,7 @@ public class DataEngine implements Closeable {
         List<Attraction> attractionsToAdd =
                 getAttractionInStandardTextSearch(type.name().replace("_", " "), priceRange, type, city);
 
-        if (!loadingCities.contains(city)) {
-            Thread thread = new Thread(() -> {
-                try {
-                    this.loadingCities.add(city);
-                    DBContext.getInstance().insertAll(attractionsToAdd);
-                    this.loadingCities.remove(city);
-                } catch (Exception ex) {
-                    LogsManager.logException(ex);
-                }
-            });
-            thread.start();
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
+        DBContext.getInstance().insertAll(attractionsToAdd);
         return attractionsToAdd;
     }
 
@@ -244,7 +235,6 @@ public class DataEngine implements Closeable {
      * @param city           The name of the city where the requested attractions should be located.
      * @return a list of attractions that match the search args.
      */
-    //Bar - I'll add another method to handle Place details
     private List<Attraction> getAttractionInStandardTextSearch(String attractionName, PriceRange priceRange, PlaceType type, City city) {
         List<Attraction> result = new ArrayList<>();
         GeoApiContext context = null;
@@ -402,14 +392,25 @@ public class DataEngine implements Closeable {
         return res;
     }
 
+
+    /**
+     * Funtions related to users
+     */
+
     public List<User> getUsers() {
-        DBContext dbContext = DBContext.getInstance();
+        DBContext dbContext = DBContext.getUsersInstance();
 
         return (List<User>) dbContext.getToList(User.class);
     }
 
+    public List<GuestUser> getGuestUsers() {
+        DBContext dbContext = DBContext.getUsersInstance();
+
+        return (List<GuestUser>) dbContext.getToList(GuestUser.class);
+    }
+
     public Optional<RegisteredUser> getUser(String userName, String password) {
-        DBContext dbContext = DBContext.getInstance();
+        DBContext dbContext = DBContext.getUsersInstance();
 
         List<RegisteredUser> users = (List<RegisteredUser>) dbContext.getToList(RegisteredUser.class);
         return users.stream()
@@ -419,7 +420,7 @@ public class DataEngine implements Closeable {
     }
 
     public Optional<GuestUser> getGuestUser(String sessionId) {
-        DBContext dbContext = DBContext.getInstance();
+        DBContext dbContext = DBContext.getUsersInstance();
 
         List<GuestUser> users = (List<GuestUser>) dbContext.getToList(GuestUser.class);
         return users.stream()
@@ -428,7 +429,7 @@ public class DataEngine implements Closeable {
     }
 
     public void updateUserSessionId(User user, String sessionId) {
-        DBContext dbContext = DBContext.getInstance();
+        DBContext dbContext = DBContext.getUsersInstance();
         user.setSessionId(sessionId);
         dbContext.update(user);
     }
@@ -437,9 +438,13 @@ public class DataEngine implements Closeable {
         return getUser(userName, password).isPresent();
     }
 
-    public void addUser(User userToAdd) {
-        DBContext dbContext = DBContext.getInstance();
-        dbContext.insert(userToAdd);
+    public boolean addUser(User userToAdd) {
+        DBContext dbContext = DBContext.getUsersInstance();
+        return dbContext.insert(userToAdd);
+    }
+
+    public void removeUser(User userToRemove) {
+        DBContext.getUsersInstance().delete(userToRemove);
     }
 
     public List<ItineraryModel> getRecentItineraries() {
@@ -476,21 +481,7 @@ public class DataEngine implements Closeable {
     }
 
     public void updateUser(User user) {
-        DBContext.getInstance().update(user);
-    }
-
-    public void deleteUser(User user) {
-        DBContext.getInstance().delete(user);
-    }
-
-    public void removeGuestUsersBySession(String sessionId) {
-        DBContext context = DBContext.getInstance();
-        List<GuestUser> lst = (List<GuestUser>) context.getToList(GuestUser.class);
-        System.out.println(lst.size());
-
-        lst.stream()
-                .filter(user -> sessionId.equals(sessionId))
-                .forEach(context::delete);
+        DBContext.getUsersInstance().update(user);
     }
 
     @Override
@@ -500,7 +491,7 @@ public class DataEngine implements Closeable {
 
     public List<ItineraryModel> getUserItineraries(String userName) {
         List<ItineraryModel> allModels =
-                (List<ItineraryModel>) DBContext.getInstance().getToList(ItineraryModel.class);
+                (List<ItineraryModel>) DBContext.getUsersInstance().getToList(ItineraryModel.class);
 
         return allModels.stream()
                 .filter(model -> model.getUser().getUserName().equals(userName))

@@ -2,6 +2,7 @@ package servlet.user;
 
 import com.google.gson.Gson;
 import constant.Constants;
+import model.user.GuestUser;
 import user.UserContext;
 
 import javax.servlet.ServletContext;
@@ -22,10 +23,10 @@ public class LogoutServlet extends HttpServlet {
         resp.setStatus(500);
 
         String sessionId = req.getSession(false).getId();
-        userContext.logout(sessionId);
+        GuestUser newUser = userContext.logout(sessionId);
 
         try (PrintWriter out = resp.getWriter()) {
-            out.println(new Gson().toJson(new UserTypeTemplate(userContext.getLoggedInUser(sessionId).get())));
+            out.println(new Gson().toJson(new UserTypeTemplate(newUser)));
             resp.setStatus(200);
         }
     }

@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Optional;
 
 @WebServlet("/registration")
 public class RegistrationServlet extends HttpServlet {
@@ -31,11 +32,13 @@ public class RegistrationServlet extends HttpServlet {
         String name = data.get("name");
         String sessionId = req.getSession(false).getId();
 
-        RegisteredUser user = userContext.createUser(sessionId, userName, password, name);
+        Optional<RegisteredUser> user = userContext.createRegisteredUser(sessionId, userName, password, name);
 
-        try (PrintWriter out = resp.getWriter()) {
-            out.println(new Gson().toJson(new UserTypeTemplate(user)));
-            resp.setStatus(200);
+        if (user.isPresent()) {
+            try (PrintWriter out = resp.getWriter()) {
+                out.println(new Gson().toJson(new UserTypeTemplate(user.get())));
+                resp.setStatus(200);
+            }
         }
     }
 }

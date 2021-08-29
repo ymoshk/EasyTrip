@@ -8,6 +8,7 @@ import itinerary.QuestionsData;
 import log.LogsManager;
 import model.itinerary.ItineraryModel;
 import model.itinerary.ItineraryStatus;
+import model.user.User;
 import user.UserContext;
 import util.Utils;
 
@@ -26,24 +27,23 @@ public class GetUserItineraries extends HttpServlet {
         UserContext userContext = (UserContext) Utils.getContext(req).getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
 
-        userContext.getLoggedInUser(req.getSession(false).getId()).ifPresent(user -> {
-            String userName = user.getUserName();
-            try (PrintWriter out = resp.getWriter()) {
-                List<ItineraryModel> itineraries = DataEngine.getInstance().getUserItineraries(userName);
+        User user = userContext.getUserBySessionId(req.getSession(false).getId());
+        String userName = user.getUserName();
+        try (PrintWriter out = resp.getWriter()) {
+            List<ItineraryModel> itineraries = DataEngine.getInstance().getUserItineraries(userName);
 
-                List<ItineraryAndStatus> res =
-                        (List<ItineraryAndStatus>) itineraries.stream().
-                                map(itineraryModel -> {
-                                    Itinerary itinerary = new Gson().fromJson(itineraryModel.getJsonData(), Itinerary.class);
-                                    return new ItineraryAndStatus(itinerary.getQuestionsData(), itineraryModel.getStatus(), itinerary.getItineraryId());
-                                });
+            List<ItineraryAndStatus> res =
+                    (List<ItineraryAndStatus>) itineraries.stream().
+                            map(itineraryModel -> {
+                                Itinerary itinerary = new Gson().fromJson(itineraryModel.getJsonData(), Itinerary.class);
+                                return new ItineraryAndStatus(itinerary.getQuestionsData(), itineraryModel.getStatus(), itinerary.getItineraryId());
+                            });
 
-                out.println(new Gson().toJson(res));
-                resp.setStatus(200);
-            } catch (Exception e) {
-                LogsManager.logException(e);
-            }
-        });
+            out.println(new Gson().toJson(res));
+            resp.setStatus(200);
+        } catch (Exception e) {
+            LogsManager.logException(e);
+        }
     }
 
     private static class ItineraryAndStatus {

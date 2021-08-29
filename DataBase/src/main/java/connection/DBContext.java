@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 class DBContext implements Closeable {
 
     private static DBContext instance = null;
+    private static DBContext usersInstance = null;
     private final EntityManagerFactory entityManagerFactory;
     private final EntityManager entityManager;
 
@@ -34,6 +35,13 @@ class DBContext implements Closeable {
             instance = new DBContext();
         }
         return instance;
+    }
+
+    static synchronized DBContext getUsersInstance() {
+        if (usersInstance == null) {
+            usersInstance = new DBContext();
+        }
+        return usersInstance;
     }
 
     /**
@@ -139,7 +147,7 @@ class DBContext implements Closeable {
     /**
      * @param objectToAdd A model to insert into the DB. The model will be mapped automatically to the relevant table.
      */
-    void insert(Model objectToAdd) {
+    boolean insert(Model objectToAdd) {
         EntityTransaction transaction = this.entityManager.getTransaction();
         objectToAdd.setCreateTime(LocalDateTime.now());
         objectToAdd.setUpdateTime(LocalDateTime.now());
@@ -147,8 +155,10 @@ class DBContext implements Closeable {
             transaction.begin();
             this.entityManager.persist(objectToAdd);
             transaction.commit();
+            return true;
         } catch (Exception ex) {
             LogsManager.logException(ex);
+            return false;
         }
     }
 

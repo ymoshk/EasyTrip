@@ -2,7 +2,7 @@ package servlet.user;
 
 import com.google.gson.Gson;
 import constant.Constants;
-import model.user.User;
+import model.user.RegisteredUser;
 import user.UserContext;
 import util.Utils;
 
@@ -30,13 +30,12 @@ public class LoginServlet extends HttpServlet {
         String password = data.get("password");
         String sessionId = req.getSession(false).getId();
 
-        if (userContext.login(sessionId, userName, password)) {
+        Optional<RegisteredUser> user = userContext.login(sessionId, userName, password);
+
+        if (user.isPresent()) {
             try (PrintWriter out = resp.getWriter()) {
-                Optional<User> loggedInUser = userContext.getLoggedInUser(sessionId);
-                if (loggedInUser.isPresent()) {
-                    out.println(new Gson().toJson(new UserTypeTemplate(loggedInUser.get())));
-                    resp.setStatus(200);
-                }
+                out.println(new Gson().toJson(new UserTypeTemplate(user.get())));
+                resp.setStatus(200);
             }
         }
     }

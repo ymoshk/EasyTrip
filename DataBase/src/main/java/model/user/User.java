@@ -14,7 +14,7 @@ public abstract class User extends Model {
     private boolean isAdmin;
     private String sessionId;
     @JoinColumn(name = "user_id")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<ItineraryModel> itineraryList;
     @Column(unique = true, nullable = false)
     private String userName;
