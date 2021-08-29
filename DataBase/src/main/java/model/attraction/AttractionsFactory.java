@@ -125,8 +125,6 @@ public class AttractionsFactory {
             attraction.setInternationalNumber(placeDetails.internationalPhoneNumber);
         if(placeDetails.website != null)
             attraction.setWebsite(placeDetails.website.toString());
-        if(placeDetails.reviews != null)
-            attraction.setReviews(Arrays.asList(placeDetails.reviews));
         if(placeDetails.photos != null && placeDetails.photos[0] != null)
             attraction.setPhotoReference(placeDetails.photos[0].toString());
     }

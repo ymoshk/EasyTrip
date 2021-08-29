@@ -42,9 +42,6 @@ public abstract class Attraction extends Model {
     @JoinColumn(name = "city_id", insertable = true, updatable = true)
     private City city;
     private PriceLevel priceLevel;
-    @ElementCollection
-    @Column(length = 1024)
-    private List<PlaceDetails.Review> reviews;
     private String localNumber;
     private String internationalNumber;
     private String website;
@@ -136,14 +133,6 @@ public abstract class Attraction extends Model {
 
     public void setPriceLevel(PriceLevel priceLevel) {
         this.priceLevel = priceLevel;
-    }
-
-    public List<PlaceDetails.Review> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(List<PlaceDetails.Review> reviews) {
-        this.reviews = reviews;
     }
 
     public String getLocalNumber() {
