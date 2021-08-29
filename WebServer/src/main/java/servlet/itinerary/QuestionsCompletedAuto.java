@@ -4,7 +4,9 @@ import algorithm.HillClimbing;
 import algorithm.State;
 import cache.ItineraryCache;
 import com.google.gson.Gson;
+import connection.DataEngine;
 import constant.Constants;
+import container.PriceRange;
 import itinerary.Itinerary;
 import itinerary.ItineraryBuilderUtil;
 import itinerary.QuestionsData;
@@ -33,7 +35,8 @@ public class QuestionsCompletedAuto extends HttpServlet {
 
         try (PrintWriter out = resp.getWriter()) {
             QuestionsData questionsData = itineraryBuilder.getQuestionsData();
-            List<Attraction> attractionList = questionsData.getCity().getAttractionList();
+            DataEngine dataEngine = DataEngine.getInstance();
+            List<Attraction> attractionList = dataEngine.getAttractions(questionsData.getCity().getCityName(), new PriceRange(2));
             HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
             State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
             Itinerary itinerary = hillClimbing.getItineraryWithHillClimbingAlgorithm(state);
