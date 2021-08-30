@@ -23,8 +23,10 @@ public abstract class Attraction extends Model {
     @Column(nullable = false)
     private String name;
     private URL icon;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String placeId;
+    @Column(nullable = false, unique = true)
+    private String attractionKey;
     private float rating;
     @ElementCollection
     private List<String> types;
@@ -54,6 +56,7 @@ public abstract class Attraction extends Model {
         this.name = searchResultObject.name;
         this.icon = searchResultObject.icon;
         this.placeId = searchResultObject.placeId;
+        this.attractionKey = placeType.toString() + " " + searchResultObject.placeId;
         this.rating = searchResultObject.rating;
         this.types = Arrays.asList(searchResultObject.types);
         this.openingHours = searchResultObject.openingHours;
