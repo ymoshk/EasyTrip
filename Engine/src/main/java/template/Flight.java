@@ -2,14 +2,17 @@ package template;
 
 import model.flightOffer.FlightOffer;
 
-public class Flight {
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+public class Flight implements Serializable {
     private Segment Outbound;
     private Segment Return;
     private String price;
 
     public Flight(FlightOffer flightOffer) {
-        Outbound = new Segment(flightOffer, 0);
-        Return = new Segment(flightOffer, 1);
+        this.Outbound = new Segment(flightOffer, 0);
+        this.Return = new Segment(flightOffer, 1);
         this.price = Double.toString(flightOffer.getPrice()) + " " + flightOffer.getCurrency();
     }
 }

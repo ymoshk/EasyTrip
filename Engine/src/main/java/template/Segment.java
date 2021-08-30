@@ -3,10 +3,11 @@ package template;
 
 import model.flightOffer.FlightOffer;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.Period;
 
-public class Segment {
+public class Segment implements Serializable {
     private String departureAirport;
     private String arrivalAirport;
     private String departureTime;

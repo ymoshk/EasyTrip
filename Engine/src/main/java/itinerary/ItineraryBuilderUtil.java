@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class ItineraryBuilderUtil {
     private final QuestionsData questionsData;
     private final HashMap<String, List<template.Attraction>> attractions;
+    private template.Flight flight;
 
     public ItineraryBuilderUtil(HashMap<String, String> questionnaireData) {
         this.questionsData = parseQuestionsData(questionnaireData);
@@ -49,6 +50,8 @@ public class ItineraryBuilderUtil {
 
         List<TripTag> tripVibes = (List<TripTag>) gson.fromJson(questionnaireData.get("tripVibes"), List.class)
                 .stream().map(data -> new TripTag((LinkedTreeMap<String, Object>) data)).collect(Collectors.toList());
+
+        this.flight = gson.fromJson(questionnaireData.get("flight"), template.Flight.class);
 
         return new QuestionsData(country, city, adultsCount, childrenCount, 0,
                 startDate, endDate, favoriteAttraction, tripVibes, transportation);
