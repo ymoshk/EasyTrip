@@ -265,6 +265,9 @@ public class AttractionEvaluator {
     }
 
     public boolean isRecommended(Attraction attraction, List<String> attractionTags, List<String> vibeTags) {
+        if(!attractionToIndexMap.containsKey(attraction.getClass().getSimpleName())){
+            return false;
+        }
         double ratingScore = evaluateByRating(attraction);
         double reviewsScore = evaluateByReviewsNumber(attraction);
         double preferencesScore;
