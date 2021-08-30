@@ -592,10 +592,10 @@ public class HillClimbing {
             addAttraction(currentState);
         }
 
-        Itinerary itinerary = currentState.getItinerary();
-        Itinerary optimizedItinerary = optimize(itinerary);
+//        Itinerary itinerary = currentState.getItinerary();
+//        Itinerary optimizedItinerary = optimize(itinerary);
 
-        return itinerary;
+        return currentState.getItinerary();
     }
 
     private Itinerary optimize(Itinerary itinerary) {
@@ -724,18 +724,18 @@ public class HillClimbing {
 
     Travel getTransportationTime(Attraction attractionDestination){
         // let assume the distance is walkable
-        Travel travel = dataEngine.getTravel(
+        Travel travel = dataEngine.getTravelFromApi(
                 lastAttraction.getGeometry().location,
                 attractionDestination.getGeometry().location, TravelMode.WALKING);
 
         if(travel.getDistanceMatrixElement().duration.inSeconds > WALKABLE_TIME){
             if(hasCar){
-                travel = dataEngine.getTravel(
+                travel = dataEngine.getTravelFromApi(
                         lastAttraction.getGeometry().location,
                         attractionDestination.getGeometry().location, TravelMode.DRIVING);
             }
             else{
-                travel = dataEngine.getTravel(
+                travel = dataEngine.getTravelFromApi(
                         lastAttraction.getGeometry().location,
                         attractionDestination.getGeometry().location, TravelMode.TRANSIT);
             }
@@ -991,7 +991,7 @@ public class HillClimbing {
 
             QuestionsData questionsData = new QuestionsData(country, city, adultsCount,
                     childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(4), new ArrayList<>(),
-                    new ArrayList<>(), new ArrayList<>());
+                    new ArrayList<>(), new ArrayList<>(), null);
             DataEngine dataEngine = DataEngine.getInstance();
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 
