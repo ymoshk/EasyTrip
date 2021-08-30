@@ -500,6 +500,21 @@ public class DataEngine implements Closeable {
         return res;
     }
 
+    public Travel getTravelFromApi(LatLng source, LatLng dest, TravelMode mode){
+        Travel travel = null;
+
+        DistanceMatrixElement distanceMatrixElement =
+                getDistanceMatrixElementFromGoogleApi(source, dest, mode);
+
+        if(distanceMatrixElement != null){
+            travel = new Travel(source, dest, mode, distanceMatrixElement);
+        }
+
+        return travel;
+    }
+
+
+
     private Travel getTravelFromDB(LatLng source, LatLng dest, TravelMode mode) {
         DBContext dbContext = DBContext.getInstance();
 
