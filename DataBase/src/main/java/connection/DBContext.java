@@ -167,6 +167,7 @@ class DBContext {
             try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
                 Transaction transaction = sessionObj.beginTransaction();
                 updatedModel.setUpdateTime(LocalDateTime.now());
+                sessionObj.update(updatedModel);
                 transaction.commit();
             } catch (Exception ex) {
                 LogsManager.logException(ex);

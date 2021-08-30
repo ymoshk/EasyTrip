@@ -6,7 +6,6 @@ import generator.Hash;
 import javax.persistence.Entity;
 
 @Entity
-//@Table(name = "GuestUser")
 public class GuestUser extends User {
     private static int counter = 0;
 

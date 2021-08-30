@@ -36,7 +36,8 @@ public class DataEngine implements Closeable {
     private static final int MIN_SIZE_COLLECTION = 5;
     private static final int EARTH_RADIUS = 6371; // Radius of the earth in km
     private static DataEngine instance = null;
-//    private List<Thread> threadsList = new ArrayList<>();
+
+    //    private List<Thread> threadsList = new ArrayList<>();
     //empty constructor just to make sure the class is a singleton
     private DataEngine() {
         DBContext.getInstance(); // To load the session factory as the server loads.
@@ -104,7 +105,7 @@ public class DataEngine implements Closeable {
 
     public void refreshModelUpdateTime(Model model) {
         model.setUpdateTime(LocalDateTime.now());
-        //        DBContext.getInstance().update(model);
+        DBContext.getInstance().update(model);
     }
 
     /**
@@ -170,7 +171,7 @@ public class DataEngine implements Closeable {
                     .filter(attr -> attr.getPlaceType().equals(type))
                     .collect(Collectors.toList());
 
-            if(!shouldFetchAttraction){
+            if (!shouldFetchAttraction) {
                 return res;
             }
 
@@ -200,7 +201,7 @@ public class DataEngine implements Closeable {
         if (theCity != null) {
             res = theCity.getAttractionList();
         }
-        if(!shouldFetchAttractions){
+        if (!shouldFetchAttractions) {
             return res;
         }
         List<PlaceType> types = (Arrays.asList(
@@ -225,7 +226,7 @@ public class DataEngine implements Closeable {
 
         List<Attraction> finalRes = res;
         types.forEach(type -> {
-            if(type.equals(PlaceType.RESTAURANT)) {
+            if (type.equals(PlaceType.RESTAURANT)) {
                 Arrays.stream(PriceLevel.values()).filter(priceLevel ->
                         !priceLevel.equals(PriceLevel.UNKNOWN)).collect(Collectors.toList()).forEach(priceLevel ->
                 {
@@ -236,8 +237,7 @@ public class DataEngine implements Closeable {
                         LogsManager.log(e.getMessage());
                     }
                 });
-            }
-            else{
+            } else {
                 finalRes.addAll(getAttractions(type, cityName, priceRange, null, true));
                 try {
                     Thread.sleep(NEXT_PAGE_DELAY);
@@ -253,22 +253,21 @@ public class DataEngine implements Closeable {
         finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, cityName, priceRange));
 
 
-
         return res;
     }
 
     private List<Attraction> fetchRestaurantsByTopSights(List<Attraction> topSights, String cityName, PriceRange priceRange) {
         City theCity = getCity(cityName).orElse(null);
-        List <Attraction> mostVisitedTopSights = topSights.stream().
+        List<Attraction> mostVisitedTopSights = topSights.stream().
                 sorted(Comparator.comparingInt(attraction -> attraction.getUserRatingsTotal())).collect(Collectors.toList());
         mostVisitedTopSights = mostVisitedTopSights.subList(mostVisitedTopSights.size() - 7, mostVisitedTopSights.size());
-        List <Attraction> res = new ArrayList<>();
+        List<Attraction> res = new ArrayList<>();
         AtomicReference<Attraction> mostFarAttraction = new AtomicReference<>(mostVisitedTopSights.get(0));
         AtomicReference<Double> currentDistance = new AtomicReference<>(calculateDistance(theCity, mostFarAttraction.get()));
         AtomicReference<Double> maxDistance = new AtomicReference<>(currentDistance.get());
         mostVisitedTopSights.forEach(attraction -> {
             currentDistance.set(calculateDistance(theCity, attraction));
-            if(currentDistance.get() > maxDistance.get()){
+            if (currentDistance.get() > maxDistance.get()) {
                 mostFarAttraction.set(attraction);
                 maxDistance.set(currentDistance.get());
             }
@@ -304,8 +303,8 @@ public class DataEngine implements Closeable {
     }
 
     public List<Attraction> getNearByAttractionsAndSaveToDB(LatLng location, PriceRange priceRange,
-                                                            PlaceType type, City city, PriceLevel priceLevel){
-        List <Attraction> attractionList = getAttractionInNearBySearch(location, priceRange,
+                                                            PlaceType type, City city, PriceLevel priceLevel) {
+        List<Attraction> attractionList = getAttractionInNearBySearch(location, priceRange,
                 type, city, priceLevel);
 
         DBContext.getInstance().insertAll(attractionList);
