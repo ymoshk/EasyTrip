@@ -20,9 +20,11 @@ public class QuestionsData {
     private final List<TripTag> favoriteAttractions;
     private final List<TripTag> tripVibes;
     private final List<TripTag> transportation;
+    private template.Flight flight;
 
     public QuestionsData(String countryName, String cityName, int adultsCount, int childrenCount, int budget, LocalDateTime startDate,
-                         LocalDateTime endDate, List<TripTag> favoriteAttractions, List<TripTag> tripVibes, List<TripTag> transportation) {
+                         LocalDateTime endDate, List<TripTag> favoriteAttractions, List<TripTag> tripVibes, List<TripTag> transportation,
+                         template.Flight flight) {
         this.adultsCount = adultsCount;
         this.childrenCount = childrenCount;
         this.city = cityName;
@@ -33,6 +35,7 @@ public class QuestionsData {
         this.tripVibes = tripVibes;
         this.priceRange = new PriceRange(budget);
         this.transportation = transportation;
+        this.flight = flight;
     }
 
     public String getCountry() {

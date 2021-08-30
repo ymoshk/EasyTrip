@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 public class ItineraryBuilderUtil {
     private final QuestionsData questionsData;
     private final HashMap<String, List<template.Attraction>> attractions;
-    private template.Flight flight;
 
     public ItineraryBuilderUtil(HashMap<String, String> questionnaireData) {
         this.questionsData = parseQuestionsData(questionnaireData);
@@ -41,6 +40,7 @@ public class ItineraryBuilderUtil {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         LocalDateTime startDate = LocalDateTime.parse(questionnaireData.get("startDate"), formatter);
         LocalDateTime endDate = LocalDateTime.parse(questionnaireData.get("endDate"), formatter);
+        template.Flight flight = null;  // flight is optional parameter
 
         List<TripTag> transportation = (List<TripTag>) gson.fromJson(questionnaireData.get("transportation"), List.class)
                 .stream().map(data -> new TripTag((LinkedTreeMap<String, Object>) data)).collect(Collectors.toList());
@@ -51,10 +51,12 @@ public class ItineraryBuilderUtil {
         List<TripTag> tripVibes = (List<TripTag>) gson.fromJson(questionnaireData.get("tripVibes"), List.class)
                 .stream().map(data -> new TripTag((LinkedTreeMap<String, Object>) data)).collect(Collectors.toList());
 
-        this.flight = gson.fromJson(questionnaireData.get("flight"), template.Flight.class);
+        if(!questionnaireData.get("flight").equals("{}")){
+            flight = gson.fromJson(questionnaireData.get("flight"), template.Flight.class);
+        }
 
         return new QuestionsData(country, city, adultsCount, childrenCount, 0,
-                startDate, endDate, favoriteAttraction, tripVibes, transportation);
+                startDate, endDate, favoriteAttraction, tripVibes, transportation, flight);
     }
 
     private HashMap<String, List<template.Attraction>> generateAttractionsDictionary() {
