@@ -5,10 +5,10 @@ import model.user.User;
 
 class UserTypeTemplate {
     Type type;
-    User user;
+    UserTemplate user;
 
     public UserTypeTemplate(User user) {
-        this.user = user;
+        this.user = new UserTemplate(user);
 
         if (user.getClass().equals(GuestUser.class)) {
             this.type = Type.GUEST;
@@ -23,7 +23,7 @@ class UserTypeTemplate {
         GUEST, REGISTERED, ADMIN
     }
 
-    private class UserTemplate {
+    private static class UserTemplate {
         private final String userName;
         private final String password;
         private final Long id;
@@ -36,8 +36,32 @@ class UserTypeTemplate {
             this.userName = user.getUserName();
             this.password = user.getPassword();
             this.isAdmin = user.isAdmin();
-            this.name = user.getUserName();
+            this.name = user.getName();
             this.sessionId = user.getSessionId();
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean isAdmin() {
+            return isAdmin;
+        }
+
+        public String getSessionId() {
+            return sessionId;
         }
     }
 }
