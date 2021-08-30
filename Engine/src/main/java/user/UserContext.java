@@ -8,10 +8,7 @@ import model.user.RegisteredUser;
 import model.user.User;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class UserContext {
@@ -78,6 +75,7 @@ public class UserContext {
         DataEngine dataEngine = DataEngine.getInstance();
         //        List<ItineraryModel> itineraryModelList = dataEngine.getUserItineraries(guest.getUserName());
         List<ItineraryModel> itineraryModelList = guest.getItineraryList();
+        List<ItineraryModel> cloneList = new ArrayList<>();
 
         if (itineraryModelList != null) {
             for (ItineraryModel itinerary : itineraryModelList) {
@@ -85,10 +83,11 @@ public class UserContext {
                         ItineraryModel(itinerary.getItineraryId(), itinerary.getJsonData(), registeredUser);
 
                 clone.setStatus(itinerary.getStatus());
-                dataEngine.saveItinerary(clone);
+                cloneList.add(clone);
             }
         }
         dataEngine.removeUser(guest);
+        cloneList.forEach(dataEngine::saveItinerary);
     }
 
     public Optional<RegisteredUser> createRegisteredUser(String sessionId, String userName, String password, String name) {

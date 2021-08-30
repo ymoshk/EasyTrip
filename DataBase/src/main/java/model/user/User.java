@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(indexes = @Index(columnList = "sessionId", unique = true, name = "sessionId_Index"))
+@Table(indexes = @Index(columnList = "sessionId", name = "sessionId_Index"))
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class User extends Model {
     @Column(length = 1024, nullable = false)
