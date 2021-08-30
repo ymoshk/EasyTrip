@@ -39,6 +39,7 @@ public class DataEngine implements Closeable {
 //    private List<Thread> threadsList = new ArrayList<>();
     //empty constructor just to make sure the class is a singleton
     private DataEngine() {
+        DBContext.getInstance(); // To load the session factory as the server loads.
     }
 
     // only one thread can execute this method at the same time.
@@ -103,7 +104,7 @@ public class DataEngine implements Closeable {
 
     public void refreshModelUpdateTime(Model model) {
         model.setUpdateTime(LocalDateTime.now());
-        DBContext.getInstance().update(model);
+        //        DBContext.getInstance().update(model);
     }
 
     /**
@@ -543,19 +544,19 @@ public class DataEngine implements Closeable {
      */
 
     public List<User> getUsers() {
-        DBContext dbContext = DBContext.getUsersInstance();
+        DBContext dbContext = DBContext.getInstance();
 
         return (List<User>) dbContext.selectQuery("FROM User");
     }
 
     public List<GuestUser> getGuestUsers() {
-        DBContext dbContext = DBContext.getUsersInstance();
+        DBContext dbContext = DBContext.getInstance();
 
         return (List<GuestUser>) dbContext.selectQuery("FROM User WHERE DTYPE = GuestUser");
     }
 
     public Optional<RegisteredUser> getUser(String userName, String password) {
-        DBContext dbContext = DBContext.getUsersInstance();
+        DBContext dbContext = DBContext.getInstance();
 
         List<RegisteredUser> users = (List<RegisteredUser>) dbContext
                 .selectQuery("FROM User WHERE DTYPE = RegisteredUser");
@@ -566,7 +567,7 @@ public class DataEngine implements Closeable {
     }
 
     public Optional<GuestUser> getGuestUser(String sessionId) {
-        DBContext dbContext = DBContext.getUsersInstance();
+        DBContext dbContext = DBContext.getInstance();
 
         List<GuestUser> users = (List<GuestUser>) dbContext.selectQuery("FROM User WHERE DTYPE = GuestUser");
         return users.stream()
@@ -575,7 +576,7 @@ public class DataEngine implements Closeable {
     }
 
     public void updateUserSessionId(User user, String sessionId) {
-        DBContext dbContext = DBContext.getUsersInstance();
+        DBContext dbContext = DBContext.getInstance();
         user.setSessionId(sessionId);
         dbContext.update(user);
     }
@@ -585,12 +586,12 @@ public class DataEngine implements Closeable {
     }
 
     public boolean addUser(User userToAdd) {
-        DBContext dbContext = DBContext.getUsersInstance();
+        DBContext dbContext = DBContext.getInstance();
         return dbContext.insert(userToAdd);
     }
 
     public void removeUser(User userToRemove) {
-        DBContext.getUsersInstance().delete(userToRemove);
+        DBContext.getInstance().delete(userToRemove);
     }
 
     public List<ItineraryModel> getRecentItineraries() {
@@ -627,25 +628,11 @@ public class DataEngine implements Closeable {
     }
 
     public void updateUser(User user) {
-        DBContext.getUsersInstance().update(user);
+        DBContext.getInstance().update(user);
     }
 
     @Override
     public void close() {
-        DBContext.getInstance().close();
+        SessionFactoryUtil.getInstance().close();
     }
-
-    //    public List<ItineraryModel> getUserItineraries(String userName) {
-    //        List<ItineraryModel> allModels =
-    //                (List<ItineraryModel>) DBContext.getUsersInstance().getToList(ItineraryModel.class);
-    //
-    //        return allModels.stream()
-    //                .filter(model -> model.getUser().getUserName().equals(userName))
-    //                .collect(Collectors.toList());
-    //    }
-
-    //    public List<ItineraryModel> getUserItineraries(User user) {
-    //
-    //        return user.getItineraryList();
-    //    }
 }

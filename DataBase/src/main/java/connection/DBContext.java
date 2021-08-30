@@ -2,10 +2,10 @@ package connection;
 
 import log.LogsManager;
 import model.Model;
-import org.hibernate.Hibernate;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
-import javax.persistence.*;
-import java.io.Closeable;
+import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,41 +16,16 @@ import java.util.Optional;
  * A singleton class to connect and process CRUD operations over the DB.
  * This class can only be accessed from 'connection' package.
  */
-class DBContext implements Closeable {
+class DBContext {
 
-    private static DBContext instance = null;
-    private static DBContext usersInstance = null;
-    private final EntityManagerFactory entityManagerFactory;
-    private final EntityManager entityManager;
-    private DBContext() {
-        entityManagerFactory = Persistence
-                .createEntityManagerFactory("EasyTrip");
-        this.entityManager = entityManagerFactory.createEntityManager();
+    DBContext() {
+        // Just to load the session factory as the server loads.
+        Session sessionObj = SessionFactoryUtil.getInstance().getNewSession();
+        sessionObj.close();
     }
 
-    // only one thread can execute this method at the same time.
-    static synchronized DBContext getInstance() {
-        if (instance == null) {
-            instance = new DBContext();
-        }
-        return instance;
-    }
-
-    static synchronized DBContext getUsersInstance() {
-        if (usersInstance == null) {
-            usersInstance = new DBContext();
-        }
-        return usersInstance;
-    }
-
-    /**
-     * A method to close the release any resource of the DBContext
-     */
-    @Override
-    public void close() {
-        this.entityManagerFactory.close();
-        this.entityManager.close();
-        instance = null;
+    static DBContext getInstance() {
+        return new DBContext();
     }
 
     /**
@@ -61,15 +36,19 @@ class DBContext implements Closeable {
      * @return An 'optional' object contains the requested object or an empty value if nothing was found.
      */
     Optional<Model> findById(Class<?> modelClass, long id) {
+        Session sessionObj = SessionFactoryUtil.getInstance().getNewSession();
+        Optional<Model> result = Optional.empty();
+
         if (modelClass.getSuperclass() == Model.class || modelClass == Model.class) {
-            Model modelFound = (Model) entityManager.find(modelClass, id);
+            Model modelFound = (Model) sessionObj.load(modelClass, id);
 
             if (modelFound != null) {
-                return Optional.of(modelFound);
+                result = Optional.of(modelFound);
             }
         }
 
-        return Optional.empty();
+        sessionObj.close();
+        return result;
     }
 
     /**
@@ -84,104 +63,77 @@ class DBContext implements Closeable {
      * More info can be found at https://www.javatpoint.com/hql
      */
     List<? extends Model> selectQuery(String queryString) {
-        try {
-            Query query = this.entityManager.createQuery(queryString);
-            return query.getResultList();
+        try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
+            Query query = sessionObj.createQuery(queryString);
+            return (List<? extends Model>) query.getResultList();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return new ArrayList<>();
         }
+
+        return new ArrayList<>();
     }
 
     List<? extends Model> selectQuery(String queryString, int limit) {
-        try {
-            Query query = this.entityManager.createQuery(queryString);
+        try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
+            Query query = sessionObj.createQuery(queryString);
             query.setFirstResult(0);
             query.setMaxResults(limit);
-            return query.getResultList();
+            return (List<? extends Model>) query.getResultList();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return new ArrayList<>();
         }
-    }
-
-
-    Query createQuery(String queryString) {
-        return this.entityManager.createQuery(queryString);
-    }
-
-    List<? extends Model> selectQuery(Query query) {
-        try {
-            return query.getResultList();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return new ArrayList<>();
-        }
+        return new ArrayList<>();
     }
 
     /**
      * @param objectToAdd A model to insert into the DB. The model will be mapped automatically to the relevant table.
      */
-    synchronized boolean insert(Model objectToAdd) {
-        flushManager();
-        EntityTransaction transaction = this.entityManager.getTransaction();
-        objectToAdd.setCreateTime(LocalDateTime.now());
-        objectToAdd.setUpdateTime(LocalDateTime.now());
-
-        try {
-            transaction.begin();
-            this.entityManager.persist(objectToAdd);
+    boolean insert(Model objectToAdd) {
+        try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
+            Transaction transaction = sessionObj.beginTransaction();
+            objectToAdd.setCreateTime(LocalDateTime.now());
+            objectToAdd.setUpdateTime(LocalDateTime.now());
+            sessionObj.save(objectToAdd);
             transaction.commit();
+
             return true;
         } catch (Exception ex) {
             LogsManager.logException(ex);
-            return false;
         }
+
+        return false;
     }
 
-    void flushManager() {
-        try {
-            this.entityManager.flush();
-        } catch (Exception ignore) {
-        }
-    }
 
     /**
      * @param modelCollection A collection of models to insert into the DB.
      *                        The models will be mapped automatically to the relevant table.
      */
-    synchronized void insertAll(Collection<? extends Model> modelCollection) {
-        EntityTransaction transaction = this.entityManager.getTransaction();
+    void insertAll(Collection<? extends Model> modelCollection) {
+        Transaction transaction;
 
-
+        try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
             for (Model model : modelCollection) {
-                try {
-                flushManager();
-                transaction.begin();
+                transaction = sessionObj.beginTransaction();
                 model.setCreateTime(LocalDateTime.now());
                 model.setUpdateTime(LocalDateTime.now());
-                this.entityManager.persist(model);
+                sessionObj.save(model);
                 transaction.commit();
-                } catch (Exception ex) {
-                    LogsManager.logException(ex);
-                    System.out.println(ex.getMessage());
-                }
             }
-
+        } catch (Exception ex) {
+            LogsManager.logException(ex);
+        }
     }
 
     /**
      * @param modelToRemove the model to remove from the DB.
      *                      If the model couldn't be found in the DB, the method will end without an error.
      */
-    synchronized void delete(Model modelToRemove) {
-        flushManager();
-
+    void delete(Model modelToRemove) {
         if (modelToRemove != null) {
-            EntityTransaction transaction = this.entityManager.getTransaction();
-            try {
-                transaction.begin();
-                entityManager.remove(modelToRemove);
+            try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
+                Transaction transaction = sessionObj.beginTransaction();
+                sessionObj.delete(modelToRemove);
                 transaction.commit();
             } catch (Exception ex) {
                 LogsManager.logException(ex);
@@ -193,14 +145,11 @@ class DBContext implements Closeable {
      * @param modelCollection A collection of models to remove from the DB.
      *                        If any of the models couldn't be found in the DB it will be ignored.
      */
-    synchronized void deleteAll(Collection<? extends Model> modelCollection) {
-        flushManager();
-
+    void deleteAll(Collection<? extends Model> modelCollection) {
         if (modelCollection != null) {
-            EntityTransaction transaction = this.entityManager.getTransaction();
-            try {
-                transaction.begin();
-                modelCollection.forEach(entityManager::remove);
+            try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
+                Transaction transaction = sessionObj.beginTransaction();
+                modelCollection.forEach(sessionObj::delete);
                 transaction.commit();
             } catch (Exception ex) {
                 LogsManager.logException(ex);
@@ -213,14 +162,11 @@ class DBContext implements Closeable {
      *                     Use the model's setters to modify any of it's value.
      *                     Use this method once to save these changes.
      */
-    synchronized void update(Model updatedModel) {
-        flushManager();
-
+    void update(Model updatedModel) {
         if (updatedModel != null) {
-            EntityTransaction transaction = this.entityManager.getTransaction();
-            updatedModel.setUpdateTime(LocalDateTime.now());
-            try {
-                transaction.begin();
+            try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
+                Transaction transaction = sessionObj.beginTransaction();
+                updatedModel.setUpdateTime(LocalDateTime.now());
                 transaction.commit();
             } catch (Exception ex) {
                 LogsManager.logException(ex);

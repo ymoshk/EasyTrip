@@ -4,10 +4,9 @@ import generator.GUID;
 import generator.Hash;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Entity
-@Table(name = "GuestUser")
+//@Table(name = "GuestUser")
 public class GuestUser extends User {
     private static int counter = 0;
 

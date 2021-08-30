@@ -1,10 +1,9 @@
 package model.user;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Entity
-@Table(name = "RegisteredUser")
+//@Table(name = "RegisteredUser")
 public class RegisteredUser extends User {
 
     public RegisteredUser(String sessionId, String userName, String password, String name, boolean isAdmin) {

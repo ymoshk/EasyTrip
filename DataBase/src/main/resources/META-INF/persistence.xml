@@ -28,19 +28,6 @@
 
             <!-- Auto generate tables in the DB-->
             <property name="hibernate.hbm2ddl.auto" value="update"/>
-
-
-            <!-- Local server configurations -->
-            <!--            <property name="hibernate.hbm2ddl.auto" value="create"/>-->
-<!--                        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>-->
-<!--                        <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>-->
-            <!--            &lt;!&ndash; URL for DB &ndash;&gt;-->
-            <!--            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://127.0.0.1/EasyTrip?createDatabaseIfNotExist=true&amp;serverTimezone=UTC"/>-->
-            <!--            &lt;!&ndash; Username &ndash;&gt;-->
-            <!--            <property name="javax.persistence.jdbc.user" value="root"/>-->
-            <!--            &lt;!&ndash; Password &ndash;&gt;-->
-            <!--            <property name="javax.persistence.jdbc.password" value="easyPassword"/>-->
-
         </properties>
     </persistence-unit>
 </persistence>

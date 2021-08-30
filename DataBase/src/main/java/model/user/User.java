@@ -6,7 +6,7 @@ import model.itinerary.ItineraryModel;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity()
+@Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class User extends Model {
     @Column(length = 1024, nullable = false)
@@ -41,6 +41,14 @@ public abstract class User extends Model {
 
     public void setItineraryList(List<ItineraryModel> itineraryList) {
         this.itineraryList = itineraryList;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getSessionId() {

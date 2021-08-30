@@ -6,14 +6,15 @@ import log.LogsManager;
 import model.IATACode.IATACode;
 import model.flightOffer.FlightOffer;
 
-import javax.persistence.Query;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import java.util.stream.Collectors;
 
 
@@ -67,33 +68,37 @@ public class FlightEngine {
         return flightOfferList;
     }
 
-    /**
-     *
-     * @param originLocationCode airport IATA code (e.g TLV)
-     * @param destinationLocationCode airport IATA code (e.g NYC)
-     * @param departureDate LocalDateTime.
-     * @param returnDate LocalDateTime.
-     * @param oneWay 1 => one way, 0 => round-trip.
-     * @param numberOfPassengers not used right now, might help for filter in the future.
-     * @return List of flights that match the search result OR empty list.
-     */
-    private List<FlightOffer> getFlightsFromDB(String originLocationCode, String destinationLocationCode, LocalDateTime departureDate,
-                                              LocalDateTime returnDate, boolean oneWay, int numberOfPassengers){
-        Query q = DBContext.getInstance().createQuery(
-                "FROM FlightOffer WHERE " +
-                        "originLocationCode = :originLocationCode AND " +
-                        "destinationLocationCode = :destinationLocationCode AND " +
-                        "departureDate = :departureDate AND " +
-                        "returnDate = :returnDate AND " +
-                        "oneWay =: oneWay");
-        q.setParameter("originLocationCode", originLocationCode);
-        q.setParameter("destinationLocationCode", destinationLocationCode);
-        q.setParameter("departureDate", departureDate);
-        q.setParameter("returnDate", returnDate);
-        q.setParameter("oneWay", oneWay);
-        q.setMaxResults(MAX_NUMBER_OF_RESULTS);
+    static private void saveToDBCityIATATable() throws IOException {
+        DBContext context = DBContext.getInstance();
+        File file = new File("C:\\2021\\airport_list_final.txt");
+        int counter = 1;
+        String city = "";
+        String country = "";
+        String code = "";
+        IATACode iataCode;
 
-        return (List<FlightOffer>) DBContext.getInstance().selectQuery(q);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+
+        String st;
+        while ((st = br.readLine()) != null) {
+            //System.out.println(st);
+
+            if (counter == 2) {
+                city = st;
+            } else if (counter == 3) {
+                country = st;
+            } else if (counter == 4) {
+                code = st;
+            }
+            if (counter == 4) {
+                counter = 0;
+                iataCode = new IATACode(city, country, code);
+                context.insert(iataCode);
+                //System.out.println(iataCode);
+            }
+
+            counter++;
+        }
     }
 
     /**
@@ -145,50 +150,37 @@ public class FlightEngine {
      * or reach Ori for further help
      */
     private List <String> locationToIATACode(String country, String city){
-        List <IATACode> IATACodeList = (List <IATACode>) DBContext.getInstance().selectQuery(
+        List<IATACode> IATACodeList = (List<IATACode>) DBContext.getInstance().selectQuery(
                 "FROM IATACode WHERE country LIKE '" + country + "%' AND city LIKE '" + city + "%'");
 
-        if(IATACodeList.isEmpty()){
+        if (IATACodeList.isEmpty()) {
             LogsManager.log("Couldn't find country: " + country + ", city: " + city + " airports");
         }
 
         return IATACodeList.stream().map(IATACode::getCode).collect(Collectors.toList());
     }
 
-    static private void saveToDBCityIATATable() throws IOException {
-        DBContext context = DBContext.getInstance();
-        File file = new File("C:\\2021\\airport_list_final.txt");
-        int counter = 1;
-        String city = "";
-        String country = "";
-        String code = "";
-        IATACode iataCode;
+    /**
+     * @param originLocationCode      airport IATA code (e.g TLV)
+     * @param destinationLocationCode airport IATA code (e.g NYC)
+     * @param departureDate           LocalDateTime.
+     * @param returnDate              LocalDateTime.
+     * @param oneWay                  1 => one way, 0 => round-trip.
+     * @param numberOfPassengers      not used right now, might help for filter in the future.
+     * @return List of flights that match the search result OR empty list.
+     */
+    private List<FlightOffer> getFlightsFromDB(String originLocationCode, String destinationLocationCode, LocalDateTime departureDate,
+                                               LocalDateTime returnDate, boolean oneWay, int numberOfPassengers) {
+        StringBuilder queryString = new StringBuilder();
+        queryString.append("FROM FlightOffer WHERE ");
+        queryString.append("originLocationCode = ").append(originLocationCode).append(" AND ");
+        queryString.append("destinationLocationCode = ").append(destinationLocationCode).append(" AND ");
+        queryString.append("departureDate = ").append(departureDate).append(" AND ");
+        queryString.append("returnDate = ").append(returnDate).append(" AND ");
+        queryString.append("oneWay = ").append(oneWay);
 
-        BufferedReader br = new BufferedReader(new FileReader(file));
-
-        String st;
-        while ((st = br.readLine()) != null)
-        {
-            //System.out.println(st);
-
-            if(counter == 2){
-                city = new String(st);
-            }
-            else if(counter == 3){
-                country = new String(st);
-            }
-            else if(counter == 4){
-                code = new String(st);
-            }
-            if(counter == 4){
-                counter = 0;
-                iataCode = new IATACode(city, country, code);
-                context.insert(iataCode);
-                //System.out.println(iataCode);
-            }
-
-            counter++;
-        }
+        return (List<FlightOffer>) DBContext.getInstance()
+                .selectQuery(queryString.toString(), MAX_NUMBER_OF_RESULTS);
     }
 
     public static void main(String[] args) {

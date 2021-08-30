@@ -4,12 +4,11 @@ import model.Model;
 import model.user.User;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+
 
 @Entity
+@Table(name = "ItineraryModel")
 public class ItineraryModel extends Model {
     @Column(unique = true, nullable = false)
     String itineraryId;
