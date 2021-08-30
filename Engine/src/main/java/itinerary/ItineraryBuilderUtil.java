@@ -60,8 +60,9 @@ public class ItineraryBuilderUtil {
         if (this.questionsData != null) {
             HashMap<String, List<template.Attraction>> hashMap = new HashMap<>();
             DataEngine dataEngine = DataEngine.getInstance();
-            List<model.attraction.Attraction> attractionList = dataEngine.getAttractions(questionsData.getCity().getCityName(),
-                    new PriceRange(2));
+            List<model.attraction.Attraction> attractionList = dataEngine.
+                    getAttractions(questionsData.getCity().getCityName(),
+                    new PriceRange(2), false);
             HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
             AttractionEvaluator attractionEvaluator = hillClimbing.getAttractionEvaluator();
             List<String> attractionTags = hillClimbing.getAttractionTags();
