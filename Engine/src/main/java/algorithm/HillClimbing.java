@@ -993,8 +993,7 @@ public class HillClimbing {
                     childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(4), new ArrayList<>(),
                     new ArrayList<>(), new ArrayList<>());
             DataEngine dataEngine = DataEngine.getInstance();
-            List<Attraction> attractionList = dataEngine.getAttractions(questionsData.getCity().getCityName(),
-                    new PriceRange(2));
+            List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 
             HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
             State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
