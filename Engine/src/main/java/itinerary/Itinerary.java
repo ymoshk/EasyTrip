@@ -98,4 +98,34 @@ public class Itinerary {
     public void setAttractions(HashMap<String, List<template.Attraction>> attractions) {
         this.attractions = attractions;
     }
+
+    public void addOutboundToItinerary(){
+        template.Flight flight = questionsData.getFlight();
+        ItineraryDay itineraryDay;
+        LocalDateTime departureFromOrigin;
+        LocalDateTime arrivalToDestination;
+
+        if(flight != null){
+            departureFromOrigin = flight.getDepartureFromOrigin();
+            arrivalToDestination = flight.getArrivalToDestination();
+
+            itineraryDay = getItineraryDay(departureFromOrigin.toLocalDate());
+            itineraryDay.getActivities().get(0).setEndTime(departureFromOrigin.format(DateTimeFormatter.ofPattern("HH:mm")));
+
+            // check if flight continues to the next day
+            if(arrivalToDestination.toLocalDate().isAfter(departureFromOrigin.toLocalDate())){
+                // split flight time into two days
+                itineraryDay.addFlightTime(departureFromOrigin,
+                        arrivalToDestination.withHour(23).withMinute(59).withSecond(0));
+
+                itineraryDay = getItineraryDay(arrivalToDestination.toLocalDate());
+
+                itineraryDay.addFlightTime(arrivalToDestination.withHour(0).withMinute(0).withSecond(0),
+                        arrivalToDestination);
+            }
+            else{
+                itineraryDay.addFlightTime(departureFromOrigin, arrivalToDestination);
+            }
+        }
+    }
 }

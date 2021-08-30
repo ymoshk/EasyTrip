@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class FlightEngine {
     private DBContext context;
     final private AmadeusApi amadeusApi = new AmadeusApi();
-    private final static int MAX_NUMBER_OF_RESULTS = 5;
+    private final static int MAX_NUMBER_OF_RESULTS = 10;
 
     /**
      * This method find flights using:

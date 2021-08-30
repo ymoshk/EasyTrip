@@ -3,6 +3,7 @@ package itinerary;
 import connection.DataEngine;
 import container.PriceRange;
 import model.location.City;
+import template.Flight;
 import template.TripTag;
 
 import java.time.LocalDateTime;
@@ -76,5 +77,9 @@ public class QuestionsData {
 
     public List<TripTag> getTransportation() {
         return transportation;
+    }
+
+    public Flight getFlight() {
+        return flight;
     }
 }

@@ -91,6 +91,6 @@ public class ActivityNode {
     }
 
     public enum Types {
-        FREE_TIME, CAR, BICYCLE, WALK, TRANSIT, ATTRACTION
+        FREE_TIME, CAR, BICYCLE, WALK, TRANSIT, ATTRACTION, FLIGHT
     }
 }
