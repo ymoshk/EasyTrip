@@ -156,7 +156,10 @@ public class DataEngine implements Closeable {
      * @param priceRange A price range object to limit the price range of the requested attractions.
      * @return A list of attraction that match the search args.
      */
-    public List<Attraction> getAttractions(PlaceType type, String cityName, PriceRange priceRange, PriceLevel priceLevel) {
+
+    public List<Attraction> getAttractions(PlaceType type, String cityName, PriceRange priceRange, PriceLevel priceLevel,
+                                           boolean shouldFetchAttraction) {
+
         DBContext dbContext = DBContext.getInstance();
         City theCity = getCity(cityName).orElse(null);
         List<Attraction> res = new ArrayList<>();
@@ -165,6 +168,10 @@ public class DataEngine implements Closeable {
             res = theCity.getAttractionList().stream()
                     .filter(attr -> attr.getPlaceType().equals(type))
                     .collect(Collectors.toList());
+
+            if(!shouldFetchAttraction){
+                return res;
+            }
 
             try {
                 //TODO: make sure there're enough attractions
@@ -184,8 +191,17 @@ public class DataEngine implements Closeable {
         return res;
     }
 
-    public List<Attraction> getAttractions(String cityName, PriceRange priceRange) {
+    public List<Attraction> getAttractions(String cityName, PriceRange priceRange, boolean shouldFetchAttractions) {
         List<Attraction> res = new ArrayList<>();
+        DBContext dbContext = DBContext.getInstance();
+        City theCity = getCity(cityName).orElse(null);
+
+        if (theCity != null) {
+            res = theCity.getAttractionList();
+        }
+        if(!shouldFetchAttractions){
+            return res;
+        }
         List<PlaceType> types = (Arrays.asList(
                 PlaceType.ATM,       // ATM == TOP SIGHT
                 PlaceType.AMUSEMENT_PARK,
@@ -206,12 +222,13 @@ public class DataEngine implements Closeable {
                 PlaceType.DOCTOR    // DOCTOR == BEACH
         ));
 
+        List<Attraction> finalRes = res;
         types.forEach(type -> {
             if(type.equals(PlaceType.RESTAURANT)) {
                 Arrays.stream(PriceLevel.values()).filter(priceLevel ->
                         !priceLevel.equals(PriceLevel.UNKNOWN)).collect(Collectors.toList()).forEach(priceLevel ->
                 {
-                    res.addAll(getAttractions(type, cityName, priceRange, priceLevel));
+                    finalRes.addAll(getAttractions(type, cityName, priceRange, priceLevel, true));
                     try {
                         Thread.sleep(NEXT_PAGE_DELAY);
                     } catch (InterruptedException e) {
@@ -220,7 +237,7 @@ public class DataEngine implements Closeable {
                 });
             }
             else{
-                res.addAll(getAttractions(type, cityName, priceRange, null));
+                finalRes.addAll(getAttractions(type, cityName, priceRange, null, true));
                 try {
                     Thread.sleep(NEXT_PAGE_DELAY);
                 } catch (InterruptedException e) {
@@ -229,10 +246,10 @@ public class DataEngine implements Closeable {
             }
         });
 
-        List<Attraction> topSightsAttractions = res.stream().filter(attraction ->
+        List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
                 attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
                 collect(Collectors.toList());
-        res.addAll(fetchRestaurantsByTopSights(topSightsAttractions, cityName, priceRange));
+        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, cityName, priceRange));
 
 
 

@@ -1,14 +1,13 @@
 package application;
 
+import com.google.maps.model.LatLng;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PriceLevel;
 import connection.DataEngine;
 import container.PriceRange;
 import model.attraction.Attraction;
-import model.attraction.AttractionImage;
 import model.location.City;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,8 +16,11 @@ public class Application {
     public static void main(String[] args) throws Exception {
         System.out.println("Application is starting...");
         DataEngine data = DataEngine.getInstance();
+
+
         City city = data.getCity("Tel Aviv-Yafo").orElse(null);
-        List<Attraction> attractionList = data.getAttractions(PlaceType.RESTAURANT, city.getCityName(), new PriceRange(3), PriceLevel.INEXPENSIVE);
+        List<Attraction> attractionList = data.getAttractions(city.getCityName(), new PriceRange(3),
+                true);
 
 
         System.out.println(attractionList.size());
