@@ -30,13 +30,13 @@ public class QuestionsData {
         this.childrenCount = childrenCount;
         this.city = cityName;
         this.country = countryName;
+        this.flight = flight;
         this.startDate = startDate.withHour(8).withMinute(0).withSecond(0).withNano(0);
         this.endDate = endDate.withHour(23).withMinute(59).withSecond(59).withNano(0);
         this.favoriteAttractions = favoriteAttractions;
         this.tripVibes = tripVibes;
         this.priceRange = new PriceRange(budget);
         this.transportation = transportation;
-        this.flight = flight;
     }
 
     public String getCountry() {

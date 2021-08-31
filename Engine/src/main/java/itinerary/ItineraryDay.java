@@ -78,6 +78,10 @@ public class ItineraryDay {
 
     public void addFlightTime(LocalDateTime startTime, LocalDateTime endTime){
         activities.add(new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FLIGHT, null));
+        System.out.println("Flight time");
+        System.out.println("Start time: " + startTime);
+        System.out.println("End time: " + endTime);
+        System.out.println("\n\n");
     }
 
     public void clean() {

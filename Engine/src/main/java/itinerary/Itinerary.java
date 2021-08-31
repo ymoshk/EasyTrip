@@ -110,6 +110,7 @@ public class Itinerary {
             arrivalToDestination = flight.getArrivalToDestination();
 
             itineraryDay = getItineraryDay(departureFromOrigin.toLocalDate());
+            // add padding free time before flight
             itineraryDay.getActivities().get(0).setEndTime(departureFromOrigin.format(DateTimeFormatter.ofPattern("HH:mm")));
 
             // check if flight continues to the next day

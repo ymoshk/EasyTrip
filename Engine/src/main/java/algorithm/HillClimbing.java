@@ -3,7 +3,6 @@ package algorithm;
 import com.google.maps.model.*;
 import connection.DataEngine;
 import constant.DefaultDurations;
-import container.PriceRange;
 import evaluators.AttractionEvaluator;
 import itinerary.ActivityNode;
 import itinerary.Itinerary;
@@ -14,6 +13,7 @@ import model.location.City;
 import model.travel.Travel;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -54,12 +54,12 @@ public class HillClimbing {
         private final City city;
         private final List<String> attractionTags;
         private final List<String> vibeTags;
+        private final boolean hasFlight;
+        private final LocalDateTime startVacationDateTime;
 
         public ScheduleRestrictions(QuestionsData preferences, List<String> attractionTags, List<String> vibeTags) {
             initTimeConstraints(preferences, vibeTags);
             this.city = preferences.getCity();
-            this.scheduledLunch = false;
-            this.scheduledDinner = false;
             this.BAR_TIME = LocalTime.of(16, 59,0,0);
             this.NIGHT_CLUB_TIME = LocalTime.of(20,59,0,0);
             this.BEACH_TIME = LocalTime.of(16, 1, 0, 0);
@@ -74,6 +74,33 @@ public class HillClimbing {
             this.spaIncluded = attractionTags.contains("SPA");
             this.casinoIncluded = attractionTags.contains("CASINO");
             this.nightClubIncluded = attractionTags.contains("NIGHTCLUB");
+            this.hasFlight = preferences.getFlight() != null;
+            this.startVacationDateTime = initStartVacationDateTime(preferences);
+            initMealsRestrictions();
+        }
+
+        private void initMealsRestrictions(){
+            if(hasFlight){
+                if(startVacationDateTime.toLocalTime().isAfter(LUNCH_TIME.plusHours(2))){
+                    this.scheduledLunch = true;
+                }
+                if(startVacationDateTime.toLocalTime().isAfter(DINNER_TIME.plusHours(2))){
+                    this.scheduledDinner = true;
+                }
+            }
+            else{
+                this.scheduledLunch = false;
+                this.scheduledDinner = false;
+            }
+        }
+
+        private LocalDateTime initStartVacationDateTime(QuestionsData preferences){
+            if(hasFlight){
+                return preferences.getFlight().getArrivalToDestination().plusHours(3);
+            }
+            else{
+                return preferences.getStartDate();
+            }
         }
 
         public void setScheduledCasino(boolean scheduledCasino) {
@@ -96,8 +123,25 @@ public class HillClimbing {
             this.scheduledDinner = scheduledDinner;
         }
 
-        public LocalTime getSTART_TIME() {
-            return START_TIME;
+        public LocalTime getSTART_TIME(LocalDate currentDay) {
+            if(hasFlight){
+                if(currentDay.isEqual(startVacationDateTime.toLocalDate())){
+                    // flight arrival is before schedule beginning
+                    if(startVacationDateTime.toLocalTime().isBefore(START_TIME.plusMinutes(1))){
+                        return START_TIME;
+                    }
+                    else{
+                        return startVacationDateTime.toLocalTime();
+                    }
+                }
+                // current day isn't arriving day
+                else{
+                    return START_TIME;
+                }
+            }
+            else{
+                return START_TIME;
+            }
         }
 
         public LocalTime getEND_TIME() {
@@ -122,7 +166,7 @@ public class HillClimbing {
                 this.END_TIME = LocalTime.of(23, 0, 0, 0);
             }
             else{
-                this.LUNCH_TIME = LocalTime.of(12,29, 0, 0);
+                this.LUNCH_TIME = LocalTime.of(11,59, 0, 0);
                 this.DINNER_TIME = LocalTime.of(17,59, 0, 0);
                 this.END_TIME = LocalTime.of(23, 59, 0, 0);
             }
@@ -389,12 +433,32 @@ public class HillClimbing {
             return DataEngine.calculateDistance(city, attraction) < 15;
         }
 
-        public void resetRestrictions(){
-            setScheduledLunch(false);
-            setScheduledDinner(false);
+        public void resetRestrictions(LocalDate currentDate){
+            // apply restrictions to arrival day
+            if(hasFlight && currentDate.isEqual(startVacationDateTime.toLocalDate())){
+                if(startVacationDateTime.toLocalTime().isAfter(LUNCH_TIME.plusHours(2))){
+                    setScheduledLunch(true);
+                }
+                if(startVacationDateTime.toLocalTime().isAfter(DINNER_TIME.plusHours(2))){
+                    setScheduledDinner(true);
+                }
+            }
+            else{
+                setScheduledLunch(false);
+                setScheduledDinner(false);
+            }
+
             setScheduledBeach(false);
             setScheduledCasino(false);
             setScheduledSpa(false);
+        }
+
+        public boolean isHasFlight() {
+            return hasFlight;
+        }
+
+        public LocalDateTime getStartVacationDateTime() {
+            return startVacationDateTime;
         }
     }
 
@@ -427,7 +491,7 @@ public class HillClimbing {
         this.placeTypeToAttraction = attractionListToAttractionHashMap(attractionList);
         this.attractionEvaluator = new AttractionEvaluator(placeTypeToAttraction);
         this.attractionToBooleanMap = new HashMap<>();
-        this.currentTime = getStartTimeByTravelerType();
+        this.currentTime = getStartTimeByTravelerPreferences();
         this.rand = new Random();
         this.dataEngine = DataEngine.getInstance();
         this.lastAttraction = null;
@@ -438,8 +502,6 @@ public class HillClimbing {
         //in seconds
         this.BREAK_TIME_FACTOR = calculateBreakTimeByTravelerType(vibeTags);
     }
-
-
 
     private long calculateBreakTimeByTravelerType(List<String> vibeTags){
         if(vibeTags.contains("Chill")){
@@ -543,8 +605,11 @@ public class HillClimbing {
         placeTypeToAttraction.put("TouristAttraction", attractionList);
     }
 
-    private LocalDateTime getStartTimeByTravelerType(){
-        return preferences.getStartDate().with(scheduleRestrictions.getSTART_TIME());
+    private LocalDateTime getStartTimeByTravelerPreferences(){
+        LocalDateTime startVacationDateTime = preferences.getStartDate();
+        LocalDate currentDate = preferences.getStartDate().toLocalDate();
+
+        return startVacationDateTime.with(scheduleRestrictions.getSTART_TIME(currentDate));
     }
 
     private boolean addAttractionToHashMap(String attractionType){
@@ -584,16 +649,28 @@ public class HillClimbing {
         return res;
     }
 
+    private void addArrangementTimeAfterFlight(State currentState){
+        LocalDateTime startTime = preferences.getFlight().getArrivalToDestination();
+        LocalDateTime endTime = preferences.getFlight().getArrivalToDestination().plusHours(3);
+
+        if(endTime.toLocalDate().isAfter(startTime.toLocalDate())){
+            endTime = endTime.withHour(23).withMinute(59).withSecond(59);
+        }
+
+        currentState.getItinerary().addFreeTime(startTime, endTime);
+    }
+
     public Itinerary getItineraryWithHillClimbingAlgorithm(State initState) {
         State currentState = initState;
+
+        if(preferences.getFlight() != null){
+            addArrangementTimeAfterFlight(currentState);
+        }
 
         // schedule attraction until vacation is over
         while(currentTime.isBefore(preferences.getEndDate())){
             addAttraction(currentState);
         }
-
-//        Itinerary itinerary = currentState.getItinerary();
-//        Itinerary optimizedItinerary = optimize(itinerary);
 
         return currentState.getItinerary();
     }
@@ -789,6 +866,19 @@ public class HillClimbing {
         return false;
     }
 
+    private void addStartDayPadding(State currentState){
+        // traveller doesn't have flight
+        if(!scheduleRestrictions.isHasFlight()){
+            currentState.getItinerary().addStartDayPadding(currentTime, currentTime.with(
+                    scheduleRestrictions.getSTART_TIME(currentTime.toLocalDate())));
+        }
+        // if it's arrival day, padding is already added
+        else if(!currentTime.toLocalDate().isEqual(scheduleRestrictions.getStartVacationDateTime().toLocalDate())){
+                currentState.getItinerary().addStartDayPadding(currentTime, currentTime.with(
+                        scheduleRestrictions.getSTART_TIME(currentTime.toLocalDate())));
+        }
+    }
+
     private Attraction addAttraction(State currentState) {
         List<Attraction> attractionList;
         Attraction attractionToAdd;
@@ -805,8 +895,8 @@ public class HillClimbing {
 
         // configure start time of the day
         if(lastAttraction == null){
-            currentState.getItinerary().addStartDayPadding(currentTime, currentTime.with(scheduleRestrictions.getSTART_TIME()));
-            currentTime = currentTime.with(scheduleRestrictions.getSTART_TIME());
+            addStartDayPadding(currentState);
+            currentTime = currentTime.with(scheduleRestrictions.getSTART_TIME(currentTime.toLocalDate()));
         }
 
         if(attractionToAdd != null){
@@ -898,10 +988,10 @@ public class HillClimbing {
     }
 
     private void resetNextDay(){
-        LocalTime startTime = scheduleRestrictions.getSTART_TIME();
+        LocalTime startTime = scheduleRestrictions.getSTART_TIME(currentTime.toLocalDate());
 
         currentTime = currentTime.with(startTime);
-        scheduleRestrictions.resetRestrictions();
+        scheduleRestrictions.resetRestrictions(currentTime.toLocalDate());
         lastAttraction = null;
     }
 

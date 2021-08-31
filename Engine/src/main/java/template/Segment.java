@@ -14,6 +14,7 @@ public class Segment implements Serializable {
     private String arrivalTime;
     private String duration;
     private String stop;
+    private int daysDiff;
 
     public Segment(FlightOffer flightOffer, int direction){
         LocalDateTime departureDateTime = flightOffer.getDepartureDateTime(direction);
@@ -27,9 +28,9 @@ public class Segment implements Serializable {
         // check if arrival is on the sequence day
         if(arrivalDateTime.toLocalDate().isAfter(departureDateTime.toLocalDate())){
             Period period = Period.between(departureDateTime.toLocalDate(), arrivalDateTime.toLocalDate());
-            int diff = Math.abs(period.getDays());
+            daysDiff = Math.abs(period.getDays());
 
-            this.arrivalTime = this.arrivalTime + " (+" + diff + ")";
+            this.arrivalTime = this.arrivalTime + " (+" + daysDiff + ")";
         }
         this.duration = flightOffer.getItineraryList().get(direction).getDurationTotal();
         this.duration = this.duration.replace("PT", "").replace("H", "H ").toLowerCase();
