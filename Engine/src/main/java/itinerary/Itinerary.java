@@ -5,6 +5,7 @@ import model.attraction.Attraction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,8 +84,14 @@ public class Itinerary {
 
     public void addStartDayPadding(LocalDateTime startTime, LocalDateTime endTime){
         ItineraryDay itineraryDay = getItineraryDay(startTime.toLocalDate());
+        ActivityNode activityNode = itineraryDay.getActivities().get(0);
 
-        itineraryDay.getActivities().get(0).setEndTime(endTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+        if(activityNode.getType().equals(ActivityNode.Types.FLIGHT)){
+            itineraryDay.getActivities().get(1).setEndTime(endTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+        }
+        else{
+            itineraryDay.getActivities().get(0).setEndTime(endTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+        }
     }
 
     public void addTransportation(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type){
@@ -110,22 +117,58 @@ public class Itinerary {
             arrivalToDestination = flight.getArrivalToDestination();
 
             itineraryDay = getItineraryDay(departureFromOrigin.toLocalDate());
-            // add padding free time before flight
-            itineraryDay.getActivities().get(0).setEndTime(departureFromOrigin.format(DateTimeFormatter.ofPattern("HH:mm")));
+
+            if(departureFromOrigin.toLocalTime().isAfter(LocalTime.of(8,0,0))){
+                // add padding free time before flight
+                itineraryDay.getActivities().get(0).setEndTime(departureFromOrigin.format(DateTimeFormatter.ofPattern("HH:mm")));
+            }
+            else{
+                // remove free time before flight
+                itineraryDay.getActivities().remove(0);
+            }
 
             // check if flight continues to the next day
             if(arrivalToDestination.toLocalDate().isAfter(departureFromOrigin.toLocalDate())){
                 // split flight time into two days
                 itineraryDay.addFlightTime(departureFromOrigin,
-                        arrivalToDestination.withHour(23).withMinute(59).withSecond(0));
+                        departureFromOrigin.withHour(23).withMinute(59).withSecond(0));
 
                 itineraryDay = getItineraryDay(arrivalToDestination.toLocalDate());
 
-                itineraryDay.addFlightTime(arrivalToDestination.withHour(0).withMinute(0).withSecond(0),
+                itineraryDay.addFlightTimeAtTheBeginning(arrivalToDestination.withHour(0).withMinute(0).withSecond(0),
                         arrivalToDestination);
             }
             else{
                 itineraryDay.addFlightTime(departureFromOrigin, arrivalToDestination);
+            }
+        }
+    }
+
+    public void addReturnToItinerary(){
+        template.Flight flight = getQuestionsData().getFlight();
+        ItineraryDay itineraryDay;
+        LocalDateTime departureFromDestination;
+        LocalDateTime arrivalToOrigin;
+        ActivityNode lastActivity;
+
+        if(flight != null){
+            departureFromDestination = flight.getDepartureFromDestination();
+            arrivalToOrigin = flight.getArrivalToOrigin();
+
+            itineraryDay = getItineraryDay(departureFromDestination.toLocalDate());
+
+            lastActivity = itineraryDay.getActivities().get(itineraryDay.getActivities().size()-1);
+            lastActivity.setEndTime(departureFromDestination.format(DateTimeFormatter.ofPattern("HH:mm")));
+
+            // check if flight continues to the next day
+            if (arrivalToOrigin.toLocalDate().isAfter(departureFromDestination.toLocalDate())) {
+                // trim flight end in itinerary
+                itineraryDay.addFlightTime(departureFromDestination,
+                        departureFromDestination.withHour(23).withMinute(59).withSecond(0));
+            }
+            else{
+                itineraryDay.addFlightTime(departureFromDestination, arrivalToOrigin);
+                itineraryDay.addFreeTime(arrivalToOrigin, arrivalToOrigin);
             }
         }
     }
