@@ -4,6 +4,7 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.*;
 import container.PriceRange;
+import distanceCalculator.DistanceCalculator;
 import generator.Hash;
 import log.LogsManager;
 import model.Model;
@@ -177,7 +178,7 @@ public class DataEngine implements Closeable {
 
             try {
                 //TODO: make sure there're enough attractions
-                if (res.isEmpty()) {
+                if (res.isEmpty() || type.equals(PlaceType.RESTAURANT)) {
                     res = getAttractionsAndSaveToDB(priceRange, type, theCity, priceLevel);
                     //} else if (res.size() <= MIN_SIZE_COLLECTION || !Model.isCollectionUpdated(res)) {
                 } else if (!Model.isCollectionUpdated(res)) {
@@ -215,7 +216,6 @@ public class DataEngine implements Closeable {
                 PlaceType.BAR,
                 PlaceType.TOURIST_ATTRACTION,
                 PlaceType.PARK,
-                PlaceType.RESTAURANT,
                 PlaceType.CAFE,
                 PlaceType.SHOPPING_MALL,
                 PlaceType.SPA,
@@ -226,61 +226,80 @@ public class DataEngine implements Closeable {
 
         List<Attraction> finalRes = res;
         types.forEach(type -> {
-            if (type.equals(PlaceType.RESTAURANT)) {
-                Arrays.stream(PriceLevel.values()).filter(priceLevel ->
-                        !priceLevel.equals(PriceLevel.UNKNOWN)).collect(Collectors.toList()).forEach(priceLevel ->
-                {
-                    finalRes.addAll(getAttractions(type, cityName, priceRange, priceLevel, true));
-                    try {
-                        Thread.sleep(NEXT_PAGE_DELAY);
-                    } catch (InterruptedException e) {
-                        LogsManager.log(e.getMessage());
-                    }
-                });
-            } else {
                 finalRes.addAll(getAttractions(type, cityName, priceRange, null, true));
                 try {
-                    Thread.sleep(NEXT_PAGE_DELAY);
+                    Thread.sleep(NEXT_PAGE_DELAY * 10);
                 } catch (InterruptedException e) {
                     LogsManager.log(e.getMessage());
                 }
-            }
         });
 
+
+        List<Attraction> restaurantList = fetchRestaurants(PlaceType.RESTAURANT, cityName, priceRange);
+        finalRes.addAll(restaurantList);
         List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
                 attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
                 collect(Collectors.toList());
-        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, cityName, priceRange));
+        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, restaurantList, cityName, priceRange));
 
+
+        return finalRes;
+    }
+
+
+    public List<Attraction> fetchRestaurants(PlaceType type, String cityName, PriceRange priceRange){
+        List<Attraction> res = new ArrayList<>();
+        Arrays.stream(PriceLevel.values()).filter(priceLevel -> !priceLevel.equals(PriceLevel.UNKNOWN)
+                && !priceLevel.equals(PriceLevel.FREE)).collect(Collectors.toList()).forEach(priceLevel ->
+            {
+                res.addAll(getAttractions(type, cityName, priceRange, priceLevel, true));
+                try {
+                    Thread.sleep(NEXT_PAGE_DELAY * 10);
+                } catch (InterruptedException e) {
+                    LogsManager.log(e.getMessage());
+                }
+            });
 
         return res;
     }
 
-    private List<Attraction> fetchRestaurantsByTopSights(List<Attraction> topSights, String cityName, PriceRange priceRange) {
+    private List<Attraction> fetchRestaurantsByTopSights(List<Attraction> topSights, List<Attraction> restaurantList,
+                                                         String cityName, PriceRange priceRange) {
         City theCity = getCity(cityName).orElse(null);
-        List<Attraction> mostVisitedTopSights = topSights.stream().
-                sorted(Comparator.comparingInt(attraction -> attraction.getUserRatingsTotal())).collect(Collectors.toList());
-        mostVisitedTopSights = mostVisitedTopSights.subList(mostVisitedTopSights.size() - 7, mostVisitedTopSights.size());
         List<Attraction> res = new ArrayList<>();
-        AtomicReference<Attraction> mostFarAttraction = new AtomicReference<>(mostVisitedTopSights.get(0));
-        AtomicReference<Double> currentDistance = new AtomicReference<>(calculateDistance(theCity, mostFarAttraction.get()));
-        AtomicReference<Double> maxDistance = new AtomicReference<>(currentDistance.get());
+        List<Attraction> isolatedAttractions = new ArrayList<>();
+        List<Attraction> mostVisitedTopSights = topSights.stream().
+                sorted(Comparator.comparingInt(Attraction::getUserRatingsTotal)).collect(Collectors.toList());
+        if(mostVisitedTopSights.size() > 7){
+            mostVisitedTopSights = mostVisitedTopSights.subList(mostVisitedTopSights.size() - 7, mostVisitedTopSights.size());
+        }
         mostVisitedTopSights.forEach(attraction -> {
-            currentDistance.set(calculateDistance(theCity, attraction));
-            if (currentDistance.get() > maxDistance.get()) {
-                mostFarAttraction.set(attraction);
-                maxDistance.set(currentDistance.get());
+            AtomicReference<Double> minDistanceFromRestaurant =
+                    new AtomicReference<>(DistanceCalculator.calculateDistance(attraction.getGeometry().location,
+                            restaurantList.get(0).getGeometry().location));
+            restaurantList.forEach(restaurant ->{
+                double currentDistance = DistanceCalculator.calculateDistance(attraction.getGeometry().location,
+                        restaurant.getGeometry().location);
+                if(currentDistance < minDistanceFromRestaurant.get()){
+                    minDistanceFromRestaurant.set(currentDistance);
+                }
+            });
+            if(minDistanceFromRestaurant.get() > 1){
+                isolatedAttractions.add(attraction);
             }
         });
-        Arrays.stream(PriceLevel.values()).filter(priceLevel ->
-                !priceLevel.equals(PriceLevel.UNKNOWN)).collect(Collectors.toList()).forEach(priceLevel -> {
-            res.addAll(getAttractionInNearBySearch(mostFarAttraction.get().getGeometry().location,
-                    new PriceRange(2), PlaceType.RESTAURANT, theCity, priceLevel));
-            try {
-                Thread.sleep(NEXT_PAGE_DELAY);
-            } catch (InterruptedException e) {
-                LogsManager.log(e.getMessage());
-            }
+        isolatedAttractions.forEach(attraction -> {
+            Arrays.stream(PriceLevel.values()).filter(priceLevel ->
+                    !priceLevel.equals(PriceLevel.UNKNOWN)
+                            && !priceLevel.equals(PriceLevel.FREE)).collect(Collectors.toList()).forEach(priceLevel -> {
+                res.addAll(getAttractionInNearBySearch(attraction.getGeometry().location,
+                        new PriceRange(2), PlaceType.RESTAURANT, theCity, priceLevel));
+                try {
+                    Thread.sleep(NEXT_PAGE_DELAY * 10);
+                } catch (InterruptedException e) {
+                    LogsManager.log(e.getMessage());
+                }
+            });
         });
 
         return res;
@@ -329,10 +348,8 @@ public class DataEngine implements Closeable {
         switch (type) {
             case SPA:
             case CASINO:
-                pageCountToGet = 2;
-                break;
-            case RESTAURANT:
-                pageCountToGet = 7;
+            case ZOO:
+                pageCountToGet = 1;
                 break;
         }
 

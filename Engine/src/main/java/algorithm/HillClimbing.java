@@ -592,8 +592,8 @@ public class HillClimbing {
             addAttraction(currentState);
         }
 
-//        Itinerary itinerary = currentState.getItinerary();
-//        Itinerary optimizedItinerary = optimize(itinerary);
+        Itinerary itinerary = currentState.getItinerary();
+        Itinerary optimizedItinerary = optimize(itinerary);
 
         return currentState.getItinerary();
     }

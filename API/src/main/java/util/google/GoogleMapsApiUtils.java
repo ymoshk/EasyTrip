@@ -1,10 +1,7 @@
 package util.google;
 
 import com.google.maps.*;
-import com.google.maps.model.LatLng;
-import com.google.maps.model.PlaceType;
-import com.google.maps.model.PriceLevel;
-import com.google.maps.model.TravelMode;
+import com.google.maps.model.*;
 import container.PriceRange;
 
 public class GoogleMapsApiUtils {
@@ -13,26 +10,25 @@ public class GoogleMapsApiUtils {
     public static TextSearchRequest getTextSearchRequest(GeoApiContext context, String attractionName, String cityName,
                                                          LatLng cityCenter, PriceRange priceRange, PlaceType type, PriceLevel priceLevel) {
         if(type.equals(PlaceType.GROCERY_OR_SUPERMARKET)) {
-            return PlacesApi.textSearchQuery(context, "market" + "+" + cityName).location(cityCenter).radius(RADIUS);
+            return PlacesApi.textSearchQuery(context, "market" + "+" + cityName);
         }
         // DOCTOR == BEACH
         else if(type.equals(PlaceType.DOCTOR)) {
-            return PlacesApi.textSearchQuery(context, "beach" + "+" + cityName).location(cityCenter).radius(RADIUS);
+            return PlacesApi.textSearchQuery(context, "beach" + "+" + cityName);
         }
         // ATM == TOP SIGHT
         else if(type.equals(PlaceType.ATM)) {
-            return PlacesApi.textSearchQuery(context, "top sights" + "+" + cityName).location(cityCenter).radius(RADIUS);
+            return PlacesApi.textSearchQuery(context, "top sights" + "+" + cityName);
         }
         //fetch amusement parks without a radius limit
         else if(type.equals(PlaceType.AMUSEMENT_PARK)){
             return PlacesApi.textSearchQuery(context, "amusement park" + "+" + cityName).type(type);
         }
         else if(type.equals(PlaceType.RESTAURANT)){
-            return PlacesApi.textSearchQuery(context, attractionName).type(type).location(cityCenter).radius(RADIUS).
-                    minPrice(priceLevel).maxPrice(priceLevel);
+            return PlacesApi.textSearchQuery(context, attractionName).type(type).minPrice(priceLevel).maxPrice(priceLevel);
         }
 
-        return PlacesApi.textSearchQuery(context, attractionName).type(type).location(cityCenter).radius(RADIUS);
+        return PlacesApi.textSearchQuery(context, attractionName).type(type);
     }
 
     public static TextSearchRequest getNextPageTextSearchRequest(GeoApiContext context, String pageToken) {
