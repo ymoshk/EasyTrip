@@ -56,6 +56,7 @@ public class HillClimbing {
         private final List<String> vibeTags;
         private final boolean hasFlight;
         private final LocalDateTime startVacationDateTime;
+        private final LocalDateTime endVacationTime;
 
         public ScheduleRestrictions(QuestionsData preferences, List<String> attractionTags, List<String> vibeTags) {
             initTimeConstraints(preferences, vibeTags);
@@ -76,6 +77,7 @@ public class HillClimbing {
             this.nightClubIncluded = attractionTags.contains("NIGHTCLUB");
             this.hasFlight = preferences.getFlight() != null;
             this.startVacationDateTime = initStartVacationDateTime(preferences);
+            this.endVacationTime = initEndVacationTime(preferences);
             initMealsRestrictions();
         }
 
@@ -91,6 +93,15 @@ public class HillClimbing {
             else{
                 this.scheduledLunch = false;
                 this.scheduledDinner = false;
+            }
+        }
+
+        private LocalDateTime initEndVacationTime(QuestionsData preferences){
+            if(hasFlight){
+                return preferences.getFlight().getDepartureFromDestination().minusHours(3);
+            }
+            else{
+                return preferences.getEndDate();
             }
         }
 
@@ -144,8 +155,13 @@ public class HillClimbing {
             }
         }
 
-        public LocalTime getEND_TIME() {
-            return END_TIME;
+        public LocalTime getEND_TIME(LocalDate currentDay) {
+            if(hasFlight && currentDay.isEqual(endVacationTime.toLocalDate())){
+                    return endVacationTime.toLocalTime();
+            }
+            else{
+                return END_TIME;
+            }
         }
 
         public boolean isAmusementParkIncluded() {
@@ -665,6 +681,10 @@ public class HillClimbing {
 
         if(preferences.getFlight() != null){
             addArrangementTimeAfterFlight(currentState);
+            // if the traveller arrives in destination in the following day
+            if(currentTime.toLocalDate().isBefore(scheduleRestrictions.getStartVacationDateTime().toLocalDate())){
+                currentTime = currentTime.plusDays(1);
+            }
         }
 
         // schedule attraction until vacation is over
@@ -871,11 +891,12 @@ public class HillClimbing {
         if(!scheduleRestrictions.isHasFlight()){
             currentState.getItinerary().addStartDayPadding(currentTime, currentTime.with(
                     scheduleRestrictions.getSTART_TIME(currentTime.toLocalDate())));
+            return;
         }
         // if it's arrival day, padding is already added
-        else if(!currentTime.toLocalDate().isEqual(scheduleRestrictions.getStartVacationDateTime().toLocalDate())){
-                currentState.getItinerary().addStartDayPadding(currentTime, currentTime.with(
-                        scheduleRestrictions.getSTART_TIME(currentTime.toLocalDate())));
+        if(!currentTime.toLocalDate().isEqual(scheduleRestrictions.getStartVacationDateTime().toLocalDate())){
+            currentState.getItinerary().addStartDayPadding(currentTime, currentTime.with(
+                    scheduleRestrictions.getSTART_TIME(currentTime.toLocalDate())));
         }
     }
 
@@ -926,8 +947,6 @@ public class HillClimbing {
 
             if(lastAttraction != null && moveToNextDay(transportationStartTime)){
                 resetNextDay();
-                // add padding to the end of the day
-                currentState.getItinerary().addFreeTime(transportationStartTime, transportationStartTime);
                 return lastAttraction;
             }
 
@@ -979,7 +998,12 @@ public class HillClimbing {
         if(!prevTime.toLocalDate().isEqual(currentTime.toLocalDate())){
             return true;
         }
-        else if(scheduleRestrictions.isFamilyTrip && currentTime.toLocalTime().isAfter(scheduleRestrictions.getEND_TIME())){
+        else if(scheduleRestrictions.isFamilyTrip && currentTime.toLocalTime().
+                isAfter(scheduleRestrictions.getEND_TIME(currentTime.toLocalDate()))){
+            currentTime = currentTime.plusDays(1);
+            return true;
+        }
+        else if(currentTime.toLocalTime().isAfter(scheduleRestrictions.getEND_TIME(currentTime.toLocalDate()))){
             currentTime = currentTime.plusDays(1);
             return true;
         }
