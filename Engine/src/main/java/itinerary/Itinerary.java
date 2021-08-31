@@ -122,6 +122,10 @@ public class Itinerary {
                 // add padding free time before flight
                 itineraryDay.getActivities().get(0).setEndTime(departureFromOrigin.format(DateTimeFormatter.ofPattern("HH:mm")));
             }
+            else{
+                // remove free time before flight
+                itineraryDay.getActivities().remove(0);
+            }
 
             // check if flight continues to the next day
             if(arrivalToDestination.toLocalDate().isAfter(departureFromOrigin.toLocalDate())){

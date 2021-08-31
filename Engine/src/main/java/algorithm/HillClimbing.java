@@ -669,6 +669,11 @@ public class HillClimbing {
         LocalDateTime startTime = preferences.getFlight().getArrivalToDestination();
         LocalDateTime endTime = preferences.getFlight().getArrivalToDestination().plusHours(3);
 
+        // if arrival is before the day starts don't add free time
+        if(preferences.getFlight().getArrivalToDestination().toLocalTime().isBefore(LocalTime.of(8,0,0))){
+            return;
+        }
+
         if(endTime.toLocalDate().isAfter(startTime.toLocalDate())){
             endTime = endTime.withHour(23).withMinute(59).withSecond(59);
         }
@@ -690,6 +695,10 @@ public class HillClimbing {
         // schedule attraction until vacation is over
         while(currentTime.isBefore(preferences.getEndDate())){
             addAttraction(currentState);
+
+            if(scheduleRestrictions.isHasFlight() && currentTime.isAfter(scheduleRestrictions.endVacationTime)){
+                break;
+            }
         }
 
         return currentState.getItinerary();
@@ -944,6 +953,11 @@ public class HillClimbing {
             attractionStartTime = currentTime;
             currentTime = currentTime.plusMinutes(attractionDurationMinutes);
             attractionEndTime = currentTime;
+
+            // end vacation in case the user has flight and it's time to go to the airport
+            if(scheduleRestrictions.isHasFlight() && currentTime.isAfter(scheduleRestrictions.endVacationTime)){
+                return lastAttraction;
+            }
 
             if(lastAttraction != null && moveToNextDay(transportationStartTime)){
                 resetNextDay();
