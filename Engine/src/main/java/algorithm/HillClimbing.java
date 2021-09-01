@@ -2,6 +2,7 @@ package algorithm;
 
 import com.google.maps.model.*;
 import connection.DataEngine;
+import constant.DefaultBeaches;
 import constant.DefaultDurations;
 import evaluators.AttractionEvaluator;
 import itinerary.ActivityNode;
@@ -629,8 +630,11 @@ public class HillClimbing {
     }
 
     private boolean addAttractionToHashMap(String attractionType){
+        if(attractionType.equalsIgnoreCase("Beach")){
+            return DefaultBeaches.cityHasBeach(preferences.getCity().getCityName());
+        }
         // Don't add hotels to itinerary
-        if(attractionType.equalsIgnoreCase("Hotel")){
+        else if(attractionType.equalsIgnoreCase("Hotel")){
             return false;
         }
         else if(!scheduleRestrictions.isFamilyTrip()){
@@ -1096,15 +1100,14 @@ public class HillClimbing {
         System.out.println("\n\n");
     }
 
-
     public static void main(String[] args) {
         try{
             String country, city;
             int adultsCount = 1, childrenCount, budget;
             List <String> attractionTripTags =
                     new ArrayList<>(Arrays.asList("Museum", "Amusement park", "Aquarium", "Art Gallery",
-                    "Bar", "Night Club", "Casino", "Park", "Shopping mall",
-                    "Zoo", "Spa", "Beach", "Market"));
+                            "Bar", "Night Club", "Casino", "Park", "Shopping mall",
+                            "Zoo", "Spa", "Beach", "Market"));
             List <String> vibeTripTags = new ArrayList<>();
 
             Scanner scanner = new Scanner(System.in);  // Create a Scanner object
@@ -1132,4 +1135,5 @@ public class HillClimbing {
             System.out.println(exception.getMessage());
         }
     }
+
 }
