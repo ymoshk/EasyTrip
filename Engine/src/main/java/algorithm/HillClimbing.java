@@ -72,7 +72,7 @@ public class HillClimbing {
             this.isFamilyTrip = preferences.getChildrenCount() > 0;
             this.attractionTags = attractionTags;
             this.vibeTags = vibeTags;
-            this.amusementParkIncluded = attractionTags.contains("AMUSEMENTPARK");
+            this.amusementParkIncluded = attractionTags.contains("AMUSEMENTPARK") || preferences.getChildrenCount() > 0;
             this.spaIncluded = attractionTags.contains("SPA");
             this.casinoIncluded = attractionTags.contains("CASINO");
             this.nightClubIncluded = attractionTags.contains("NIGHTCLUB");
