@@ -44,6 +44,25 @@ public class ItineraryCache implements Closeable {
         }
     }
 
+    public void removeItinerary(String id) {
+        this.memory.remove(id);
+        removeFromQueue(id);
+        DataEngine.getInstance().removeItinerary(id);
+    }
+
+    private void removeFromQueue(String id) {
+        Queue<Map.Entry<String, LocalTime>> newQueue = new LinkedList<>();
+
+        for (Map.Entry<String, LocalTime> entry : this.queue) {
+            if (!entry.getKey().equals(id)) {
+                newQueue.offer(entry);
+            }
+        }
+
+        this.queue.clear();
+        this.queue.addAll(newQueue);
+    }
+
     public void addNewItinerary(Itinerary itinerary, User user) {
         try {
             if (this.memory.size() >= CACHE_CAPACITY) {

@@ -30,7 +30,7 @@ public class RegistrationServlet extends HttpServlet {
         String userName = data.get("userName");
         String password = data.get("password");
         String name = data.get("name");
-        String sessionId = req.getSession(false).getId();
+        String sessionId = Utils.getSessionId(req);
 
         Optional<RegisteredUser> user = userContext.createRegisteredUser(sessionId, userName, password, name);
 

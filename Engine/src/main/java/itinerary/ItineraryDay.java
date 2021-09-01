@@ -57,39 +57,39 @@ public class ItineraryDay {
 //        System.out.println("\n\n");
     }
 
-    public void addTransportationTime(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type){
+    public void addTransportationTime(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type) {
         activities.add(new ActivityNode(startTime.toLocalTime(),
                 endTime.toLocalTime(),
                 type,
                 null));
-//        System.out.println("Transportation time");
-//        System.out.println("Start time: " +  startTime);
-//        System.out.println("End time: " +  endTime);
-//        System.out.println("\n\n");
+        //        System.out.println("Transportation time");
+        //        System.out.println("Start time: " +  startTime);
+        //        System.out.println("End time: " +  endTime);
+        //        System.out.println("\n\n");
     }
 
-    public void addFreeTime(LocalDateTime startTime, LocalDateTime endTime){
+    public void addFreeTime(LocalDateTime startTime, LocalDateTime endTime) {
         activities.add(new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FREE_TIME, null));
-//        System.out.println("Free time");
-//        System.out.println("Start time: " +  startTime);
-//        System.out.println("End time: " +  endTime);
-//        System.out.println("\n\n");
+        //        System.out.println("Free time");
+        //        System.out.println("Start time: " +  startTime);
+        //        System.out.println("End time: " +  endTime);
+        //        System.out.println("\n\n");
     }
 
-    public void addFlightTime(LocalDateTime startTime, LocalDateTime endTime){
+    public void addFlightTime(LocalDateTime startTime, LocalDateTime endTime) {
         activities.add(new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FLIGHT, null));
-//        System.out.println("Flight time");
-//        System.out.println("Start time: " + startTime);
-//        System.out.println("End time: " + endTime);
-//        System.out.println("\n\n");
+        //        System.out.println("Flight time");
+        //        System.out.println("Start time: " + startTime);
+        //        System.out.println("End time: " + endTime);
+        //        System.out.println("\n\n");
     }
 
-    public void addFlightTimeAtTheBeginning(LocalDateTime startTime, LocalDateTime endTime){
+    public void addFlightTimeAtTheBeginning(LocalDateTime startTime, LocalDateTime endTime) {
         activities.add(0, new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FLIGHT, null));
-//        System.out.println("Flight time");
-//        System.out.println("Start time: " + startTime);
-//        System.out.println("End time: " + endTime);
-//        System.out.println("\n\n");
+        //        System.out.println("Flight time");
+        //        System.out.println("Start time: " + startTime);
+        //        System.out.println("End time: " + endTime);
+        //        System.out.println("\n\n");
     }
 
     public void clean() {
@@ -99,5 +99,30 @@ public class ItineraryDay {
                 LocalTime.of(8, 0), ActivityNode.Types.FREE_TIME, null);
 
         this.activities.add(padding);
+    }
+
+    public void fixTransportationNodes() {
+        List<ActivityNode> list = new ArrayList<>();
+
+        for (int i = 0; i < this.getActivities().size() - 1; i++) {
+            if (this.getActivities().get(i).getType() == ActivityNode.Types.ATTRACTION ||
+                    this.getActivities().get(i).getType() == ActivityNode.Types.FREE_TIME ||
+                    this.getActivities().get(i).getType() == ActivityNode.Types.FLIGHT) {
+                list.add(this.getActivities().get(i));
+
+            } else {
+                ActivityNode paddingBefore = this.getActivities().get(i - 1);
+                ActivityNode transportation = this.getActivities().get(i);
+                ActivityNode paddingAfter = this.getActivities().get(i + 1);
+                ActivityNode nextActivity = this.getActivities().get(i + 2);
+
+                String activityNewStartTime = nextActivity.getStartTime();
+                //                LocalTime.parse(activityNewStartTime, )
+
+                paddingBefore.setEndTime(nextActivity.getStartTime());
+            }
+        }
+
+
     }
 }

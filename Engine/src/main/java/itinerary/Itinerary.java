@@ -165,11 +165,14 @@ public class Itinerary {
                 // trim flight end in itinerary
                 itineraryDay.addFlightTime(departureFromDestination,
                         departureFromDestination.withHour(23).withMinute(59).withSecond(0));
-            }
-            else{
+            } else {
                 itineraryDay.addFlightTime(departureFromDestination, arrivalToOrigin);
                 itineraryDay.addFreeTime(arrivalToOrigin, arrivalToOrigin);
             }
         }
+    }
+
+    public void fixTransportationNodes() {
+        this.getItineraryDays().forEach(day -> day.fixTransportationNodes());
     }
 }

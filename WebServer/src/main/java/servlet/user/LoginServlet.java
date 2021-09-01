@@ -28,7 +28,7 @@ public class LoginServlet extends HttpServlet {
 
         String userName = data.get("userName");
         String password = data.get("password");
-        String sessionId = req.getSession(false).getId();
+        String sessionId = Utils.getSessionId(req);
 
         Optional<RegisteredUser> user = userContext.login(sessionId, userName, password);
 

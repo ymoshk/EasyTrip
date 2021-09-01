@@ -30,7 +30,7 @@ public class QuestionsCompletedAuto extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req));
         UserContext userContext = (UserContext) req.getServletContext().getAttribute(Constants.USERS_CONTEXT);
-        User user = userContext.getUserBySessionId(req.getSession(false).getId());
+        User user = userContext.getUserBySessionId(Utils.getSessionId(req));
         resp.setStatus(500);
 
         try (PrintWriter out = resp.getWriter()) {
@@ -49,6 +49,7 @@ public class QuestionsCompletedAuto extends HttpServlet {
             itinerary.addReturnToItinerary();
 
             itinerary.setAttractions(itineraryBuilder.getAttractions());
+            itinerary.fixTransportationNodes();
 
             Gson gson = new Gson();
 

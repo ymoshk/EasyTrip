@@ -151,6 +151,7 @@ public class UserContext {
     }
 
     public boolean isItineraryOwner(String sessionId, String itineraryId) {
+        // TODO - process with a direct query to get a faster method
         User user = getUserBySessionId(sessionId);
 
         return user.getItineraryList()

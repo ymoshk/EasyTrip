@@ -6,6 +6,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Utils {
@@ -24,5 +25,14 @@ public class Utils {
 
     public static ServletContext getContext(HttpServletRequest req) {
         return req.getServletContext();
+    }
+
+    public static String getSessionId(HttpServletRequest req) {
+        return Arrays
+                .stream(req.getCookies())
+                .filter(cookie -> cookie.getName().equals("ET_SESSION"))
+                .findFirst()
+                .get()
+                .getValue();
     }
 }

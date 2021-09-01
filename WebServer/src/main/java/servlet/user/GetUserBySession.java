@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import constant.Constants;
 import model.user.User;
 import user.UserContext;
+import util.Utils;
 
 import javax.servlet.ServletContext;
 import javax.servlet.annotation.WebServlet;
@@ -21,7 +22,7 @@ public class GetUserBySession extends HttpServlet {
         UserContext userContext = (UserContext) context.getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
 
-        User loggedInUser = userContext.getUserBySessionId(req.getSession().getId());
+        User loggedInUser = userContext.getUserBySessionId(Utils.getSessionId(req));
 
         try (PrintWriter out = resp.getWriter()) {
             UserTypeTemplate userTypeTemplate = new UserTypeTemplate(loggedInUser);

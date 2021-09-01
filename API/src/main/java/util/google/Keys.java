@@ -7,17 +7,20 @@ public class Keys {
 
     private static final String saharApiKey = "AIzaSyA7J13fNA-XT138vseVyVOFmpQ7fhmiKyQ";
     private static final String barApiKey = "AIzaSyAYtKxi1-RER7t9mS_N3a74B94CDdIeaZY";
+    private static final String yotamApiKey = "AIzaSyCOYS4Gbzx80nW3GJyt35kWdafDhhP1jbM";
+
     private static final List<String> keys = new ArrayList<>();
     private static final int currentIndex = 0;
 
     static {
         keys.add(saharApiKey);
         keys.add(barApiKey);
+        keys.add(yotamApiKey);
     }
 
     public static String getKey(){
         //TODO - replace between the comment and the next line.
-        return saharApiKey;
+        return yotamApiKey;
 
         //        if (keys.isEmpty()) {
         //            throw new Exception("You must define at least one google API key.");

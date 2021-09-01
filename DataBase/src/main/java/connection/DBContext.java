@@ -35,7 +35,7 @@ class DBContext {
      * @param id         Represent the id of the requested object inside the DB - long int.
      * @return An 'optional' object contains the requested object or an empty value if nothing was found.
      */
-    Optional<Model> findById(Class<?> modelClass, long id) {
+    Optional<? extends Model> findById(Class<?> modelClass, long id) {
         Session sessionObj = SessionFactoryUtil.getInstance().getNewSession();
         Optional<Model> result = Optional.empty();
 

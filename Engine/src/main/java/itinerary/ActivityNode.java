@@ -6,7 +6,6 @@ import template.Attraction;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ActivityNode {
@@ -16,7 +15,9 @@ public class ActivityNode {
     private String endTime;
     private Attraction attraction;
     private String uniqueKey;
-    private Map<Types, Long> transDuration;
+    private final boolean showTransportationIcon; // For free time only
+    //    private Map<Types, Long> transDuration;
+    private TransportationObject transportation;
 
     public ActivityNode(LocalTime startTime, LocalTime endTime, Types type, Attraction attraction) {
         this.startTime = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -24,19 +25,20 @@ public class ActivityNode {
         this.type = type;
         this.attraction = attraction;
         this.uniqueKey = GUID.generate();
+        this.showTransportationIcon = false;
 
         if (type != Types.ATTRACTION && type != Types.FREE_TIME) {
-            this.transDuration = new HashMap<>();
+            //            this.transDuration = new HashMap<>();
         }
     }
 
-    public Map<Types, Long> getTransDuration() {
-        return transDuration;
-    }
+    //    public Map<Types, Long> getTransDuration() {
+    //        return transDuration;
+    //    }
 
-    public void setTransDuration(Map<Types, Long> transDuration) {
-        this.transDuration = transDuration;
-    }
+    //    public void setTransDuration(Map<Types, Long> transDuration) {
+    //        this.transDuration = transDuration;
+    //    }
 
     public String getUniqueKey() {
         return uniqueKey;
@@ -92,5 +94,16 @@ public class ActivityNode {
 
     public enum Types {
         FREE_TIME, CAR, BICYCLE, WALK, TRANSIT, ATTRACTION, FLIGHT
+    }
+
+    private static class TransportationObject {
+        private Map<Types, Long> data;
+        private Types type;
+        private sourceData sourceData;
+
+        private static class sourceData {
+            private double srcLng;
+            private double srcLat;
+        }
     }
 }

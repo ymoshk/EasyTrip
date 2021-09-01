@@ -226,39 +226,39 @@ public class DataEngine implements Closeable {
 
         List<Attraction> finalRes = res;
         types.forEach(type -> {
-                finalRes.addAll(getAttractions(type, cityName, priceRange, null, true));
-                try {
-                    Thread.sleep(NEXT_PAGE_DELAY * 10);
-                } catch (InterruptedException e) {
-                    LogsManager.log(e.getMessage());
-                }
+            finalRes.addAll(getAttractions(type, cityName, priceRange, null, true));
+            try {
+                Thread.sleep(NEXT_PAGE_DELAY * 10);
+            } catch (InterruptedException e) {
+                LogsManager.log(e.getMessage());
+            }
         });
 
 
         List<Attraction> restaurantList = fetchRestaurants(PlaceType.RESTAURANT, cityName, priceRange);
         finalRes.addAll(restaurantList);
-//        List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
-//                attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
-//                collect(Collectors.toList());
-//        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, restaurantList, cityName, priceRange));
+        //        List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
+        //                attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
+        //                collect(Collectors.toList());
+        //        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, restaurantList, cityName, priceRange));
 
 
         return finalRes;
     }
 
 
-    public List<Attraction> fetchRestaurants(PlaceType type, String cityName, PriceRange priceRange){
+    public List<Attraction> fetchRestaurants(PlaceType type, String cityName, PriceRange priceRange) {
         List<Attraction> res = new ArrayList<>();
         Arrays.stream(PriceLevel.values()).filter(priceLevel -> !priceLevel.equals(PriceLevel.UNKNOWN)
                 && !priceLevel.equals(PriceLevel.FREE)).collect(Collectors.toList()).forEach(priceLevel ->
-            {
-                res.addAll(getAttractions(type, cityName, priceRange, priceLevel, true));
-                try {
-                    Thread.sleep(NEXT_PAGE_DELAY * 10);
-                } catch (InterruptedException e) {
-                    LogsManager.log(e.getMessage());
-                }
-            });
+        {
+            res.addAll(getAttractions(type, cityName, priceRange, priceLevel, true));
+            try {
+                Thread.sleep(NEXT_PAGE_DELAY * 10);
+            } catch (InterruptedException e) {
+                LogsManager.log(e.getMessage());
+            }
+        });
 
         return res;
     }
@@ -270,21 +270,21 @@ public class DataEngine implements Closeable {
         List<Attraction> isolatedAttractions = new ArrayList<>();
         List<Attraction> mostVisitedTopSights = topSights.stream().
                 sorted(Comparator.comparingInt(Attraction::getUserRatingsTotal)).collect(Collectors.toList());
-        if(mostVisitedTopSights.size() > 7){
+        if (mostVisitedTopSights.size() > 7) {
             mostVisitedTopSights = mostVisitedTopSights.subList(mostVisitedTopSights.size() - 7, mostVisitedTopSights.size());
         }
         mostVisitedTopSights.forEach(attraction -> {
             AtomicReference<Double> minDistanceFromRestaurant =
                     new AtomicReference<>(DistanceCalculator.calculateDistance(attraction.getGeometry().location,
                             restaurantList.get(0).getGeometry().location));
-            restaurantList.forEach(restaurant ->{
+            restaurantList.forEach(restaurant -> {
                 double currentDistance = DistanceCalculator.calculateDistance(attraction.getGeometry().location,
                         restaurant.getGeometry().location);
-                if(currentDistance < minDistanceFromRestaurant.get()){
+                if (currentDistance < minDistanceFromRestaurant.get()) {
                     minDistanceFromRestaurant.set(currentDistance);
                 }
             });
-            if(minDistanceFromRestaurant.get() > 1){
+            if (minDistanceFromRestaurant.get() > 1) {
                 isolatedAttractions.add(attraction);
             }
         });
@@ -516,19 +516,18 @@ public class DataEngine implements Closeable {
         return res;
     }
 
-    public Travel getTravelFromApi(LatLng source, LatLng dest, TravelMode mode){
+    public Travel getTravelFromApi(LatLng source, LatLng dest, TravelMode mode) {
         Travel travel = null;
 
         DistanceMatrixElement distanceMatrixElement =
                 getDistanceMatrixElementFromGoogleApi(source, dest, mode);
 
-        if(distanceMatrixElement != null){
+        if (distanceMatrixElement != null) {
             travel = new Travel(source, dest, mode, distanceMatrixElement);
         }
 
         return travel;
     }
-
 
 
     private Travel getTravelFromDB(LatLng source, LatLng dest, TravelMode mode) {
@@ -660,6 +659,15 @@ public class DataEngine implements Closeable {
 
     public void updateUser(User user) {
         DBContext.getInstance().update(user);
+    }
+
+    public void removeItinerary(String id) {
+        List<ItineraryModel> itineraryModelList = (List<ItineraryModel>) DBContext.getInstance()
+                .selectQuery("FROM ItineraryModel WHERE itineraryId = '" + id + "'");
+
+        if (itineraryModelList.size() == 1) {
+            DBContext.getInstance().delete(itineraryModelList.get(0));
+        }
     }
 
     @Override
