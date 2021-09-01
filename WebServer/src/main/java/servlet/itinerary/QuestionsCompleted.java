@@ -33,7 +33,7 @@ public class QuestionsCompleted extends HttpServlet {
                 ItineraryCache cache = (ItineraryCache) req.getServletContext()
                         .getAttribute(Constants.ITINERARY_CACHE);
 
-                cache.addNewItinerary(itinerary, user);
+                cache.addNewItinerary(itinerary, user, false);
                 out.println(gson.toJson(itinerary.getItineraryId()));
             }
             resp.setStatus(200);

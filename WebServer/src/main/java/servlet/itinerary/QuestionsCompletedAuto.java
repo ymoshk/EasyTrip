@@ -49,14 +49,14 @@ public class QuestionsCompletedAuto extends HttpServlet {
             itinerary.addReturnToItinerary();
 
             itinerary.setAttractions(itineraryBuilder.getAttractions());
-            itinerary.fixTransportationNodes();
+//            itinerary.fixTransportationNodes();
 
             Gson gson = new Gson();
 
             ItineraryCache cache = (ItineraryCache) req.getServletContext()
                     .getAttribute(Constants.ITINERARY_CACHE);
 
-            cache.addNewItinerary(itinerary, user);
+            cache.addNewItinerary(itinerary, user, true);
             out.println(gson.toJson(itinerary.getItineraryId()));
             resp.setStatus(200);
         } catch (Exception ignore) {

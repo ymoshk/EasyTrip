@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import connection.DataEngine;
 import itinerary.Itinerary;
 import model.itinerary.ItineraryModel;
+import model.itinerary.ItineraryStatus;
 import model.user.User;
 
 import java.io.Closeable;
@@ -63,7 +64,7 @@ public class ItineraryCache implements Closeable {
         this.queue.addAll(newQueue);
     }
 
-    public void addNewItinerary(Itinerary itinerary, User user) {
+    public void addNewItinerary(Itinerary itinerary, User user, boolean isAuto) {
         try {
             if (this.memory.size() >= CACHE_CAPACITY) {
                 removeOldestItinerary();
@@ -74,7 +75,7 @@ public class ItineraryCache implements Closeable {
                     itinerary.getItineraryId(),
                     LocalTime.now()));
 
-            saveItinerary(itinerary, user);
+            saveItinerary(itinerary, user, isAuto);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -91,7 +92,7 @@ public class ItineraryCache implements Closeable {
                 itinerary = gson.fromJson(itineraryModel.getJsonData(), Itinerary.class);
 
                 if (itinerary != null) {
-                    this.addNewItinerary(itinerary, itineraryModel.getUser());
+                    this.addNewItinerary(itinerary, itineraryModel.getUser(), false);
                 }
             }
 
@@ -129,11 +130,17 @@ public class ItineraryCache implements Closeable {
         }
     }
 
-    private void saveItinerary(Itinerary itinerary, User user) {
+    private void saveItinerary(Itinerary itinerary, User user, boolean isAuto) {
         try {
             Gson gson = new Gson();
             ItineraryModel model = new ItineraryModel(itinerary.getItineraryId(),
                     gson.toJson(itinerary), user);
+
+            if (isAuto) {
+                model.setStatus(ItineraryStatus.AUTO_MODE);
+            } else {
+                model.setStatus(ItineraryStatus.EDIT);
+            }
 
             DataEngine.getInstance().saveItinerary(model);
         } catch (Exception ex) {
