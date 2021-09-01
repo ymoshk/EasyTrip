@@ -237,10 +237,10 @@ public class DataEngine implements Closeable {
 
         List<Attraction> restaurantList = fetchRestaurants(PlaceType.RESTAURANT, cityName, priceRange);
         finalRes.addAll(restaurantList);
-        List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
-                attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
-                collect(Collectors.toList());
-        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, restaurantList, cityName, priceRange));
+//        List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
+//                attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
+//                collect(Collectors.toList());
+//        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, restaurantList, cityName, priceRange));
 
 
         return finalRes;

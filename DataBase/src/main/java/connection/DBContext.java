@@ -112,17 +112,19 @@ class DBContext {
     void insertAll(Collection<? extends Model> modelCollection) {
         Transaction transaction;
 
-        try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
+
             for (Model model : modelCollection) {
+                try (Session sessionObj = SessionFactoryUtil.getInstance().getNewSession()) {
                 transaction = sessionObj.beginTransaction();
                 model.setCreateTime(LocalDateTime.now());
                 model.setUpdateTime(LocalDateTime.now());
                 sessionObj.save(model);
                 transaction.commit();
+                } catch (Exception ex) {
+                    LogsManager.logException(ex);
+                }
             }
-        } catch (Exception ex) {
-            LogsManager.logException(ex);
-        }
+
     }
 
     /**
