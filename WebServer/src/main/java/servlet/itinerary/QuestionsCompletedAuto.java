@@ -45,7 +45,7 @@ public class QuestionsCompletedAuto extends HttpServlet {
 
             // build itinerary
             state.getItinerary().addOutboundToItinerary();
-            Itinerary itinerary = hillClimbing.getItineraryWithHillClimbingAlgorithm(state, true);
+            Itinerary itinerary = hillClimbing.getItineraryWithHillClimbingAlgorithm(state, false, -1);
             itinerary.addReturnToItinerary();
 
             itinerary.setAttractions(itineraryBuilder.getAttractions());
