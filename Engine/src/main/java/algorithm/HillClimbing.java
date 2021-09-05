@@ -1,9 +1,11 @@
 package algorithm;
 
 import com.google.maps.model.*;
+import com.google.maps.model.Duration;
 import connection.DataEngine;
 import constant.DefaultBeaches;
 import constant.DefaultDurations;
+import distanceCalculator.DistanceCalculator;
 import evaluators.AttractionEvaluator;
 import itinerary.ActivityNode;
 import itinerary.Itinerary;
@@ -13,10 +15,8 @@ import model.attraction.Attraction;
 import model.location.City;
 import model.travel.Travel;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.sql.Timestamp;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,9 +29,6 @@ import java.util.stream.Collectors;
 //https://bigseventravel.com/most-visited-cities-in-europe/
 
 public class HillClimbing {
-
-
-    //TODO: fetch 10 cities & check them + Tel Aviv + Jerusalem
     static private class ScheduleRestrictions {
         private LocalTime START_TIME;
         private LocalTime END_TIME;
@@ -515,7 +512,7 @@ public class HillClimbing {
         removeAttractionDuplicationFromTouristAttraction();
         initTopSights(TOP_SIGHTS_NUM);
         removeDuplicateRestaurant();
-        this.hasCar = transportationTags.contains("Car");
+        this.hasCar = true; // transportationTags.contains("Car");
         //in seconds
         this.BREAK_TIME_FACTOR = calculateBreakTimeByTravelerType(vibeTags);
     }
@@ -685,7 +682,7 @@ public class HillClimbing {
         currentState.getItinerary().addFreeTime(startTime, endTime);
     }
 
-    public Itinerary getItineraryWithHillClimbingAlgorithm(State initState) {
+    public Itinerary getItineraryWithHillClimbingAlgorithm(State initState, boolean fetchTravelFromApi) {
         State currentState = initState;
 
         if(preferences.getFlight() != null){
@@ -698,7 +695,7 @@ public class HillClimbing {
 
         // schedule attraction until vacation is over
         while(currentTime.isBefore(preferences.getEndDate())){
-            addAttraction(currentState);
+            addAttraction(currentState, fetchTravelFromApi);
 
             if(scheduleRestrictions.isHasFlight() && currentTime.isAfter(scheduleRestrictions.endVacationTime)){
                 break;
@@ -832,22 +829,68 @@ public class HillClimbing {
         return maxAttraction;
     }
 
-    Travel getTransportationTime(Attraction attractionDestination){
+    long estimateDurationByDistance(double distance, TravelMode travelMode){
+        long seconds = 0;
+
+        switch(travelMode){
+            case WALKING:
+                seconds = (long) (distance * 12);
+                break;
+            case TRANSIT:
+                seconds = (long) (distance * 6);
+                break;
+            case DRIVING:
+                seconds = (long) (distance * 4);
+                break;
+        }
+
+        return seconds * 60;
+    }
+
+    Travel getTravelTime(Attraction attractionDestination, TravelMode travelMode, boolean fetchFromApi){
+        Travel travel;
+        DistanceMatrixElement distanceMatrixElement;
+        Duration duration;
+        double distance;
+
+        if(fetchFromApi){
+            travel = dataEngine.getTravelFromApi(
+                    lastAttraction.getGeometry().location,
+                    attractionDestination.getGeometry().location, travelMode);
+        }
+        else{
+            distanceMatrixElement = new DistanceMatrixElement();
+            duration = new Duration();
+            distance = DistanceCalculator.calculateDistance(lastAttraction.getGeometry().location,
+                    attractionDestination.getGeometry().location) * 1.5;  // multiply by factor absolute distance
+
+            duration.inSeconds = estimateDurationByDistance(distance, travelMode);
+
+            distanceMatrixElement.duration = duration;
+            distanceMatrixElement.duration.humanReadable = String.valueOf(duration.inSeconds / 60) + "mins";
+            distanceMatrixElement.distance = new Distance();
+            distanceMatrixElement.distance.humanReadable = String.valueOf(distance);
+            distanceMatrixElement.status = DistanceMatrixElementStatus.OK;
+
+            travel = new Travel(lastAttraction.getGeometry().location,
+                    attractionDestination.getGeometry().location,
+                    travelMode,
+                    distanceMatrixElement);
+        }
+
+        return travel;
+    }
+
+    Travel getTransportationTime(Attraction attractionDestination, boolean fetchTravelFromApi){
         // let assume the distance is walkable
-        Travel travel = dataEngine.getTravelFromApi(
-                lastAttraction.getGeometry().location,
-                attractionDestination.getGeometry().location, TravelMode.WALKING);
+        Travel travel = getTravelTime(attractionDestination, TravelMode.WALKING, fetchTravelFromApi);
 
         if(travel.getDistanceMatrixElement().duration.inSeconds > WALKABLE_TIME){
             if(hasCar){
-                travel = dataEngine.getTravelFromApi(
-                        lastAttraction.getGeometry().location,
-                        attractionDestination.getGeometry().location, TravelMode.DRIVING);
+                travel = getTravelTime(attractionDestination, TravelMode.DRIVING, fetchTravelFromApi);
             }
             else{
-                travel = dataEngine.getTravelFromApi(
-                        lastAttraction.getGeometry().location,
-                        attractionDestination.getGeometry().location, TravelMode.TRANSIT);
+                travel = getTravelTime(attractionDestination, TravelMode.TRANSIT, fetchTravelFromApi);
             }
         }
 
@@ -913,7 +956,7 @@ public class HillClimbing {
         }
     }
 
-    private Attraction addAttraction(State currentState) {
+    private Attraction addAttraction(State currentState, boolean fetchTravelFromApi) {
         List<Attraction> attractionList;
         Attraction attractionToAdd;
         Travel travelTime = null;   // because initialized inside if statement
@@ -937,7 +980,7 @@ public class HillClimbing {
             // exclude first attraction transportation time
             if(lastAttraction != null){
                 transportationStartTime = currentTime;
-                travelTime = getTransportationTime(attractionToAdd);
+                travelTime = getTransportationTime(attractionToAdd, fetchTravelFromApi);
                 if(travelTime.getDistanceMatrixElement().status.equals(DistanceMatrixElementStatus.OK)){
                     currentTime = currentTime.plusSeconds(travelTime.getDistanceMatrixElement().duration.inSeconds);
                 }
@@ -951,7 +994,7 @@ public class HillClimbing {
 
             //case of a big amusement park when spending there most of the day
             if(scheduleRestrictions.isAmusementParkIncluded() && addAmusementParkExtraTime(attractionToAdd)){
-                attractionDurationMinutes += 5 * 60;
+                attractionDurationMinutes += 4 * 60;
             }
 
             attractionStartTime = currentTime;
@@ -1102,6 +1145,7 @@ public class HillClimbing {
 
     public static void main(String[] args) {
         try{
+
             String country, city;
             int adultsCount = 1, childrenCount, budget;
             List <String> attractionTripTags =
@@ -1124,12 +1168,16 @@ public class HillClimbing {
                     childrenCount, budget, LocalDateTime.now().plusDays(0), LocalDateTime.now().plusDays(4), new ArrayList<>(),
                     new ArrayList<>(), new ArrayList<>(), null);
             DataEngine dataEngine = DataEngine.getInstance();
+
+            Timestamp tsBefore = Timestamp.from(Instant.now());
             List<Attraction> attractionList = questionsData.getCity().getAttractionList();
 
             HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
             State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
 
-            hillClimbing.getItineraryWithHillClimbingAlgorithm(state);
+            hillClimbing.getItineraryWithHillClimbingAlgorithm(state, false);
+            Timestamp tsAfter = Timestamp.from(Instant.now());
+            System.out.println("Run Time: " + ((tsAfter.getTime() - tsBefore.getTime()) / 1000));
 
         }catch (Exception exception){
             System.out.println(exception.getMessage());
