@@ -34,18 +34,17 @@ public class QuestionsCompletedAuto extends HttpServlet {
         resp.setStatus(500);
 
         try (PrintWriter out = resp.getWriter()) {
-            QuestionsData questionsData = itineraryBuilder.getQuestionsData();
+            Itinerary itinerary = itineraryBuilder.getItinerary();
             DataEngine dataEngine = DataEngine.getInstance();
 
             //shouldFetchAttraction = false since we don't want to fetch new attractions
-            List<Attraction> attractionList = dataEngine.getAttractions(questionsData.getCity().getCityName(),
+            List<Attraction> attractionList = dataEngine.getAttractions(itinerary.getQuestionsData().getCity().getCityName(),
                     new PriceRange(2), false);
-            HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
-            State state = new State(new Itinerary(new HashMap<>(), questionsData), 0.0);
+            HillClimbing hillClimbing = new HillClimbing(itinerary.getQuestionsData(), attractionList);
 
             // build itinerary
-            state.getItinerary().addOutboundToItinerary();
-            Itinerary itinerary = hillClimbing.getItineraryWithHillClimbingAlgorithm(state, false, -1);
+            itinerary.addOutboundToItinerary();
+            hillClimbing.getBestItinerary(itinerary);
             itinerary.addReturnToItinerary();
 
             itinerary.setAttractions(itineraryBuilder.getAttractions());

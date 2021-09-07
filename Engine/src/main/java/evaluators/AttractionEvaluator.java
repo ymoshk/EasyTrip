@@ -1,10 +1,12 @@
 package evaluators;
 
+import algorithm.State;
 import model.attraction.Attraction;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -135,9 +137,21 @@ public class AttractionEvaluator {
             return 100.0;
         }
         // user chose many tags - normalize scores
-       if( numberOfTags > 5){
+       if(numberOfTags > 5){
            numberOfTags = 5;
        }
+
+       if(attraction.getClass().getSimpleName().equalsIgnoreCase("Nightclub")){
+           if(attractionTags.contains(attraction.getClass().getSimpleName().toUpperCase())){
+               return 100.0;
+           }
+       }
+
+        if(attraction.getClass().getSimpleName().equalsIgnoreCase("Aquarium")){
+            if(attractionTags.contains(attraction.getClass().getSimpleName().toUpperCase())){
+                return 100.0;
+            }
+        }
 
         if (attraction.getClass().getSimpleName().equalsIgnoreCase("Museum")){
             if (attractionTags.contains("ART")){
@@ -288,13 +302,37 @@ public class AttractionEvaluator {
 
     }
 
-
     private static double customLog(double base, double logNumber) {
         return Math.log(logNumber) / Math.log(base);
     }
 
     public Attraction getTopAmusementPark() {
         return topAmusementPark;
+    }
+
+    private double calculateStateScore(State state, double avgDistance){
+        int distanceScore = state.getDistance() > avgDistance ? -1 : 1;
+
+        return state.getHeuristicValue()/state.getNumOfAttractions() + state.getPreferencesCnt() + distanceScore;
+    }
+
+    public int findBestState(List<State> stateList){
+        OptionalDouble avgDistance = stateList.stream().mapToDouble(State::getDistance).average();
+        int bestStateIndex = 0;
+        // TODO: check exception
+        double bestStateScore = calculateStateScore(stateList.get(0), avgDistance.getAsDouble());
+        double currentScore = 0;
+
+        for(int i = 1; i < stateList.size(); i++){
+            currentScore = calculateStateScore(stateList.get(i), avgDistance.getAsDouble());
+
+            if(currentScore > bestStateScore){
+                bestStateIndex = i;
+                bestStateScore = currentScore;
+            }
+        }
+
+        return bestStateIndex;
     }
 
     public static void main(String[] args) {
