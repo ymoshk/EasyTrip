@@ -6,6 +6,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,6 +18,11 @@ public class SessionFilter implements Filter {
                          FilterChain filterChain) throws IOException, ServletException {
 
         Cookie[] cookies = ((HttpServletRequest) request).getCookies();
+
+        if(cookies == null){
+            cookies = new Cookie[0];
+        }
+
         List<Cookie> cookieList = Arrays.asList(cookies);
 
         if (cookieList.stream().noneMatch(cookie -> cookie.getName().equals("ET_SESSION"))) {
