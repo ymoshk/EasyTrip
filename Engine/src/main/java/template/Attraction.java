@@ -29,6 +29,7 @@ public class Attraction {
     public String internationalNumber;
     public String website;
     public int priceLevel;
+    public double recommendedScore;
     public int minDurationAsSeconds;
 
     // TODO: check if null before using .get(), exception on line 43

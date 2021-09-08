@@ -11,9 +11,8 @@ import template.TripTag;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class ItineraryBuilderUtil {
@@ -72,11 +71,18 @@ public class ItineraryBuilderUtil {
             AttractionEvaluator attractionEvaluator = hillClimbing.getAttractionEvaluator();
             List<String> attractionTags = hillClimbing.getAttractionTags();
             List<String> vibeTags = hillClimbing.getVibeTags();
-            List<template.Attraction> attractionsTemplatesList = attractionList.stream()
-                    .map(attraction ->
-                        new template.Attraction(attraction,
-                                attractionEvaluator.isRecommended(attraction, attractionTags, vibeTags)))
-                    .collect(Collectors.toList());
+            List<template.Attraction> attractionsTemplatesList = new ArrayList<>();
+            attractionList.forEach(attraction ->{
+                Attraction attractionToAdd = new template.Attraction(attraction,false);
+                if(attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant")){
+                    attractionToAdd.recommendedScore = attractionEvaluator.getRecommendationScore(attraction, vibeTags);
+                    attractionToAdd.isRecommended = attractionEvaluator.isRecommended(attraction, vibeTags);
+                }else {
+                    attractionToAdd.recommendedScore = attractionEvaluator.evaluateAttraction(attraction);
+                }
+                attractionsTemplatesList.add(attractionToAdd);
+            });
+
 
             for (template.Attraction attraction : attractionsTemplatesList) {
                 if (!hashMap.containsKey(attraction.type)) {
@@ -85,6 +91,22 @@ public class ItineraryBuilderUtil {
 
                 hashMap.get(attraction.type).add(attraction);
             }
+
+            AtomicBoolean isPreferred = new AtomicBoolean(false);
+            hashMap.keySet().forEach(attractionType->{
+                List<Attraction> attractions = hashMap.get(attractionType);
+                attractions = attractions.stream().sorted(Comparator.comparingDouble(value ->
+                        value.recommendedScore)).collect(Collectors.toList());
+                Collections.reverse(attractions);
+                if(!attractionType.equalsIgnoreCase("Restaurant")){
+                    isPreferred.set(attractionTags.contains(attractionType.toUpperCase()));
+                    if(attractionType.equalsIgnoreCase("Museum")){
+                        isPreferred.set(attractionTags.contains("ART"));
+                    }
+                    attractionEvaluator.setRecommendedAttractions(attractions, isPreferred.get());
+                }
+                hashMap.put(attractionType, attractions);
+            });
 
             result = hashMap;
         }

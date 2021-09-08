@@ -1,7 +1,9 @@
 package evaluators;
 
 import algorithm.State;
+import distanceCalculator.DistanceCalculator;
 import model.attraction.Attraction;
+import model.location.City;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -278,27 +280,35 @@ public class AttractionEvaluator {
         return attractionToIndexMap.get(generateAttractionKey(attractionToAdd));
     }
 
-    public boolean isRecommended(Attraction attraction, List<String> attractionTags, List<String> vibeTags) {
-        if(!attractionToIndexMap.containsKey(attraction.getPlaceId())){
+    public void setRecommendedAttractions(List<template.Attraction> attractions, boolean isPreferred){
+        int listSize = attractions.size();
+        int percentageOfRecommended = isPreferred ? 5 : 10;
+        int recommendedIndex = listSize/percentageOfRecommended  == 0 ? 1: listSize/percentageOfRecommended;
+        for(int i = 0; i < recommendedIndex; i++){
+            attractions.get(i).isRecommended = true;
+        }
+
+    }
+
+    public boolean isRecommended(Attraction attraction, List<String> vibeTags) {
+        if(!attractionToIndexMap.containsKey(attraction.getPlaceId() + attraction.getClass().getSimpleName())){
             return false;
+        }
+        double score = getRecommendationScore(attraction, vibeTags);
+
+        return score > 90;
+    }
+
+    public double getRecommendationScore(Attraction attraction, List<String> vibeTags){
+        if(!attractionToIndexMap.containsKey(attraction.getPlaceId() + attraction.getClass().getSimpleName())){
+            return 0;
         }
         double ratingScore = evaluateByRating(attraction);
         double reviewsScore = evaluateByReviewsNumber(attraction);
-        double preferencesScore;
-        double finalScore;
-        if(attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant")){
-            preferencesScore = evaluateRestaurantByPreferences(attraction, vibeTags);
-            finalScore =  0.5 * reviewsScore + 0.3 * ratingScore + 0.2 * preferencesScore;
+        double preferencesScore = evaluateRestaurantByPreferences(attraction, vibeTags);
 
-            return finalScore > 80;
-        }
-        else{
-            preferencesScore = evaluateByUserPreferences(attraction, attractionTags);
-            finalScore =  0.5 * reviewsScore + 0.35 * ratingScore + 0.15 * preferencesScore;
 
-            return finalScore > 75;
-        }
-
+        return  0.4 * reviewsScore + 0.3 * ratingScore + 0.3 * preferencesScore;
 
     }
 
