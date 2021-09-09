@@ -117,15 +117,16 @@ public class AttractionEvaluator {
     }
 
     public double evaluateByReviewsNumber(Attraction attraction) {
-            double placeTypeStep = reviewsDataMap.get(attraction.getClass().getSimpleName()).step;
-            int attractionIndex = attractionToIndexMap.get(generateAttractionKey(attraction));
-            ReviewsData reviewsData = reviewsDataMap.get(attraction.getClass().getSimpleName());
+        // in case attraction isn't mapped, set 'placeTypeStep' & 'attractionIndex' to 0
+        ReviewsData reviewsData = reviewsDataMap.get(attraction.getClass().getSimpleName());
+        double placeTypeStep = reviewsData != null ? reviewsData.step : 0;
+        int attractionIndex = attractionToIndexMap.getOrDefault(generateAttractionKey(attraction), 0);
 
             // Give boost to attractions above average or median
-            if(attraction.getUserRatingsTotal() >= reviewsData.getAverageReviews()){
+            if(reviewsData != null && attraction.getUserRatingsTotal() >= reviewsData.getAverageReviews()){
                 return 0.85 * (placeTypeStep * attractionIndex) + 0.15 * 100;
             }
-            else if(attraction.getUserRatingsTotal() >= reviewsData.getMedianReviews()){
+            else if(reviewsData != null && attraction.getUserRatingsTotal() >= reviewsData.getMedianReviews()){
                 return 0.9 * (placeTypeStep * attractionIndex) + 0.1 * 100;
             }
 
