@@ -124,15 +124,15 @@ public class ItineraryDay {
 
                 long paddingBeforeDuration = getNodeDuration(paddingBefore);
                 long paddingAfterDuration = getNodeDuration(paddingAfter);
-                String newPaddingBeforeAndTime = timeStringToLocalTime(paddingBefore.getStartTime())
+                long transportationDuration = getNodeDuration(transportation);
+
+                String newPaddingBeforeEndTime = timeStringToLocalTime(paddingBefore.getStartTime())
                         .plusMinutes(paddingAfterDuration)
                         .plusMinutes(paddingBeforeDuration)
+                        .plusMinutes(transportationDuration)
                         .toString();
 
-                paddingBefore.setEndTime(newPaddingBeforeAndTime);
-
-
-                long transportationDuration = getNodeDuration(transportation);
+                paddingBefore.setEndTime(newPaddingBeforeEndTime);
 
                 String nextActivityStartTime = timeStringToLocalTime(nextActivity.getStartTime())
                         .minusMinutes(transportationDuration)

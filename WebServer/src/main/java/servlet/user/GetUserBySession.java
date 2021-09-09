@@ -22,7 +22,7 @@ public class GetUserBySession extends HttpServlet {
         UserContext userContext = (UserContext) context.getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
 
-        User loggedInUser = userContext.getUserBySessionId(Utils.getSessionId(req));
+        User loggedInUser = userContext.getUserBySessionId(Utils.getSessionId(req, resp));
 
         try (PrintWriter out = resp.getWriter()) {
             UserTypeTemplate userTypeTemplate = new UserTypeTemplate(loggedInUser);

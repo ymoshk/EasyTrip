@@ -73,7 +73,6 @@ public class UserContext {
      */
     private void grabAndRemoveGuest(RegisteredUser registeredUser, GuestUser guest) {
         DataEngine dataEngine = DataEngine.getInstance();
-        //        List<ItineraryModel> itineraryModelList = dataEngine.getUserItineraries(guest.getUserName());
         List<ItineraryModel> itineraryModelList = guest.getItineraryList();
         List<ItineraryModel> cloneList = new ArrayList<>();
 

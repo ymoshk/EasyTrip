@@ -25,7 +25,7 @@ public class CleanItinerary extends HttpServlet {
         res.setStatus(500);
 
         String id = data.get("id");
-        String sessionId = Utils.getSessionId(req);
+        String sessionId = Utils.getSessionId(req, res);
 
         if (!id.isEmpty()) {
             Itinerary itinerary = cache.getItinerary(id).orElse(null);

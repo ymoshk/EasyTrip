@@ -26,7 +26,7 @@ public class GetUserItineraries extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         UserContext userContext = (UserContext) Utils.getContext(req).getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
-        User user = userContext.getUserBySessionId(Utils.getSessionId(req));
+        User user = userContext.getUserBySessionId(Utils.getSessionId(req, resp));
 
 //        String userName = user.getUserName();
         try (PrintWriter out = resp.getWriter()) {

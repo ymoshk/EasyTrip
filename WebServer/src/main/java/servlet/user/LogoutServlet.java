@@ -23,7 +23,7 @@ public class LogoutServlet extends HttpServlet {
         UserContext userContext = (UserContext) context.getAttribute(Constants.USERS_CONTEXT);
         resp.setStatus(500);
 
-        String sessionId = Utils.getSessionId(req);
+        String sessionId = Utils.getSessionId(req, resp);
         GuestUser newUser = userContext.logout(sessionId);
 
         try (PrintWriter out = resp.getWriter()) {

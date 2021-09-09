@@ -27,7 +27,7 @@ public class QuestionsCompletedAuto extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req));
         UserContext userContext = (UserContext) req.getServletContext().getAttribute(Constants.USERS_CONTEXT);
-        User user = userContext.getUserBySessionId(Utils.getSessionId(req));
+        User user = userContext.getUserBySessionId(Utils.getSessionId(req, resp));
         resp.setStatus(500);
 
         try (PrintWriter out = resp.getWriter()) {
@@ -37,7 +37,7 @@ public class QuestionsCompletedAuto extends HttpServlet {
             //shouldFetchAttraction = false since we don't want to fetch new attractions
             List<Attraction> attractionList = dataEngine.getAttractions(itinerary.getQuestionsData().getCity().getCityName(),
                     new PriceRange(2), false);
-            HillClimbing hillClimbing = itineraryBuilder.getHillClimbing();
+            HillClimbing hillClimbing = new HillClimbing(itinerary.getQuestionsData(), attractionList);
 
             // build itinerary
             itinerary.addOutboundToItinerary();

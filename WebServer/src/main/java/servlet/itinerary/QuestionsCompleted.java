@@ -21,7 +21,7 @@ public class QuestionsCompleted extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         UserContext userContext = (UserContext) req.getServletContext().getAttribute(Constants.USERS_CONTEXT);
-        User user = userContext.getUserBySessionId(Utils.getSessionId(req));
+        User user = userContext.getUserBySessionId(Utils.getSessionId(req, resp));
         resp.setStatus(500);
 
         try (PrintWriter out = resp.getWriter()) {

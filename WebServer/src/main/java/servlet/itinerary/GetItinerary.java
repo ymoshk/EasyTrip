@@ -26,7 +26,7 @@ public class GetItinerary extends HttpServlet {
         HashMap<String, String> data = Utils.parsePostData(req);
 
         String id = data.get("id");
-        String sessionId = Utils.getSessionId(req);
+        String sessionId = Utils.getSessionId(req, res);
 
         //        if (userContext.isItineraryOwner(sessionId, id)) {
         res.setStatus(500);
