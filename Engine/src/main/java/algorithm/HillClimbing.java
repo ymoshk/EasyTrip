@@ -590,9 +590,9 @@ public class HillClimbing {
             transportationTags.add(tripTag.getTagName().replaceAll(" ", ""));
         });
 
-        attractionTags.forEach(System.out::println);
-        vibeTags.forEach(System.out::println);
-        transportationTags.forEach(System.out::println);
+//        attractionTags.forEach(System.out::println);
+//        vibeTags.forEach(System.out::println);
+//        transportationTags.forEach(System.out::println);
     }
 
     void removeDuplicateRestaurant(){
@@ -927,8 +927,8 @@ public class HillClimbing {
             }
         }
 
-        System.out.println(travel.getDistanceMatrixElement());
-        System.out.println(travel.getMode());
+//        System.out.println(travel.getDistanceMatrixElement());
+//        System.out.println(travel.getMode());
         return travel;
     }
 
@@ -1053,7 +1053,7 @@ public class HillClimbing {
             }
 
             if(lastAttraction != null) {
-                System.out.println(calculateDistance(lastAttraction, attractionToAdd));
+//                System.out.println(calculateDistance(lastAttraction, attractionToAdd));
                 if(travelTime.getDistanceMatrixElement().status.equals(DistanceMatrixElementStatus.OK)){
                     currentState.getItinerary().addTransportation(transportationStartTime, transportationEndTime,
                             ActivityNode.googleTravelToActivityType(travelTime.getMode()));
@@ -1228,13 +1228,13 @@ public class HillClimbing {
             stateList.add(state);
 
             resetState();
-            System.out.println("-----------------------------------------Break----------------------------------------");
+//            System.out.println("-----------------------------------------Break----------------------------------------");
         }
 
-        stateList.forEach(System.out::println);
+//        stateList.forEach(System.out::println);
         bestItineraryIndex = attractionEvaluator.findBestState(stateList);
 
-        System.out.println(stateList.get(bestItineraryIndex));
+//        System.out.println(stateList.get(bestItineraryIndex));
 
         // build itinerary with API and best attraction as first one
         state = new State(itinerary);

@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class ItineraryBuilderUtil {
     private final QuestionsData questionsData;
     private final HashMap<String, List<template.Attraction>> attractions;
+    private HillClimbing hillClimbing;
 
     public ItineraryBuilderUtil(HashMap<String, String> questionnaireData) {
         this.questionsData = parseQuestionsData(questionnaireData);
@@ -67,10 +68,11 @@ public class ItineraryBuilderUtil {
             List<model.attraction.Attraction> attractionList = dataEngine.
                     getAttractions(questionsData.getCity().getCityName(),
                     new PriceRange(2), false);
-            HillClimbing hillClimbing = new HillClimbing(questionsData, attractionList);
-            AttractionEvaluator attractionEvaluator = hillClimbing.getAttractionEvaluator();
-            List<String> attractionTags = hillClimbing.getAttractionTags();
-            List<String> vibeTags = hillClimbing.getVibeTags();
+            // save hill climbing as class member in order to reuse
+            this.hillClimbing = new HillClimbing(questionsData, attractionList);
+            AttractionEvaluator attractionEvaluator = this.hillClimbing.getAttractionEvaluator();
+            List<String> attractionTags = this.hillClimbing.getAttractionTags();
+            List<String> vibeTags = this.hillClimbing.getVibeTags();
             List<template.Attraction> attractionsTemplatesList = new ArrayList<>();
             attractionList.forEach(attraction ->{
                 Attraction attractionToAdd = new template.Attraction(attraction,false);
@@ -120,5 +122,9 @@ public class ItineraryBuilderUtil {
 
     public HashMap<String, List<Attraction>>getAttractions () {
         return attractions;
+    }
+
+    public HillClimbing getHillClimbing() {
+        return hillClimbing;
     }
 }

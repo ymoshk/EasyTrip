@@ -40,7 +40,7 @@ public class QuestionsCompletedAuto extends HttpServlet {
             //shouldFetchAttraction = false since we don't want to fetch new attractions
             List<Attraction> attractionList = dataEngine.getAttractions(itinerary.getQuestionsData().getCity().getCityName(),
                     new PriceRange(2), false);
-            HillClimbing hillClimbing = new HillClimbing(itinerary.getQuestionsData(), attractionList);
+            HillClimbing hillClimbing = itineraryBuilder.getHillClimbing();
 
             // build itinerary
             itinerary.addOutboundToItinerary();
