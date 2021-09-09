@@ -173,6 +173,6 @@ public class Itinerary {
     }
 
     public void fixTransportationNodes() {
-        this.getItineraryDays().forEach(day -> day.fixTransportationNodes());
+        this.getItineraryDays().forEach(ItineraryDay::fixTransportationNodes);
     }
 }

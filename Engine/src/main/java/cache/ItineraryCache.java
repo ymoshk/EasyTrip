@@ -187,6 +187,13 @@ public class ItineraryCache implements Closeable {
         return result;
     }
 
+    public void updateItineraryStatus(String id, ItineraryStatus status) {
+        DataEngine dataEngine = DataEngine.getInstance();
+        ItineraryModel itineraryModel = dataEngine.getItinerary(id);
+        itineraryModel.setStatus(status);
+        dataEngine.updateItinerary(itineraryModel);
+    }
+
     @Override
     public void close() {
         this.timer.purge();

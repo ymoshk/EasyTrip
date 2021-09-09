@@ -1,7 +1,6 @@
 package servlet.itinerary;
 
 import algorithm.HillClimbing;
-import algorithm.State;
 import cache.ItineraryCache;
 import com.google.gson.Gson;
 import connection.DataEngine;
@@ -9,7 +8,6 @@ import constant.Constants;
 import container.PriceRange;
 import itinerary.Itinerary;
 import itinerary.ItineraryBuilderUtil;
-import itinerary.QuestionsData;
 import model.attraction.Attraction;
 import model.user.User;
 import user.UserContext;
@@ -21,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.List;
 
 @WebServlet("/api/completeQuestionsAuto")
@@ -48,7 +45,7 @@ public class QuestionsCompletedAuto extends HttpServlet {
             itinerary.addReturnToItinerary();
 
             itinerary.setAttractions(itineraryBuilder.getAttractions());
-//            itinerary.fixTransportationNodes();
+            itinerary.fixTransportationNodes();
 
             Gson gson = new Gson();
 

@@ -6,16 +6,17 @@ import template.Attraction;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ActivityNode {
 
+    private final boolean showTransportationIcon; // For free time only
     private Types type;
     private String startTime;
     private String endTime;
     private Attraction attraction;
     private String uniqueKey;
-    private final boolean showTransportationIcon; // For free time only
     //    private Map<Types, Long> transDuration;
     private TransportationObject transportation;
 
@@ -32,13 +33,29 @@ public class ActivityNode {
         }
     }
 
-    //    public Map<Types, Long> getTransDuration() {
-    //        return transDuration;
-    //    }
+    public static Types googleTravelToActivityType(TravelMode travelMode) {
+        if (travelMode.equals(TravelMode.WALKING)) {
+            return Types.WALK;
+        } else if (travelMode.equals(TravelMode.DRIVING)) {
+            return Types.CAR;
+        } else if (travelMode.equals(TravelMode.TRANSIT)) {
+            return Types.TRANSIT;
+        } else {
+            return Types.BICYCLE;
+        }
+    }
 
-    //    public void setTransDuration(Map<Types, Long> transDuration) {
-    //        this.transDuration = transDuration;
-    //    }
+    public boolean isShowTransportationIcon() {
+        return showTransportationIcon;
+    }
+
+    public TransportationObject getTransportation() {
+        return transportation;
+    }
+
+    public void setTransportation(Types type, HashMap<Types, Long> durations, double srcLng, double srcLat) {
+        this.transportation = new TransportationObject(type, durations, srcLng, srcLat);
+    }
 
     public String getUniqueKey() {
         return uniqueKey;
@@ -80,30 +97,57 @@ public class ActivityNode {
         this.endTime = endTime;
     }
 
-    public static Types googleTravelToActivityType(TravelMode travelMode) {
-        if (travelMode.equals(TravelMode.WALKING)) {
-            return Types.WALK;
-        } else if (travelMode.equals(TravelMode.DRIVING)) {
-            return Types.CAR;
-        } else if (travelMode.equals(TravelMode.TRANSIT)) {
-            return Types.TRANSIT;
-        } else {
-            return Types.BICYCLE;
-        }
-    }
-
     public enum Types {
         FREE_TIME, CAR, BICYCLE, WALK, TRANSIT, ATTRACTION, FLIGHT
     }
 
     private static class TransportationObject {
+        private final Types type;
         private Map<Types, Long> data;
-        private Types type;
         private sourceData sourceData;
 
+        public TransportationObject(Types type, Map<Types, Long> data, double srcLng, double srcLat) {
+            this.type = type;
+            this.data = data;
+            this.sourceData = new sourceData(srcLng, srcLat);
+        }
+
+        public Types getType() {
+            return type;
+        }
+
+        public Map<Types, Long> getData() {
+            return data;
+        }
+
+        public void setData(Map<Types, Long> data) {
+            this.data = data;
+        }
+
+        public TransportationObject.sourceData getSourceData() {
+            return sourceData;
+        }
+
+        public void setSourceData(TransportationObject.sourceData sourceData) {
+            this.sourceData = sourceData;
+        }
+
         private static class sourceData {
-            private double srcLng;
-            private double srcLat;
+            private final double srcLng;
+            private final double srcLat;
+
+            public sourceData(double srcLng, double srcLat) {
+                this.srcLng = srcLng;
+                this.srcLat = srcLat;
+            }
+
+            public double getSrcLng() {
+                return srcLng;
+            }
+
+            public double getSrcLat() {
+                return srcLat;
+            }
         }
     }
 }
