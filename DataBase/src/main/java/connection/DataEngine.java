@@ -237,10 +237,10 @@ public class DataEngine implements Closeable {
 
         List<Attraction> restaurantList = fetchRestaurants(PlaceType.RESTAURANT, cityName, priceRange);
         finalRes.addAll(restaurantList);
-        //        List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
-        //                attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
-        //                collect(Collectors.toList());
-        //        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, restaurantList, cityName, priceRange));
+                List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
+                        attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
+                        collect(Collectors.toList());
+                finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, cityName));
 
 
         return finalRes;
@@ -263,32 +263,15 @@ public class DataEngine implements Closeable {
         return res;
     }
 
-    private List<Attraction> fetchRestaurantsByTopSights(List<Attraction> topSights, List<Attraction> restaurantList,
-                                                         String cityName, PriceRange priceRange) {
+    public List<Attraction> fetchRestaurantsByTopSights(List<Attraction> topSights, String cityName) {
         City theCity = getCity(cityName).orElse(null);
         List<Attraction> res = new ArrayList<>();
-        List<Attraction> isolatedAttractions = new ArrayList<>();
         List<Attraction> mostVisitedTopSights = topSights.stream().
                 sorted(Comparator.comparingInt(Attraction::getUserRatingsTotal)).collect(Collectors.toList());
         if (mostVisitedTopSights.size() > 7) {
             mostVisitedTopSights = mostVisitedTopSights.subList(mostVisitedTopSights.size() - 7, mostVisitedTopSights.size());
         }
         mostVisitedTopSights.forEach(attraction -> {
-            AtomicReference<Double> minDistanceFromRestaurant =
-                    new AtomicReference<>(DistanceCalculator.calculateDistance(attraction.getGeometry().location,
-                            restaurantList.get(0).getGeometry().location));
-            restaurantList.forEach(restaurant -> {
-                double currentDistance = DistanceCalculator.calculateDistance(attraction.getGeometry().location,
-                        restaurant.getGeometry().location);
-                if (currentDistance < minDistanceFromRestaurant.get()) {
-                    minDistanceFromRestaurant.set(currentDistance);
-                }
-            });
-            if (minDistanceFromRestaurant.get() > 1) {
-                isolatedAttractions.add(attraction);
-            }
-        });
-        isolatedAttractions.forEach(attraction -> {
             Arrays.stream(PriceLevel.values()).filter(priceLevel ->
                     !priceLevel.equals(PriceLevel.UNKNOWN)
                             && !priceLevel.equals(PriceLevel.FREE)).collect(Collectors.toList()).forEach(priceLevel -> {
@@ -302,6 +285,7 @@ public class DataEngine implements Closeable {
             });
         });
 
+        DBContext.getInstance().insertAll(res);
         return res;
     }
 
@@ -419,7 +403,7 @@ public class DataEngine implements Closeable {
         try {
             int i = 0;
             context = new GeoApiContext.Builder().apiKey(Keys.getKey()).build();
-            PlacesSearchResponse resp = GoogleMapsApiUtils.getNearByPlaces(context, location).await();
+            PlacesSearchResponse resp = GoogleMapsApiUtils.getNearByPlaces(context, location, priceLevel).await();
             do {
                 GeoApiContext finalContext = context;
                 Arrays.stream(resp.results)
