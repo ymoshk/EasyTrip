@@ -129,7 +129,6 @@ public class ItineraryDay {
                 String newPaddingBeforeEndTime = timeStringToLocalTime(paddingBefore.getStartTime())
                         .plusMinutes(paddingAfterDuration)
                         .plusMinutes(paddingBeforeDuration)
-                        .plusMinutes(transportationDuration)
                         .toString();
 
                 paddingBefore.setEndTime(newPaddingBeforeEndTime);
