@@ -640,7 +640,7 @@ public class HillClimbing {
         filteredAttraction.forEach(attraction -> System.out.println(attraction.getName()));
         System.out.println("--------------------------------------------");
 
-        placeTypeToAttraction.remove("TopSight");
+//        placeTypeToAttraction.remove("TopSight");
         Collections.reverse(filteredAttraction);
         return filteredAttraction;
     }
