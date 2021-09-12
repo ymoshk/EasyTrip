@@ -124,7 +124,8 @@ public class Itinerary {
             }
             else{
                 // remove free time before flight
-                itineraryDay.getActivities().remove(0);
+//                itineraryDay.getActivities().remove(0);
+                departureFromOrigin = departureFromOrigin.withHour(8).withMinute(0).withSecond(0);
             }
 
             // check if flight continues to the next day
@@ -135,8 +136,11 @@ public class Itinerary {
 
                 itineraryDay = getItineraryDay(arrivalToDestination.toLocalDate());
 
-                itineraryDay.addFlightTimeAtTheBeginning(arrivalToDestination.withHour(0).withMinute(0).withSecond(0),
-                        arrivalToDestination);
+                if(arrivalToDestination.toLocalTime().isAfter(LocalTime.of(8,0,0))){
+                    // add padding free time before flight
+                    itineraryDay.addFlightTimeAtTheBeginning(arrivalToDestination.withHour(8).withMinute(0).withSecond(0),
+                            arrivalToDestination);
+                }
             }
             else{
                 itineraryDay.addFlightTime(departureFromOrigin, arrivalToDestination);

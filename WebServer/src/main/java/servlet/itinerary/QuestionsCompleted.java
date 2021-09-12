@@ -27,6 +27,8 @@ public class QuestionsCompleted extends HttpServlet {
         try (PrintWriter out = resp.getWriter()) {
             ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req));
             Itinerary itinerary = itineraryBuilder.getItinerary();
+            itinerary.addOutboundToItinerary();
+            itinerary.addReturnToItinerary();
             Gson gson = new Gson();
 
             if (itinerary != null) {

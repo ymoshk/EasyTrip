@@ -690,14 +690,27 @@ public class HillClimbing {
 
     private HashMap<String, List<Attraction>> attractionListToAttractionHashMap(List<Attraction> attractionList){
         HashMap<String, List<Attraction>> res = new HashMap<>();
+        String attractionSimpleName;
 
-        attractionList.stream().filter(attraction -> addAttractionToHashMap(attraction.getClass().getSimpleName())).
-                forEach(attraction -> {
-                    if(!res.containsKey(attraction.getClass().getSimpleName()))
-                        res.put(attraction.getClass().getSimpleName(), new ArrayList<>());
+        for(Attraction attraction : attractionList){
+            attractionSimpleName = attraction.getClass().getSimpleName();
 
-                    res.get(attraction.getClass().getSimpleName()).add(attraction);
-        });
+            if(addAttractionToHashMap(attractionSimpleName)){
+                if(!res.containsKey(attractionSimpleName)){
+                    res.put(attractionSimpleName, new ArrayList<>());
+                }
+
+                res.get(attractionSimpleName).add(attraction);
+            }
+        }
+
+//        attractionList.stream().filter(attraction -> addAttractionToHashMap(attraction.getClass().getSimpleName())).
+//                forEach(attraction -> {
+//                    if(!res.containsKey(attraction.getClass().getSimpleName()))
+//                        res.put(attraction.getClass().getSimpleName(), new ArrayList<>());
+//
+//                    res.get(attraction.getClass().getSimpleName()).add(attraction);
+//        });
 
         return res;
     }
@@ -712,7 +725,7 @@ public class HillClimbing {
         }
 
         if(endTime.toLocalDate().isAfter(startTime.toLocalDate())){
-            endTime = endTime.withHour(23).withMinute(59).withSecond(59);
+            endTime = endTime.withHour(23).withMinute(59).withSecond(0);
         }
 
         currentState.getItinerary().addFreeTime(startTime, endTime);
