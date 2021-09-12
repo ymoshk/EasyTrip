@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class ItineraryBuilderUtil {
     private final QuestionsData questionsData;
-    private final HashMap<String, List<template.Attraction>> attractions;
+    private HashMap<String, List<template.Attraction>> attractions;
     private HillClimbing hillClimbing;
 
     public ItineraryBuilderUtil(HashMap<String, String> questionnaireData) {
@@ -25,8 +25,17 @@ public class ItineraryBuilderUtil {
         this.attractions = generateAttractionsDictionary();
     }
 
+    public ItineraryBuilderUtil(HashMap<String, String> questionnaireData, boolean isAuto) {
+        this.questionsData = parseQuestionsData(questionnaireData);
+        this.attractions = null;
+    }
+
     public QuestionsData getQuestionsData() {
         return questionsData;
+    }
+
+    public void fillAttraction() {
+        this.attractions = generateAttractionsDictionary();
     }
 
     private QuestionsData parseQuestionsData(HashMap<String, String> questionnaireData) {
@@ -51,7 +60,7 @@ public class ItineraryBuilderUtil {
         List<TripTag> tripVibes = (List<TripTag>) gson.fromJson(questionnaireData.get("tripVibes"), List.class)
                 .stream().map(data -> new TripTag((LinkedTreeMap<String, Object>) data)).collect(Collectors.toList());
 
-        if(!questionnaireData.get("flight").equals("{}")){
+        if (!questionnaireData.get("flight").equals("{}")) {
             flight = gson.fromJson(questionnaireData.get("flight"), template.Flight.class);
         }
 
@@ -67,19 +76,19 @@ public class ItineraryBuilderUtil {
             DataEngine dataEngine = DataEngine.getInstance();
             List<model.attraction.Attraction> attractionList = dataEngine.
                     getAttractions(questionsData.getCity().getCityName(),
-                    new PriceRange(2), false);
+                            new PriceRange(2), false);
             // save hill climbing as class member in order to reuse
             this.hillClimbing = new HillClimbing(questionsData, attractionList);
             AttractionEvaluator attractionEvaluator = this.hillClimbing.getAttractionEvaluator();
             List<String> attractionTags = this.hillClimbing.getAttractionTags();
             List<String> vibeTags = this.hillClimbing.getVibeTags();
             List<template.Attraction> attractionsTemplatesList = new ArrayList<>();
-            attractionList.forEach(attraction ->{
-                Attraction attractionToAdd = new template.Attraction(attraction,false);
-                if(attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant")){
+            attractionList.forEach(attraction -> {
+                Attraction attractionToAdd = new template.Attraction(attraction, false);
+                if (attraction.getClass().getSimpleName().equalsIgnoreCase("Restaurant")) {
                     attractionToAdd.recommendedScore = attractionEvaluator.getRecommendationScore(attraction, vibeTags);
                     attractionToAdd.isRecommended = attractionEvaluator.isRecommended(attraction, vibeTags);
-                }else {
+                } else {
                     attractionToAdd.recommendedScore = attractionEvaluator.evaluateAttraction(attraction);
                 }
                 attractionsTemplatesList.add(attractionToAdd);
@@ -95,14 +104,14 @@ public class ItineraryBuilderUtil {
             }
 
             AtomicBoolean isPreferred = new AtomicBoolean(false);
-            hashMap.keySet().forEach(attractionType->{
+            hashMap.keySet().forEach(attractionType -> {
                 List<Attraction> attractions = hashMap.get(attractionType);
                 attractions = attractions.stream().sorted(Comparator.comparingDouble(value ->
                         value.recommendedScore)).collect(Collectors.toList());
                 Collections.reverse(attractions);
-                if(!attractionType.equalsIgnoreCase("Restaurant")){
+                if (!attractionType.equalsIgnoreCase("Restaurant")) {
                     isPreferred.set(attractionTags.contains(attractionType.toUpperCase()));
-                    if(attractionType.equalsIgnoreCase("Museum")){
+                    if (attractionType.equalsIgnoreCase("Museum")) {
                         isPreferred.set(attractionTags.contains("ART"));
                     }
                     attractionEvaluator.setRecommendedAttractions(attractions, isPreferred.get());
@@ -120,7 +129,7 @@ public class ItineraryBuilderUtil {
         return new Itinerary(this.attractions, this.questionsData);
     }
 
-    public HashMap<String, List<Attraction>>getAttractions () {
+    public HashMap<String, List<Attraction>> getAttractions() {
         return attractions;
     }
 
