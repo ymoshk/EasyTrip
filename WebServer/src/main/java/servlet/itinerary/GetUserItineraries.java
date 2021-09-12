@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,10 +29,14 @@ public class GetUserItineraries extends HttpServlet {
         resp.setStatus(500);
         User user = userContext.getUserBySessionId(Utils.getSessionId(req, resp));
 
-//        String userName = user.getUserName();
+        //        String userName = user.getUserName();
         try (PrintWriter out = resp.getWriter()) {
             //            List<ItineraryModel> itineraries = DataEngine.getInstance().getUserItineraries(userName);
             List<ItineraryModel> itineraries = user.getItineraryList();
+
+            if (itineraries == null) {
+                itineraries = new ArrayList<>();
+            }
 
             List<ItineraryAndStatus> res =
                     itineraries.stream().
@@ -45,7 +50,6 @@ public class GetUserItineraries extends HttpServlet {
         } catch (Exception e) {
             LogsManager.logException(e);
         }
-
     }
 
     private static class ItineraryAndStatus {

@@ -9,6 +9,7 @@ import container.PriceRange;
 import itinerary.Itinerary;
 import itinerary.ItineraryBuilderUtil;
 import model.attraction.Attraction;
+import model.itinerary.ItineraryStatus;
 import model.user.User;
 import user.UserContext;
 import util.Utils;
@@ -25,37 +26,42 @@ import java.util.List;
 public class QuestionsCompletedAuto extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req));
+        ItineraryBuilderUtil itineraryBuilder = new ItineraryBuilderUtil(Utils.parsePostData(req), true);
         UserContext userContext = (UserContext) req.getServletContext().getAttribute(Constants.USERS_CONTEXT);
         User user = userContext.getUserBySessionId(Utils.getSessionId(req, resp));
         resp.setStatus(500);
 
         try (PrintWriter out = resp.getWriter()) {
             Itinerary itinerary = itineraryBuilder.getItinerary();
-            DataEngine dataEngine = DataEngine.getInstance();
-
-            //shouldFetchAttraction = false since we don't want to fetch new attractions
-            List<Attraction> attractionList = dataEngine.getAttractions(itinerary.getQuestionsData().getCity().getCityName(),
-                    new PriceRange(2), false);
-            HillClimbing hillClimbing = new HillClimbing(itinerary.getQuestionsData(), attractionList);
-
-            // build itinerary
-            itinerary.addOutboundToItinerary();
-            hillClimbing.getBestItinerary(itinerary);
-            itinerary.addReturnToItinerary();
-
-            itinerary.setAttractions(itineraryBuilder.getAttractions());
-            itinerary.fixTransportationNodes();
+            ItineraryCache cache = (ItineraryCache) req.getServletContext().getAttribute(Constants.ITINERARY_CACHE);
+            cache.addNewItinerary(itinerary, user, true);
 
             Gson gson = new Gson();
-
-            ItineraryCache cache = (ItineraryCache) req.getServletContext()
-                    .getAttribute(Constants.ITINERARY_CACHE);
-
-            cache.addNewItinerary(itinerary, user, true);
             out.println(gson.toJson(itinerary.getItineraryId()));
             resp.setStatus(200);
+            Thread thread = new Thread(() -> threadUtil(itinerary, itineraryBuilder, cache));
+            thread.start();
         } catch (Exception ignore) {
         }
+    }
+
+    private void threadUtil(Itinerary itinerary, ItineraryBuilderUtil itineraryBuilder, ItineraryCache cache) {
+        DataEngine dataEngine = DataEngine.getInstance();
+        itineraryBuilder.fillAttraction();
+        //shouldFetchAttraction = false since we don't want to fetch new attractions
+        List<Attraction> attractionList = dataEngine.getAttractions(itinerary.getQuestionsData().getCity().getCityName(),
+                new PriceRange(2), false);
+        HillClimbing hillClimbing = new HillClimbing(itinerary.getQuestionsData(), attractionList);
+
+        // build itinerary
+        itinerary.addOutboundToItinerary();
+        hillClimbing.getBestItinerary(itinerary);
+        itinerary.addReturnToItinerary();
+
+        itinerary.setAttractions(itineraryBuilder.getAttractions());
+        itinerary.fixTransportationNodes();
+
+        cache.updateItinerary(itinerary);
+        cache.updateItineraryStatus(itinerary.getItineraryId(), ItineraryStatus.COMPLETED);
     }
 }
