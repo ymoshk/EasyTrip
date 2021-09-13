@@ -121,13 +121,12 @@ public class Itinerary {
 
             itineraryDay = getItineraryDay(departureFromOrigin.toLocalDate());
 
-            if(departureFromOrigin.toLocalTime().isAfter(LocalTime.of(8,0,0))){
+            if (departureFromOrigin.toLocalTime().isAfter(LocalTime.of(8, 0, 0))) {
                 // add padding free time before flight
                 itineraryDay.getActivities().get(0).setEndTime(departureFromOrigin.format(DateTimeFormatter.ofPattern("HH:mm")));
-            }
-            else{
+            } else {
                 // remove free time before flight
-//                itineraryDay.getActivities().remove(0);
+                //                itineraryDay.getActivities().remove(0);
                 departureFromOrigin = departureFromOrigin.withHour(8).withMinute(0).withSecond(0);
             }
 
@@ -139,28 +138,31 @@ public class Itinerary {
 
                 itineraryDay = getItineraryDay(arrivalToDestination.toLocalDate());
 
-                itineraryDay.addFlightTimeAtTheBeginning(arrivalToDestination.withHour(0).withMinute(0).withSecond(0),
-                        arrivalToDestination);
+                LocalDateTime morningTime = arrivalToDestination.withHour(8).withMinute(0).withSecond(0);
+
+                if (arrivalToDestination.isAfter(morningTime)) {
+                    itineraryDay.addFlightTimeAtTheBeginning(morningTime, arrivalToDestination);
+                }
             } else {
                 itineraryDay.addFlightTime(departureFromOrigin, arrivalToDestination);
             }
         }
     }
 
-    public void addReturnToItinerary(){
+    public void addReturnToItinerary() {
         template.Flight flight = getQuestionsData().getFlight();
         ItineraryDay itineraryDay;
         LocalDateTime departureFromDestination;
         LocalDateTime arrivalToOrigin;
         ActivityNode lastActivity;
 
-        if(flight != null){
+        if (flight != null) {
             departureFromDestination = flight.getDepartureFromDestination();
             arrivalToOrigin = flight.getArrivalToOrigin();
 
             itineraryDay = getItineraryDay(departureFromDestination.toLocalDate());
 
-            lastActivity = itineraryDay.getActivities().get(itineraryDay.getActivities().size()-1);
+            lastActivity = itineraryDay.getActivities().get(itineraryDay.getActivities().size() - 1);
             lastActivity.setEndTime(departureFromDestination.format(DateTimeFormatter.ofPattern("HH:mm")));
 
             // check if flight continues to the next day

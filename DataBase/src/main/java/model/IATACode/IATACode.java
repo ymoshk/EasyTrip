@@ -2,12 +2,13 @@ package model.IATACode;
 
 import model.Model;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@Table(indexes = {
+        @Index(columnList = "city,country", name = "city_country_index"),
+})
 public class IATACode extends Model {
     private String city;
     private String country;

@@ -53,11 +53,6 @@ public class ItineraryDay {
                 endTime.toLocalTime(),
                 ActivityNode.Types.ATTRACTION,
                 new template.Attraction(attraction, true)));
-        //        System.out.println("Attraction: " + attraction.getName());
-        //        System.out.println("Type: " + attraction.getClass().getSimpleName());
-        //        System.out.println("Start time: " +  startTime);
-        //        System.out.println("End time: " +  endTime);
-        //        System.out.println("\n\n");
     }
 
     public void addTransportationTime(LocalDateTime startTime, LocalDateTime endTime, ActivityNode.Types type) {
@@ -65,34 +60,19 @@ public class ItineraryDay {
                 endTime.toLocalTime(),
                 type,
                 null));
-        //                System.out.println("Transportation time");
-        //                System.out.println("Start time: " +  startTime);
-        //                System.out.println("End time: " +  endTime);
-        //                System.out.println("\n\n");
     }
 
     public void addFreeTime(LocalDateTime startTime, LocalDateTime endTime) {
         activities.add(new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FREE_TIME, null));
-        //                System.out.println("Free time");
-        //                System.out.println("Start time: " +  startTime);
-        //                System.out.println("End time: " +  endTime);
-        //                System.out.println("\n\n");
     }
 
     public void addFlightTime(LocalDateTime startTime, LocalDateTime endTime) {
         activities.add(new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FLIGHT, null));
-        //                System.out.println("Flight time");
-        //                System.out.println("Start time: " + startTime);
-        //                System.out.println("End time: " + endTime);
-        //                System.out.println("\n\n");
     }
 
     public void addFlightTimeAtTheBeginning(LocalDateTime startTime, LocalDateTime endTime) {
-        activities.add(0, new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FLIGHT, null));
-        //                System.out.println("Flight time");
-        //                System.out.println("Start time: " + startTime);
-        //                System.out.println("End time: " + endTime);
-        //                System.out.println("\n\n");
+        activities.add(new ActivityNode(startTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FLIGHT, null));
+        activities.add(new ActivityNode(endTime.toLocalTime(), endTime.toLocalTime(), ActivityNode.Types.FREE_TIME, null));
     }
 
     public void clean() {
@@ -106,6 +86,20 @@ public class ItineraryDay {
 
     public void fixTransportationNodes() {
         List<ActivityNode> list = new ArrayList<>();
+
+        ActivityNode last = this.activities.get(this.activities.size() - 1);
+
+        if (last.getType() != ActivityNode.Types.FREE_TIME) {
+            activities.add(new ActivityNode(timeStringToLocalTime(last.getEndTime()),
+                    timeStringToLocalTime(last.getEndTime()), ActivityNode.Types.FREE_TIME, null));
+            last = this.activities.get(this.activities.size() - 1);
+        }
+
+        if (timeStringToLocalTime(last.getEndTime()).isAfter(LocalTime.of(0, 0)) &&
+                timeStringToLocalTime(last.getEndTime()).isBefore(LocalTime.of(6, 0))) {
+            activities.remove(activities.size() - 1);
+            activities.remove(activities.size() - 1);
+        }
 
         for (int i = 0; i < this.getActivities().size(); i++) {
             if (this.getActivities().get(i).getType() == ActivityNode.Types.ATTRACTION ||
@@ -153,7 +147,6 @@ public class ItineraryDay {
                 i += 2;
             }
         }
-
         setActivities(list);
     }
 
