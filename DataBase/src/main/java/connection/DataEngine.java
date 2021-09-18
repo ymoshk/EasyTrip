@@ -4,7 +4,6 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.*;
 import container.PriceRange;
-import distanceCalculator.DistanceCalculator;
 import generator.Hash;
 import log.LogsManager;
 import model.Model;
@@ -25,7 +24,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -237,10 +235,10 @@ public class DataEngine implements Closeable {
 
         List<Attraction> restaurantList = fetchRestaurants(PlaceType.RESTAURANT, cityName, priceRange);
         finalRes.addAll(restaurantList);
-                List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
-                        attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
-                        collect(Collectors.toList());
-                finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, cityName));
+        List<Attraction> topSightsAttractions = finalRes.stream().filter(attraction ->
+                attraction.getClass().getSimpleName().equalsIgnoreCase("TopSight")).
+                collect(Collectors.toList());
+        finalRes.addAll(fetchRestaurantsByTopSights(topSightsAttractions, cityName));
 
 
         return finalRes;
@@ -554,7 +552,7 @@ public class DataEngine implements Closeable {
 
 
     /**
-     * Funtions related to users
+     * Functions related to users
      */
 
     public List<User> getUsers() {

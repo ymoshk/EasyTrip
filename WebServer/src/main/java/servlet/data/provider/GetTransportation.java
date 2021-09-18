@@ -1,4 +1,4 @@
-package servlet.transportation;
+package servlet.data.provider;
 
 import com.google.gson.Gson;
 import com.google.maps.model.LatLng;
